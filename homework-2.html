@@ -1,11 +1,45 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Homework 2 - Distributions & Caesar Cipher</title>
-  <link rel="stylesheet" href="style.css">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Homework 2 — Distributions & Caesar Cipher</title>
+  <link rel="stylesheet" href="style.css"/>
   <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;700&family=Orbitron:wght@600&display=swap" rel="stylesheet">
+  <style>
+    /* Page-specific light helpers that align with your existing theme */
+    .section-title { margin-top: 1rem; color: #18e0e6; letter-spacing: 1px; }
+    .subtle { color: #c3d4f7; opacity: 0.9; }
+    .block { display: block; }
+    .row { display: flex; flex-wrap: wrap; gap: 1rem; align-items: flex-start; }
+    .col { flex: 1 1 300px; }
+    .card-lite {
+      background: rgba(30,44,74,0.92);
+      border-radius: 14px;
+      padding: 1rem 1.25rem;
+      box-shadow: 0 6px 22px rgba(24,224,230,0.25);
+      margin: 1rem 0;
+    }
+    .control { margin: 0.5rem 0; }
+    .control input[type="number"], .control input[type="text"], .control select, .control textarea {
+      width: 100%; padding: 0.65rem 0.8rem; border-radius: 10px; border: 1px solid #26406f; background:#142042; color:#e9f2ff;
+      box-shadow: inset 0 0 0 9999px rgba(255,255,255,0.02);
+    }
+    .btn-row { display:flex; flex-wrap: wrap; gap: 0.6rem; margin: 0.5rem 0 1rem; }
+    .btn { display:inline-block; background:#18e0e6; color:#1d2951; padding:0.5rem 1rem; border-radius: 22px; font-weight:700; text-decoration:none; border:0; cursor:pointer; }
+    .btn.secondary { background:#2bd4d9; }
+    .btn.ghost { background:transparent; color:#18e0e6; border:1px solid #18e0e6; }
+    .btn:disabled { opacity: 0.65; cursor: not-allowed; }
+    .table-wrap { overflow:auto; }
+    table { width: 100%; border-collapse: collapse; margin: 0.5rem 0; }
+    th, td { text-align: left; padding: 0.5rem 0.6rem; border-bottom: 1px solid #2b3f6a; }
+    th { color:#9fe6ff; }
+    canvas { width: 100%; height: 260px; background: #0e1731; border-radius: 12px; }
+    .hint { font-size: 0.9rem; color:#a7b7f3; }
+    .muted { opacity: 0.85; }
+    .mono { font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace; }
+    .badge { display:inline-block; background:#0fd; color:#193; border-radius:10px; padding:0.1rem 0.5rem; font-size:0.8rem; font-weight:700; margin-left: 0.5rem; }
+  </style>
 </head>
 <body>
   <header>
@@ -19,18 +53,138 @@
       <button class="nav-toggle" id="navToggle">&#9776;</button>
     </nav>
   </header>
+
   <main>
     <section class="hw-detail">
       <h1>Homework 2: Distributions and the Caesar Cipher</h1>
-      <article>
-        <p>This assignment explores how probability distributions help in cryptanalysis. A fundamental example is the Caesar Cipher: by looking at the frequency distribution of letters in ciphertext, it's possible to apply statistical inference to uncover the original message. Such analysis is a crucial skill in many classical and modern encryption challenges.</p>
-        <p>Understanding how distributions operate enables practitioners to detect statistical anomalies in encrypted communications, thereby aiding both codebreaking and the design of more robust ciphers.</p>
-      </article>
+      <p class="subtle">This assignment is organized in two parts. Part A focuses on datasets and distributions (with MS Access for data creation), while Part B uses JavaScript to analyze text and implement Caesar cipher operations.</p>
+
+      <!-- PART A -->
+      <h2 class="section-title">Part A — Dataset and Distribution</h2>
+      <div class="card-lite">
+        <h3>Concepts</h3>
+        <p><strong>Dataset</strong> is a collection of observations organized in rows (records) and columns (variables). Each variable represents a measurable attribute (e.g., Age, Department, LoginFailures), and each record represents one observation (e.g., a user, a session, a host).</p>
+        <p><strong>Distribution</strong> describes how the values of a variable are spread. A <em>univariate distribution</em> focuses on one variable at a time (e.g., frequency of Departments). A <em>bivariate distribution</em> (cross-tab) examines the joint frequency of two variables (e.g., Department vs. MalwareDetected).</p>
+      </div>
+
+      <div class="card-lite">
+        <h3>Workflow (using MS Access)</h3>
+        <ol>
+          <li>Create a new table (e.g., “UserSecurity”). Suggested fields: Department (Short Text), Age (Number), LoginFailures (Number), MalwareDetected (Yes/No).</li>
+          <li>Insert 15–30 rows of data (realistic values).</li>
+          <li>Export the table as CSV for analysis on this page (External Data → Export → Text File).</li>
+          <li>Compute up to <strong>k ≤ 3</strong> univariate distributions (frequency tables) and optionally a bivariate (cross-tab) using the tools below.</li>
+        </ol>
+        <p class="hint">Alternatively, click “Load Sample Dataset” to use a built-in CSV that mimics the Access table.</p>
+
+        <!-- Data controls -->
+        <div class="row">
+          <div class="col">
+            <div class="control">
+              <label for="csvFile"><strong>Upload CSV from Access</strong></label>
+              <input type="file" id="csvFile" accept=".csv" />
+            </div>
+            <div class="btn-row">
+              <button class="btn" id="btnLoadSample">Load Sample Dataset</button>
+              <button class="btn ghost" id="btnDownloadSample">Download Sample CSV</button>
+              <button class="btn secondary" id="btnClearData">Clear</button>
+            </div>
+            <div class="hint">After loading data, detected variables will appear below.</div>
+          </div>
+          <div class="col">
+            <div class="control">
+              <label><strong>Variables (select up to 3 for univariate)</strong></label>
+              <div id="varChecklist" class="muted">No data loaded yet.</div>
+            </div>
+            <div class="btn-row">
+              <button class="btn" id="btnComputeUni" disabled>Compute Univariate Distributions</button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Univariate outputs -->
+        <div id="uniOutputs"></div>
+
+        <!-- Bivariate -->
+        <div class="card-lite">
+          <h3>Optional: Bivariate Distribution (Cross-tab)</h3>
+          <div class="row">
+            <div class="col">
+              <div class="control">
+                <label for="biVarX"><strong>Variable X</strong></label>
+                <select id="biVarX"></select>
+              </div>
+            </div>
+            <div class="col">
+              <div class="control">
+                <label for="biVarY"><strong>Variable Y</strong></label>
+                <select id="biVarY"></select>
+              </div>
+            </div>
+          </div>
+          <div class="btn-row">
+            <button class="btn" id="btnComputeBi" disabled>Compute Cross-tab</button>
+          </div>
+          <div id="biOutput" class="table-wrap"></div>
+        </div>
+      </div>
+
+      <!-- PART B -->
+      <h2 class="section-title">Part B — Text Analysis & Caesar Cipher</h2>
+      <div class="card-lite">
+        <div class="control">
+          <label for="plainText"><strong>Input Text</strong></label>
+          <textarea id="plainText" rows="5" placeholder="Type or paste your text here..." class="mono"></textarea>
+        </div>
+        <div class="btn-row">
+          <button class="btn" id="btnLetterDist">Compute Letter Distribution</button>
+          <button class="btn secondary" id="btnShowDistChart">Show/Update Distribution Chart</button>
+        </div>
+        <div class="row">
+          <div class="col table-wrap" id="letterTableWrap"></div>
+          <div class="col"><canvas id="letterChart" width="600" height="260"></canvas></div>
+        </div>
+      </div>
+
+      <div class="card-lite">
+        <h3>Caesar Cipher</h3>
+        <div class="row">
+          <div class="col">
+            <div class="control">
+              <label for="shift"><strong>Shift (0–25)</strong></label>
+              <input type="number" id="shift" min="0" max="25" value="3"/>
+            </div>
+            <div class="btn-row">
+              <button class="btn" id="btnEncrypt">Encrypt</button>
+              <button class="btn secondary" id="btnDecryptKnown">Decrypt (Known Shift)</button>
+            </div>
+            <div class="control">
+              <label for="cipherText"><strong>Ciphertext</strong></label>
+              <textarea id="cipherText" rows="4" class="mono" placeholder="Result will appear here..."></textarea>
+            </div>
+          </div>
+          <div class="col">
+            <div class="btn-row">
+              <button class="btn" id="btnBruteForce">Decode (Unknown Shift — brute force)</button>
+              <button class="btn ghost" id="btnLanguageDecode">Decode using Language Distribution</button>
+            </div>
+            <div id="bfResults" class="table-wrap"></div>
+            <p class="hint">Language-based decoder uses English letter frequencies and a chi-squared score to identify the most likely shift.</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="centered">
+        <a href="homework.html" class="btn">Back to Homework</a>
+      </div>
     </section>
   </main>
+
   <footer>
     <span>&copy; 2025 Lorenzo Ciafrelli | MS Cybersecurity, Sapienza University of Rome</span>
   </footer>
+
   <script src="script.js"></script>
+  <script src="hw2.js"></script>
 </body>
 </html>
