@@ -1,6 +1,6 @@
 /* ================================
-   Enhanced Homework 2 Implementation
-   Distribution-based Caesar Cipher Analysis
+   Enhanced Homework 2 Implementation - FIXED VERSION
+   All functionality working correctly
    ================================ */
 
 const LANGUAGE_FREQUENCIES = {
@@ -34,17 +34,25 @@ Operations,28,0,No,Yes
 Finance,36,2,No,Yes
 IT,23,1,No,Yes`;
 
+// Global state - reset properly
 let appState = {
   dataset: { headers: [], rows: [] },
   originalText: '',
   cipherText: '',
   actualShift: 0,
   originalDistribution: {},
-  cipherDistribution: {}
+  cipherDistribution: {},
+  hasOriginalAnalysis: false,
+  hasCipherText: false
 };
 
+// Helper functions
 const $ = sel => document.querySelector(sel);
 const $$ = sel => document.querySelectorAll(sel);
+
+function log(msg) {
+  console.log(`[HW2] ${msg}`);
+}
 
 function createEl(tag, attrs = {}, children = []) {
   const el = document.createElement(tag);
@@ -58,6 +66,7 @@ function createEl(tag, attrs = {}, children = []) {
 }
 
 function showAlert(msg, type='info') {
+  log(`Alert: ${msg}`);
   const alert = createEl('div', { class: `alert ${type}`, textContent: msg });
   const container = $('.hw-detail');
   if(container) {
@@ -79,9 +88,24 @@ function parseCSV(text) {
   return { headers, rows };
 }
 
-// Part A functions (unchanged from previous version)
+// PART A - Dataset Analysis (unchanged but cleaned)
 function initPartA() {
-  $('#csvFile')?.addEventListener('change', async e => {
+  log('Initializing Part A');
+  
+  const csvFile = $('#csvFile');
+  const btnLoadSample = $('#btnLoadSample');
+  const btnDownloadSample = $('#btnDownloadSample');
+  const btnClearData = $('#btnClearData');
+  const btnComputeUni = $('#btnComputeUni');
+  const btnComputeBi = $('#btnComputeBi');
+
+  if(!csvFile) {
+    log('Part A elements not found, skipping');
+    return;
+  }
+
+  csvFile.addEventListener('change', async e => {
+    log('CSV file selected');
     const f = e.target.files[0];
     if(!f) return;
     try {
@@ -89,16 +113,21 @@ function initPartA() {
       appState.dataset = parseCSV(content);
       updateDatasetUI(true);
       showAlert('Dataset loaded successfully', 'success');
-    } catch {
+    } catch(err) {
+      log(`Error loading file: ${err}`);
       showAlert('Error loading file', 'alert');
     }
   });
-  $('#btnLoadSample')?.addEventListener('click', () => {
+
+  btnLoadSample.addEventListener('click', () => {
+    log('Loading sample dataset');
     appState.dataset = parseCSV(SAMPLE_CSV);
     updateDatasetUI(true);
     showAlert('Sample dataset loaded', 'success');
   });
-  $('#btnDownloadSample')?.addEventListener('click', () => {
+
+  btnDownloadSample.addEventListener('click', () => {
+    log('Downloading sample CSV');
     const blob = new Blob([SAMPLE_CSV], { type: 'text/csv' });
     const url = URL.createObjectURL(blob);
     const a = createEl('a', { href: url, download: "sample_dataset.csv" });
@@ -107,7 +136,9 @@ function initPartA() {
     a.remove();
     URL.revokeObjectURL(url);
   });
-  $('#btnClearData')?.addEventListener('click', () => {
+
+  btnClearData.addEventListener('click', () => {
+    log('Clearing dataset');
     appState.dataset = { headers: [], rows: [] };
     updateDatasetUI(false);
     clearUniResults();
@@ -115,7 +146,8 @@ function initPartA() {
     showAlert('Dataset cleared', 'success');
   });
   
-  $('#btnComputeUni')?.addEventListener('click', () => {
+  btnComputeUni.addEventListener('click', () => {
+    log('Computing univariate distributions');
     const selected = Array.from($$('input[name="uni-var"]:checked')).map(el => el.value);
     if(selected.length === 0 || selected.length > 3) {
       showAlert('Select 1 to 3 variables', 'alert');
@@ -123,7 +155,9 @@ function initPartA() {
     }
     computeUnivariate(selected);
   });
-  $('#btnComputeBi')?.addEventListener('click', () => {
+
+  btnComputeBi.addEventListener('click', () => {
+    log('Computing bivariate distribution');
     const x = $('#biVarX').value;
     const y = $('#biVarY').value;
     if(!x || !y || x === y) {
@@ -145,10 +179,10 @@ function updateDatasetUI(hasData) {
   if(!hasData) {
     dataStatus.textContent = 'No data loaded';
     varChecklist.textContent = 'Load data to select variables.';
-    btnUni.disabled = true;
-    btnBi.disabled = true;
-    biX.innerHTML = `<option value="">-- Select Variable --</option>`;
-    biY.innerHTML = `<option value="">-- Select Variable --</option>`;
+    if(btnUni) btnUni.disabled = true;
+    if(btnBi) btnBi.disabled = true;
+    if(biX) biX.innerHTML = `<option value="">-- Select Variable --</option>`;
+    if(biY) biY.innerHTML = `<option value="">-- Select Variable --</option>`;
     return;
   }
 
@@ -169,15 +203,22 @@ function updateDatasetUI(hasData) {
   const optionsHTML = `<option value="">-- Select Variable --</option>` + 
     appState.dataset.headers.map(h => `<option value="${h}">${h}</option>`).join('');
     
-  biX.innerHTML = optionsHTML;
-  biY.innerHTML = optionsHTML;
+  if(biX) biX.innerHTML = optionsHTML;
+  if(biY) biY.innerHTML = optionsHTML;
   
-  btnUni.disabled = false;
-  btnBi.disabled = false;
+  if(btnUni) btnUni.disabled = false;
+  if(btnBi) btnBi.disabled = false;
 }
 
-function clearUniResults() { $('#uniResults').innerHTML = ''; }
-function clearBiResults() { $('#biResults').innerHTML = ''; }
+function clearUniResults() { 
+  const el = $('#uniResults');
+  if(el) el.innerHTML = ''; 
+}
+
+function clearBiResults() { 
+  const el = $('#biResults'); 
+  if(el) el.innerHTML = ''; 
+}
 
 function computeUnivariate(vars) {
   clearUniResults();
@@ -222,7 +263,8 @@ function renderUnivariate(variable, freq, index) {
   visualization.appendChild(chartCont);
   
   cont.append(title, expl, visualization);
-  $('#uniResults').appendChild(cont);
+  const uniResults = $('#uniResults');
+  if(uniResults) uniResults.appendChild(cont);
   
   setTimeout(() => drawBarChart(canvas, freq.map(f=>f.val), freq.map(f=>f.count), `${variable} Distribution`), 100);
 }
@@ -279,47 +321,145 @@ function computeBivariate(varX, varY) {
   tableDiv.appendChild(table);
 
   cont.append(title, expl, tableDiv);
-  $('#biResults').appendChild(cont);
+  const biResults = $('#biResults');
+  if(biResults) biResults.appendChild(cont);
   showAlert('Bivariate distribution computed', 'success');
 }
 
-// Part B - Enhanced with distribution comparison
+// PART B - Fixed and Enhanced
 function initPartB() {
-  $('#btnAnalyzeText')?.addEventListener('click', analyzeTextDistribution);
-  $('#btnClearText')?.addEventListener('click', clearTextAnalysis);
-  $('#btnEncrypt')?.addEventListener('click', encryptText);
-  $('#btnRandomShift')?.addEventListener('click', randomShiftAndEncrypt);
-  $('#btnDistributionDecode')?.addEventListener('click', distributionBasedDecrypt);
-  $('#btnBruteForce')?.addEventListener('click', bruteForceDecrypt);
+  log('Initializing Part B');
+  
+  // Get all button elements
+  const btnAnalyzeText = $('#btnAnalyzeText');
+  const btnClearText = $('#btnClearText');
+  const btnEncrypt = $('#btnEncrypt');
+  const btnRandomShift = $('#btnRandomShift');
+  const btnDistributionDecode = $('#btnDistributionDecode');
+  const btnBruteForce = $('#btnBruteForce');
+  
+  log(`Found buttons: 
+    analyzeText: ${!!btnAnalyzeText}
+    clearText: ${!!btnClearText}
+    encrypt: ${!!btnEncrypt}
+    randomShift: ${!!btnRandomShift}
+    distributionDecode: ${!!btnDistributionDecode}
+    bruteForce: ${!!btnBruteForce}`);
+
+  // Add event listeners with proper error handling
+  if(btnAnalyzeText) {
+    btnAnalyzeText.addEventListener('click', (e) => {
+      e.preventDefault();
+      log('Analyze text clicked');
+      analyzeTextDistribution();
+    });
+  }
+
+  if(btnClearText) {
+    btnClearText.addEventListener('click', (e) => {
+      e.preventDefault();
+      log('Clear text clicked');
+      clearTextAnalysis();
+    });
+  }
+
+  if(btnEncrypt) {
+    btnEncrypt.addEventListener('click', (e) => {
+      e.preventDefault();
+      log('Encrypt clicked');
+      encryptText();
+    });
+  }
+
+  if(btnRandomShift) {
+    btnRandomShift.addEventListener('click', (e) => {
+      e.preventDefault();
+      log('Random shift clicked');
+      randomShiftAndEncrypt();
+    });
+  }
+
+  if(btnDistributionDecode) {
+    btnDistributionDecode.addEventListener('click', (e) => {
+      e.preventDefault();
+      log('Distribution decode clicked');
+      distributionBasedDecrypt();
+    });
+  }
+
+  if(btnBruteForce) {
+    btnBruteForce.addEventListener('click', (e) => {
+      e.preventDefault();
+      log('Brute force clicked');
+      bruteForceDecrypt();
+    });
+  }
 }
 
 function analyzeTextDistribution() {
-  const text = $('#plainText').value.trim();
+  log('Starting text analysis');
+  const textElement = $('#plainText');
+  if(!textElement) {
+    showAlert('Text input not found', 'alert');
+    return;
+  }
+  
+  const text = textElement.value.trim();
   if(!text) {
     showAlert('Please enter text for analysis', 'alert');
     return;
   }
+  
+  // Update state
   appState.originalText = text;
   appState.originalDistribution = computeLetterDistribution(text);
+  appState.hasOriginalAnalysis = true;
+  
+  log(`Text analyzed: ${text.length} chars, ${appState.originalDistribution.totalLetters} letters`);
+  
   renderTextAnalysis(appState.originalDistribution);
-  showAlert('Letter distribution analyzed', 'success');
+  showAlert('Letter distribution analyzed successfully!', 'success');
 }
 
 function clearTextAnalysis() {
-  $('#plainText').value = '';
-  $('#cipherText').value = '';
-  $('#textAnalysisResults').innerHTML = '';
-  $('#distributionAnalysisResults').innerHTML = '';
-  $('#decryptionResults').innerHTML = '';
-  $('#verificationResults').innerHTML = '';
+  log('Clearing text analysis');
+  
+  // Clear form fields
+  const plainTextEl = $('#plainText');
+  const cipherTextEl = $('#cipherText');
+  const shiftEl = $('#shift');
+  
+  if(plainTextEl) plainTextEl.value = '';
+  if(cipherTextEl) cipherTextEl.value = '';
+  if(shiftEl) shiftEl.value = '7';
+  
+  // Clear result containers
+  const containers = [
+    '#textAnalysisResults', 
+    '#distributionAnalysisResults', 
+    '#decryptionResults', 
+    '#verificationResults'
+  ];
+  
+  containers.forEach(sel => {
+    const el = $(sel);
+    if(el) el.innerHTML = '';
+  });
+  
+  // Reset state
   appState.originalText = '';
   appState.cipherText = '';
+  appState.actualShift = 0;
   appState.originalDistribution = {};
   appState.cipherDistribution = {};
-  showAlert('Analysis cleared', 'success');
+  appState.hasOriginalAnalysis = false;
+  appState.hasCipherText = false;
+  
+  showAlert('All text analysis cleared', 'success');
 }
 
 function computeLetterDistribution(text) {
+  log(`Computing distribution for text: "${text.substring(0, 50)}..."`);
   const letters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
   let counts = {};
   letters.split('').forEach(l => counts[l] = 0);
@@ -338,10 +478,12 @@ function computeLetterDistribution(text) {
     percent: totalLetters ? ((counts[l]/totalLetters)*100).toFixed(2) : 0
   });
   
+  log(`Distribution computed: ${totalLetters} total letters`);
   return { distribution, totalLetters };
 }
 
 function renderTextAnalysis(data) {
+  log('Rendering text analysis');
   const container = createEl('div', { class:'result-box' });
   const title = createEl('h4', { innerHTML:'Original Text - Letter Frequency Analysis', style:'color:#18e0e6' });
   const expl = createEl('div', { class:'explanation', innerHTML: `
@@ -372,8 +514,11 @@ function renderTextAnalysis(data) {
   visualization.appendChild(chartCont);
   container.append(title, expl, visualization);
 
-  $('#textAnalysisResults').innerHTML = '';
-  $('#textAnalysisResults').appendChild(container);
+  const resultsEl = $('#textAnalysisResults');
+  if(resultsEl) {
+    resultsEl.innerHTML = '';
+    resultsEl.appendChild(container);
+  }
 
   setTimeout(() => {
     drawBarChart(canvas, Object.keys(data.distribution), Object.values(data.distribution).map(d=>d.count), 'Original Text - Letter Frequency');
@@ -381,32 +526,67 @@ function renderTextAnalysis(data) {
 }
 
 function encryptText() {
-  const text = $('#plainText').value;
-  const shift = Math.min(Math.max(parseInt($('#shift').value) || 0, 0), 25);
-  if(!text.trim()) {
+  log('Encrypting text');
+  const textEl = $('#plainText');
+  const shiftEl = $('#shift');
+  const cipherTextEl = $('#cipherText');
+  
+  if(!textEl || !shiftEl || !cipherTextEl) {
+    showAlert('Form elements not found', 'alert');
+    return;
+  }
+  
+  const text = textEl.value.trim();
+  const shift = Math.min(Math.max(parseInt(shiftEl.value) || 0, 0), 25);
+  
+  if(!text) {
     showAlert('Enter text to encrypt', 'alert');
     return;
   }
+  
+  // Update state
   appState.actualShift = shift;
   appState.cipherText = caesarCipher(text, shift);
   appState.cipherDistribution = computeLetterDistribution(appState.cipherText);
-  $('#cipherText').value = appState.cipherText;
+  appState.hasCipherText = true;
+  
+  cipherTextEl.value = appState.cipherText;
+  
+  log(`Text encrypted with shift ${shift}: "${appState.cipherText.substring(0, 30)}..."`);
   showAlert(`Text encrypted with shift ${shift}`, 'success');
 }
 
 function randomShiftAndEncrypt() {
-  const text = $('#plainText').value;
-  if(!text.trim()) {
-    showAlert('Enter text to encrypt', 'alert');
+  log('Random shift and encrypt');
+  const textEl = $('#plainText');
+  const shiftEl = $('#shift');
+  const cipherTextEl = $('#cipherText');
+  
+  if(!textEl || !shiftEl || !cipherTextEl) {
+    showAlert('Form elements not found', 'alert');
     return;
   }
+  
+  const text = textEl.value.trim();
+  if(!text) {
+    showAlert('Enter text to encrypt first', 'alert');
+    return;
+  }
+  
   const randomShift = Math.floor(Math.random() * 26);
-  $('#shift').value = randomShift;
+  log(`Generated random shift: ${randomShift}`);
+  
+  // Update form and state
+  shiftEl.value = randomShift;
   appState.actualShift = randomShift;
   appState.cipherText = caesarCipher(text, randomShift);
   appState.cipherDistribution = computeLetterDistribution(appState.cipherText);
-  $('#cipherText').value = appState.cipherText;
-  showAlert(`Text encrypted with random shift ${randomShift}`, 'success');
+  appState.hasCipherText = true;
+  
+  cipherTextEl.value = appState.cipherText;
+  
+  log(`Random encryption complete: shift=${randomShift}`);
+  showAlert(`Text encrypted with random shift ${randomShift}!`, 'success');
 }
 
 function caesarCipher(text, shift) {
@@ -417,10 +597,25 @@ function caesarCipher(text, shift) {
 }
 
 function distributionBasedDecrypt() {
-  if(!appState.originalText || !appState.cipherText) {
-    showAlert('Please analyze text and encrypt it first', 'alert');
+  log('Starting distribution-based decryption');
+  
+  // Check prerequisites
+  if(!appState.hasOriginalAnalysis) {
+    showAlert('Please analyze the original text first (step 1)', 'alert');
     return;
   }
+  
+  if(!appState.hasCipherText) {
+    showAlert('Please encrypt the text first (step 2)', 'alert');
+    return;
+  }
+  
+  if(!appState.originalText || !appState.cipherText) {
+    showAlert('Both original and cipher text are required', 'alert');
+    return;
+  }
+  
+  log(`Analyzing distributions: original=${appState.originalText.length} chars, cipher=${appState.cipherText.length} chars`);
   
   // Compare distributions for all possible shifts
   const candidates = [];
@@ -455,9 +650,14 @@ function distributionBasedDecrypt() {
   candidates.sort((a,b) => b.similarityScore - a.similarityScore);
   const bestCandidate = candidates[0];
   
-  // Update fields with best result
-  $('#shift').value = bestCandidate.shift;
-  $('#plainText').value = bestCandidate.decryptedText;
+  // Update form fields with best result
+  const shiftEl = $('#shift');
+  const plainTextEl = $('#plainText');
+  
+  if(shiftEl) shiftEl.value = bestCandidate.shift;
+  if(plainTextEl) plainTextEl.value = bestCandidate.decryptedText;
+  
+  log(`Distribution analysis complete: best shift=${bestCandidate.shift}, score=${bestCandidate.similarityScore}`);
   
   renderDistributionAnalysis(candidates, bestCandidate);
   renderVerification(appState.originalText, bestCandidate.decryptedText, bestCandidate.shift);
@@ -466,6 +666,7 @@ function distributionBasedDecrypt() {
 }
 
 function renderDistributionAnalysis(candidates, best) {
+  log('Rendering distribution analysis');
   const container = createEl('div', { class: 'result-box' });
   const title = createEl('h4', { innerHTML: 'Distribution-Based Decryption Analysis', style: 'color:#18e0e6' });
   
@@ -476,7 +677,10 @@ function renderDistributionAnalysis(candidates, best) {
     3. Compare this distribution with the original text distribution<br>
     4. Calculate similarity score (higher = better match)<br>
     5. The shift with highest similarity is the correct one<br><br>
-    <strong>Best Match Found:</strong> Shift ${best.shift} with similarity score ${best.similarityScore.toFixed(1)}
+    
+    <strong>Best Match Found:</strong> Shift ${best.shift} with similarity score ${best.similarityScore.toFixed(1)}<br>
+    <strong>Actual Shift Used:</strong> ${appState.actualShift}<br>
+    <strong>Detection Result:</strong> ${best.shift === appState.actualShift ? '✅ CORRECT' : '❌ INCORRECT'}
   `});
   
   // Summary of top candidates
@@ -486,9 +690,11 @@ function renderDistributionAnalysis(candidates, best) {
   
   candidates.slice(0, 5).forEach((candidate, index) => {
     const candidateDiv = createEl('div', { 
-      class: `shift-candidate ${index === 0 ? 'best' : ''}`,
+      class: `shift-candidate ${index === 0 ? 'best' : ''}${(candidate.shift === appState.actualShift) ? ' best' : ''}`,
       innerHTML: `
-        <strong>Shift ${candidate.shift}</strong> - Similarity: ${candidate.similarityScore.toFixed(1)} | 
+        <strong>Shift ${candidate.shift}</strong> 
+        ${candidate.shift === appState.actualShift ? '(ACTUAL SHIFT)' : ''} - 
+        Similarity: ${candidate.similarityScore.toFixed(1)} | 
         Difference: ${candidate.totalDifference}% | 
         Preview: "${candidate.decryptedText.substring(0, 50)}${candidate.decryptedText.length > 50 ? '...' : ''}"
       `
@@ -514,8 +720,11 @@ function renderDistributionAnalysis(candidates, best) {
   
   container.append(title, explanation, summary, chartSection);
   
-  $('#distributionAnalysisResults').innerHTML = '';
-  $('#distributionAnalysisResults').appendChild(container);
+  const resultsEl = $('#distributionAnalysisResults');
+  if(resultsEl) {
+    resultsEl.innerHTML = '';
+    resultsEl.appendChild(container);
+  }
   
   // Draw comparison charts
   setTimeout(() => {
@@ -529,6 +738,8 @@ function renderDistributionAnalysis(candidates, best) {
 }
 
 function renderVerification(original, decrypted, detectedShift) {
+  log(`Rendering verification: original=${original.length}, decrypted=${decrypted.length}, detected=${detectedShift}, actual=${appState.actualShift}`);
+  
   if(!original || !decrypted) return;
   
   const container = createEl('div', { class: 'result-box' });
@@ -540,8 +751,8 @@ function renderVerification(original, decrypted, detectedShift) {
   const verification = createEl('div', { class: 'explanation', innerHTML: `
     <strong>Decryption Verification:</strong><br><br>
     <strong>Shift Analysis:</strong><br>
-    • Actual shift used: ${appState.actualShift}<br>
-    • Detected shift: ${detectedShift}<br>
+    • Actual shift used: <span style="color:#18e0e6; font-weight:bold;">${appState.actualShift}</span><br>
+    • Detected shift: <span style="color:#18e0e6; font-weight:bold;">${detectedShift}</span><br>
     • Shift detection: <span style="color: ${isShiftCorrect ? '#4caf50' : '#ff5722'}; font-weight: bold;">
       ${isShiftCorrect ? '✓ CORRECT' : '✗ INCORRECT'}
     </span><br><br>
@@ -553,15 +764,15 @@ function renderVerification(original, decrypted, detectedShift) {
       ${isTextMatch ? '✓ PERFECT MATCH' : '✗ MISMATCH'}
     </span><br><br>
     
-    <strong>Analysis Success:</strong><br>
+    <strong>Overall Result:</strong><br>
     ${(isTextMatch && isShiftCorrect) ? 
-      'The distribution-based analysis successfully recovered both the correct shift and original text!' :
-      'The analysis shows differences. This could be due to text length, character distribution, or algorithm limitations.'
+      '🎉 <span style="color:#4caf50;"><strong>SUCCESS!</strong> The distribution-based analysis correctly identified the shift and recovered the original text!</span>' :
+      '⚠️ <span style="color:#ff9800;">The analysis shows differences. This could be due to short text length, unusual letter distributions, or multiple shifts producing similar patterns.</span>'
     }
   `});
   
   // Show text comparison if there are differences
-  if(!isTextMatch || !isShiftCorrect) {
+  if(!isTextMatch && original.length < 500) {
     const textComparison = createEl('div', { class: 'comparison-grid' });
     
     const originalBox = createEl('div', { class: 'result-box' });
@@ -573,12 +784,13 @@ function renderVerification(original, decrypted, detectedShift) {
     decryptedBox.appendChild(createEl('p', { textContent: decrypted, style: 'font-family: monospace; font-size: 0.9rem; line-height: 1.4;' }));
     
     const analysisBox = createEl('div', { class: 'result-box' });
-    analysisBox.appendChild(createEl('h6', { textContent: 'Why Differences Occur', style: 'color:#4a9eff; margin-bottom: 0.5rem;' }));
+    analysisBox.appendChild(createEl('h6', { textContent: 'Why Differences May Occur', style: 'color:#4a9eff; margin-bottom: 0.5rem;' }));
     analysisBox.appendChild(createEl('p', { 
       innerHTML: `• Short texts may not have representative letter distributions<br>
                   • Punctuation and spaces affect frequency analysis<br>
                   • Some letters may not appear in small text samples<br>
-                  • Multiple shifts might produce similar distribution patterns`,
+                  • Multiple shifts might produce similar distribution patterns<br>
+                  • The method works better with longer texts (>200 characters)`,
       style: 'font-size: 0.9rem; line-height: 1.4;'
     }));
     
@@ -591,116 +803,159 @@ function renderVerification(original, decrypted, detectedShift) {
   
   container.append(title, verification);
   
-  $('#verificationResults').innerHTML = '';
-  $('#verificationResults').appendChild(container);
+  const resultsEl = $('#verificationResults');
+  if(resultsEl) {
+    resultsEl.innerHTML = '';
+    resultsEl.appendChild(container);
+  }
 }
 
 function bruteForceDecrypt() {
-  const cipher = $('#cipherText').value.trim();
+  log('Starting brute force decryption');
+  const cipherTextEl = $('#cipherText');
+  
+  if(!cipherTextEl) {
+    showAlert('Cipher text element not found', 'alert');
+    return;
+  }
+  
+  const cipher = cipherTextEl.value.trim();
   if(!cipher) {
     showAlert('Please encrypt text first', 'alert');
     return;
   }
+  
   const results = [];
   for(let s=0; s<26; s++) {
     const dec = caesarCipher(cipher, 26 - s);
     results.push({ shift: s, preview: dec.slice(0, 80) + (dec.length > 80 ? '...' : '') });
   }
+  
+  log(`Brute force complete: ${results.length} candidates`);
   renderBruteForceResults(results);
-  showAlert('Brute force analysis complete', 'success');
+  showAlert('Brute force analysis complete - all 26 possibilities shown', 'success');
 }
 
 function renderBruteForceResults(results) {
+  log('Rendering brute force results');
   const container = createEl('div', { class:'result-box' });
   const title = createEl('h4', { innerHTML:'Brute Force Analysis - All Possible Shifts', style:'color:#18e0e6' });
-  const expl = createEl('div', { class:'explanation', textContent:'All 26 possible decryptions. Look for meaningful text to identify the correct shift.' });
+  const expl = createEl('div', { class:'explanation', innerHTML:`
+    All 26 possible decryptions shown below. Look for meaningful text to identify the correct shift manually.
+    ${appState.actualShift !== undefined ? `<br><strong>Hint:</strong> The actual shift used was ${appState.actualShift}.` : ''}
+  `});
+  
   const tableDiv = createEl('div', { class:'data-table' });
   const table = createEl('table');
   table.innerHTML = `
-    <thead><tr><th>Shift</th><th>Decrypted Text (first 80 chars)</th></tr></thead>
+    <thead><tr><th>Shift</th><th>Decrypted Text (first 80 characters)</th></tr></thead>
     <tbody>
       ${results.map(r => 
-        `<tr><td><span style="background:${r.shift === appState.actualShift ? '#18e0e6' : '#4a6ba8'};color:#0a1628;padding:4px 10px;border-radius:12px;font-weight:700;">${r.shift}</span></td><td style="font-family: monospace; font-size: 0.85rem;">${r.preview}</td></tr>`
+        `<tr><td><span style="background:${r.shift === appState.actualShift ? '#18e0e6' : '#4a6ba8'};color:#0a1628;padding:4px 10px;border-radius:12px;font-weight:700;">${r.shift}${r.shift === appState.actualShift ? ' ✓' : ''}</span></td><td style="font-family: monospace; font-size: 0.85rem;">${r.preview}</td></tr>`
       ).join('')}
     </tbody>
   `;
   tableDiv.appendChild(table);
+  
   container.append(title, expl, tableDiv);
-  $('#decryptionResults').innerHTML = '';
-  $('#decryptionResults').appendChild(container);
+  
+  const resultsEl = $('#decryptionResults');
+  if(resultsEl) {
+    resultsEl.innerHTML = '';
+    resultsEl.appendChild(container);
+  }
 }
 
 function drawBarChart(canvas, labels, values, title) {
-  const ctx = canvas.getContext('2d');
-  const width = canvas.width;
-  const height = canvas.height;
-  ctx.clearRect(0,0,width,height);
+  try {
+    const ctx = canvas.getContext('2d');
+    const width = canvas.width;
+    const height = canvas.height;
+    ctx.clearRect(0,0,width,height);
 
-  const gradient = ctx.createLinearGradient(0,0,0,height);
-  gradient.addColorStop(0,'#0a1628');
-  gradient.addColorStop(1,'#142042');
-  ctx.fillStyle = gradient;
-  ctx.fillRect(0,0,width,height);
+    const gradient = ctx.createLinearGradient(0,0,0,height);
+    gradient.addColorStop(0,'#0a1628');
+    gradient.addColorStop(1,'#142042');
+    ctx.fillStyle = gradient;
+    ctx.fillRect(0,0,width,height);
 
-  const margin = { top: 60, right: 40, bottom: 100, left: 70 };
-  const chartWidth = width - margin.left - margin.right;
-  const chartHeight = height - margin.top - margin.bottom;
+    const margin = { top: 60, right: 40, bottom: 100, left: 70 };
+    const chartWidth = width - margin.left - margin.right;
+    const chartHeight = height - margin.top - margin.bottom;
 
-  // Title
-  ctx.fillStyle = '#18e0e6';
-  ctx.font = 'bold 18px Montserrat';
-  ctx.textAlign = 'center';
-  ctx.fillText(title, width/2, 35);
-
-  // Axes
-  ctx.strokeStyle = '#4a6ba8';
-  ctx.lineWidth = 1;
-  ctx.beginPath();
-  ctx.moveTo(margin.left, margin.top);
-  ctx.lineTo(margin.left, margin.top + chartHeight);
-  ctx.lineTo(margin.left + chartWidth, margin.top + chartHeight);
-  ctx.stroke();
-
-  const maxValue = Math.max(...values,1);
-  const barWidth = chartWidth / labels.length * 0.75;
-  const barSpacing = chartWidth / labels.length * 0.25;
-
-  labels.forEach((label,i) => {
-    const val = values[i];
-    const barHeight = (val / maxValue) * (chartHeight - 20);
-    const x = margin.left + i * (barWidth + barSpacing) + barSpacing / 2;
-    const y = margin.top + chartHeight - barHeight;
-
-    // Bar gradient
-    const barGradient = ctx.createLinearGradient(x,y,x,y + barHeight);
-    barGradient.addColorStop(0,'#18e0e6');
-    barGradient.addColorStop(1,'#2bd4d9');
-    ctx.fillStyle = barGradient;
-    ctx.fillRect(x,y,barWidth,barHeight);
-
-    // Value on top of bar
-    if(val > 0) {
-      ctx.fillStyle = '#e9f2ff';
-      ctx.font = 'bold 13px Montserrat';
-      ctx.textAlign = 'center';
-      ctx.fillText(val.toString(), x + barWidth/2, y - 8);
-    }
-
-    // Letter labels
-    ctx.fillStyle = '#b8d4ff';
-    ctx.font = 'bold 14px Montserrat';
+    // Title
+    ctx.fillStyle = '#18e0e6';
+    ctx.font = 'bold 18px Montserrat, Arial, sans-serif';
     ctx.textAlign = 'center';
-    ctx.fillText(label, x + barWidth/2, height - 20);
-  });
+    ctx.fillText(title, width/2, 35);
+
+    // Axes
+    ctx.strokeStyle = '#4a6ba8';
+    ctx.lineWidth = 1;
+    ctx.beginPath();
+    ctx.moveTo(margin.left, margin.top);
+    ctx.lineTo(margin.left, margin.top + chartHeight);
+    ctx.lineTo(margin.left + chartWidth, margin.top + chartHeight);
+    ctx.stroke();
+
+    const maxValue = Math.max(...values,1);
+    const barWidth = chartWidth / labels.length * 0.75;
+    const barSpacing = chartWidth / labels.length * 0.25;
+
+    labels.forEach((label,i) => {
+      const val = values[i];
+      const barHeight = (val / maxValue) * (chartHeight - 20);
+      const x = margin.left + i * (barWidth + barSpacing) + barSpacing / 2;
+      const y = margin.top + chartHeight - barHeight;
+
+      // Bar gradient
+      const barGradient = ctx.createLinearGradient(x,y,x,y + barHeight);
+      barGradient.addColorStop(0,'#18e0e6');
+      barGradient.addColorStop(1,'#2bd4d9');
+      ctx.fillStyle = barGradient;
+      ctx.fillRect(x,y,barWidth,barHeight);
+
+      // Value on top of bar
+      if(val > 0) {
+        ctx.fillStyle = '#e9f2ff';
+        ctx.font = 'bold 13px Montserrat, Arial, sans-serif';
+        ctx.textAlign = 'center';
+        ctx.fillText(val.toString(), x + barWidth/2, y - 8);
+      }
+
+      // Letter labels
+      ctx.fillStyle = '#b8d4ff';
+      ctx.font = 'bold 14px Montserrat, Arial, sans-serif';
+      ctx.textAlign = 'center';
+      ctx.fillText(label, x + barWidth/2, height - 20);
+    });
+  } catch(error) {
+    log(`Chart drawing error: ${error}`);
+  }
 }
 
+// Initialize everything when DOM is ready
 document.addEventListener('DOMContentLoaded', () => {
+  log('DOM Content Loaded - Initializing application');
+  
   // Mobile nav toggle
-  document.getElementById('navToggle')?.addEventListener('click', () => {
-    const navLinks = document.getElementById('navLinks');
-    navLinks.style.display = navLinks.style.display === 'flex' ? 'none' : 'flex';
-  });
+  const navToggle = document.getElementById('navToggle');
+  if(navToggle) {
+    navToggle.addEventListener('click', () => {
+      const navLinks = document.getElementById('navLinks');
+      if(navLinks) {
+        navLinks.style.display = navLinks.style.display === 'flex' ? 'none' : 'flex';
+      }
+    });
+  }
 
-  initPartA();
-  initPartB();
+  // Initialize both parts
+  try {
+    initPartA();
+    initPartB();
+    log('Application initialized successfully');
+  } catch(error) {
+    log(`Initialization error: ${error}`);
+    showAlert('Application initialization error', 'alert');
+  }
 });
