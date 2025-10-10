@@ -5,40 +5,269 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>Homework 2 — Distributions & Caesar Cipher</title>
   <link rel="stylesheet" href="style.css"/>
-  <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;700&family=Orbitron:wght@600&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;600;700&family=Orbitron:wght@600&display=swap" rel="stylesheet">
   <style>
-    /* Page-specific light helpers that align with your existing theme */
-    .section-title { margin-top: 1rem; color: #18e0e6; letter-spacing: 1px; }
-    .subtle { color: #c3d4f7; opacity: 0.9; }
-    .block { display: block; }
-    .row { display: flex; flex-wrap: wrap; gap: 1rem; align-items: flex-start; }
-    .col { flex: 1 1 300px; }
-    .card-lite {
-      background: rgba(30,44,74,0.92);
-      border-radius: 14px;
-      padding: 1rem 1.25rem;
-      box-shadow: 0 6px 22px rgba(24,224,230,0.25);
+    /* Enhanced styling for better organization */
+    .hw-section {
+      background: rgba(30,44,74,0.95);
+      border-radius: 16px;
+      margin: 1.5rem 0;
+      box-shadow: 0 8px 32px rgba(24,224,230,0.15);
+      overflow: hidden;
+    }
+    
+    .section-header {
+      background: linear-gradient(135deg, #18e0e6 0%, #2bd4d9 100%);
+      color: #0a1628;
+      padding: 1rem 1.5rem;
+      cursor: pointer;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-weight: 600;
+      font-size: 1.1rem;
+    }
+    
+    .section-header:hover {
+      background: linear-gradient(135deg, #2bd4d9 0%, #18e0e6 100%);
+    }
+    
+    .section-content {
+      padding: 0;
+      max-height: 0;
+      overflow: hidden;
+      transition: max-height 0.3s ease-out, padding 0.3s ease-out;
+    }
+    
+    .section-content.active {
+      max-height: 5000px;
+      padding: 1.5rem;
+    }
+    
+    .chevron {
+      transition: transform 0.3s ease;
+      font-size: 1.2rem;
+    }
+    
+    .section-header.active .chevron {
+      transform: rotate(180deg);
+    }
+    
+    .step-container {
+      background: rgba(20,32,66,0.6);
+      border-radius: 12px;
+      padding: 1.25rem;
+      margin: 1rem 0;
+      border-left: 4px solid #18e0e6;
+    }
+    
+    .step-title {
+      color: #18e0e6;
+      font-weight: 600;
+      font-size: 1.05rem;
+      margin-bottom: 0.75rem;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+    
+    .step-number {
+      background: #18e0e6;
+      color: #0a1628;
+      width: 24px;
+      height: 24px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 0.85rem;
+      font-weight: bold;
+    }
+    
+    .explanation {
+      background: rgba(15,25,55,0.7);
+      border-radius: 8px;
+      padding: 1rem;
+      margin: 0.75rem 0;
+      border-left: 3px solid #4a9eff;
+      font-size: 0.95rem;
+      line-height: 1.5;
+    }
+    
+    .result-box {
+      background: rgba(12,20,45,0.8);
+      border-radius: 10px;
+      padding: 1rem;
+      margin: 1rem 0;
+      border: 1px solid #2d4a7a;
+    }
+    
+    .controls-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+      gap: 1rem;
       margin: 1rem 0;
     }
-    .control { margin: 0.5rem 0; }
-    .control input[type="number"], .control input[type="text"], .control select, .control textarea {
-      width: 100%; padding: 0.65rem 0.8rem; border-radius: 10px; border: 1px solid #26406f; background:#142042; color:#e9f2ff;
-      box-shadow: inset 0 0 0 9999px rgba(255,255,255,0.02);
+    
+    .control-group {
+      background: rgba(15,25,55,0.5);
+      padding: 1rem;
+      border-radius: 8px;
     }
-    .btn-row { display:flex; flex-wrap: wrap; gap: 0.6rem; margin: 0.5rem 0 1rem; }
-    .btn { display:inline-block; background:#18e0e6; color:#1d2951; padding:0.5rem 1rem; border-radius: 22px; font-weight:700; text-decoration:none; border:0; cursor:pointer; }
-    .btn.secondary { background:#2bd4d9; }
-    .btn.ghost { background:transparent; color:#18e0e6; border:1px solid #18e0e6; }
-    .btn:disabled { opacity: 0.65; cursor: not-allowed; }
-    .table-wrap { overflow:auto; }
-    table { width: 100%; border-collapse: collapse; margin: 0.5rem 0; }
-    th, td { text-align: left; padding: 0.5rem 0.6rem; border-bottom: 1px solid #2b3f6a; }
-    th { color:#9fe6ff; }
-    canvas { width: 100%; height: 260px; background: #0e1731; border-radius: 12px; }
-    .hint { font-size: 0.9rem; color:#a7b7f3; }
-    .muted { opacity: 0.85; }
-    .mono { font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace; }
-    .badge { display:inline-block; background:#0fd; color:#193; border-radius:10px; padding:0.1rem 0.5rem; font-size:0.8rem; font-weight:700; margin-left: 0.5rem; }
+    
+    .control-group label {
+      display: block;
+      margin-bottom: 0.5rem;
+      color: #b8d4ff;
+      font-weight: 500;
+    }
+    
+    .control-group input,
+    .control-group select,
+    .control-group textarea {
+      width: 100%;
+      padding: 0.75rem;
+      border-radius: 8px;
+      border: 1px solid #3a5a8a;
+      background: #0f1937;
+      color: #e9f2ff;
+      font-family: inherit;
+      box-sizing: border-box;
+    }
+    
+    .control-group textarea {
+      font-family: 'Courier New', monospace;
+      resize: vertical;
+    }
+    
+    .btn-group {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.75rem;
+      margin: 1rem 0;
+    }
+    
+    .btn {
+      background: linear-gradient(135deg, #18e0e6 0%, #2bd4d9 100%);
+      color: #0a1628;
+      border: none;
+      padding: 0.75rem 1.5rem;
+      border-radius: 25px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      text-decoration: none;
+      display: inline-block;
+      text-align: center;
+    }
+    
+    .btn:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 4px 15px rgba(24,224,230,0.3);
+    }
+    
+    .btn:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+      transform: none;
+    }
+    
+    .btn.secondary {
+      background: linear-gradient(135deg, #4a9eff 0%, #6bb6ff 100%);
+    }
+    
+    .btn.ghost {
+      background: transparent;
+      color: #18e0e6;
+      border: 2px solid #18e0e6;
+    }
+    
+    .visualization-container {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 1.5rem;
+      margin: 1rem 0;
+    }
+    
+    @media (max-width: 768px) {
+      .visualization-container {
+        grid-template-columns: 1fr;
+      }
+      .controls-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+    
+    .chart-container {
+      background: rgba(8,15,35,0.9);
+      border-radius: 12px;
+      padding: 1rem;
+    }
+    
+    canvas {
+      width: 100%;
+      height: 300px;
+      border-radius: 8px;
+    }
+    
+    .data-table {
+      background: rgba(8,15,35,0.9);
+      border-radius: 12px;
+      padding: 1rem;
+      overflow-x: auto;
+    }
+    
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 0.9rem;
+    }
+    
+    th, td {
+      padding: 0.5rem 0.75rem;
+      text-align: left;
+      border-bottom: 1px solid #2d4a7a;
+    }
+    
+    th {
+      background: rgba(24,224,230,0.1);
+      color: #18e0e6;
+      font-weight: 600;
+    }
+    
+    .progress-indicator {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      margin: 1rem 0;
+      font-size: 0.9rem;
+    }
+    
+    .progress-dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: #3a5a8a;
+    }
+    
+    .progress-dot.active {
+      background: #18e0e6;
+    }
+    
+    .alert {
+      background: rgba(255,193,7,0.1);
+      border: 1px solid #ffc107;
+      color: #ffd54f;
+      padding: 1rem;
+      border-radius: 8px;
+      margin: 1rem 0;
+    }
+    
+    .success {
+      background: rgba(76,175,80,0.1);
+      border: 1px solid #4caf50;
+      color: #81c784;
+    }
   </style>
 </head>
 <body>
@@ -57,125 +286,209 @@
   <main>
     <section class="hw-detail">
       <h1>Homework 2: Distributions and the Caesar Cipher</h1>
-      <p class="subtle">This assignment is organized in two parts. Part A focuses on datasets and distributions (with MS Access for data creation), while Part B uses JavaScript to analyze text and implement Caesar cipher operations.</p>
+      <p class="subtle">This assignment demonstrates statistical analysis of datasets and text cryptography through two comprehensive parts.</p>
 
-      <!-- PART A -->
-      <h2 class="section-title">Part A — Dataset and Distribution</h2>
-      <div class="card-lite">
-        <h3>Concepts</h3>
-        <p><strong>Dataset</strong> is a collection of observations organized in rows (records) and columns (variables). Each variable represents a measurable attribute (e.g., Age, Department, LoginFailures), and each record represents one observation (e.g., a user, a session, a host).</p>
-        <p><strong>Distribution</strong> describes how the values of a variable are spread. A <em>univariate distribution</em> focuses on one variable at a time (e.g., frequency of Departments). A <em>bivariate distribution</em> (cross-tab) examines the joint frequency of two variables (e.g., Department vs. MalwareDetected).</p>
-      </div>
-
-      <div class="card-lite">
-        <h3>Workflow (using MS Access)</h3>
-        <ol>
-          <li>Create a new table (e.g., “UserSecurity”). Suggested fields: Department (Short Text), Age (Number), LoginFailures (Number), MalwareDetected (Yes/No).</li>
-          <li>Insert 15–30 rows of data (realistic values).</li>
-          <li>Export the table as CSV for analysis on this page (External Data → Export → Text File).</li>
-          <li>Compute up to <strong>k ≤ 3</strong> univariate distributions (frequency tables) and optionally a bivariate (cross-tab) using the tools below.</li>
-        </ol>
-        <p class="hint">Alternatively, click “Load Sample Dataset” to use a built-in CSV that mimics the Access table.</p>
-
-        <!-- Data controls -->
-        <div class="row">
-          <div class="col">
-            <div class="control">
-              <label for="csvFile"><strong>Upload CSV from Access</strong></label>
-              <input type="file" id="csvFile" accept=".csv" />
-            </div>
-            <div class="btn-row">
-              <button class="btn" id="btnLoadSample">Load Sample Dataset</button>
-              <button class="btn ghost" id="btnDownloadSample">Download Sample CSV</button>
-              <button class="btn secondary" id="btnClearData">Clear</button>
-            </div>
-            <div class="hint">After loading data, detected variables will appear below.</div>
-          </div>
-          <div class="col">
-            <div class="control">
-              <label><strong>Variables (select up to 3 for univariate)</strong></label>
-              <div id="varChecklist" class="muted">No data loaded yet.</div>
-            </div>
-            <div class="btn-row">
-              <button class="btn" id="btnComputeUni" disabled>Compute Univariate Distributions</button>
-            </div>
-          </div>
+      <!-- PART A: Dataset & Distribution -->
+      <div class="hw-section">
+        <div class="section-header" data-section="partA">
+          <span>Part A — Dataset and Distribution Analysis</span>
+          <span class="chevron">▼</span>
         </div>
-
-        <!-- Univariate outputs -->
-        <div id="uniOutputs"></div>
-
-        <!-- Bivariate -->
-        <div class="card-lite">
-          <h3>Optional: Bivariate Distribution (Cross-tab)</h3>
-          <div class="row">
-            <div class="col">
-              <div class="control">
-                <label for="biVarX"><strong>Variable X</strong></label>
-                <select id="biVarX"></select>
-              </div>
+        <div class="section-content" id="partA-content">
+          
+          <div class="step-container">
+            <div class="step-title">
+              <span class="step-number">1</span>
+              Understanding Concepts
             </div>
-            <div class="col">
-              <div class="control">
-                <label for="biVarY"><strong>Variable Y</strong></label>
-                <select id="biVarY"></select>
+            <div class="explanation">
+              <p><strong>Dataset:</strong> A structured collection of data organized in rows (observations/records) and columns (variables/attributes). In cybersecurity, this could be user login data, network traffic logs, or security incident reports.</p>
+              <p><strong>Distribution:</strong> Shows how values of a variable are spread across different categories or ranges. A <em>univariate distribution</em> analyzes one variable at a time, while a <em>bivariate distribution</em> examines relationships between two variables.</p>
+            </div>
+          </div>
+
+          <div class="step-container">
+            <div class="step-title">
+              <span class="step-number">2</span>
+              Data Loading
+            </div>
+            <div class="explanation">
+              Load your dataset from MS Access (exported as CSV) or use the sample dataset to begin analysis.
+            </div>
+            
+            <div class="controls-grid">
+              <div class="control-group">
+                <label for="csvFile">Upload CSV from Access</label>
+                <input type="file" id="csvFile" accept=".csv" />
+                <div class="btn-group">
+                  <button class="btn" id="btnLoadSample">Load Sample Dataset</button>
+                  <button class="btn ghost" id="btnDownloadSample">Download Sample CSV</button>
+                </div>
+              </div>
+              <div class="control-group">
+                <label>Dataset Status</label>
+                <div id="dataStatus" class="result-box">No data loaded</div>
+                <button class="btn secondary" id="btnClearData">Clear Data</button>
               </div>
             </div>
           </div>
-          <div class="btn-row">
-            <button class="btn" id="btnComputeBi" disabled>Compute Cross-tab</button>
+
+          <div class="step-container">
+            <div class="step-title">
+              <span class="step-number">3</span>
+              Univariate Analysis (k ≤ 3)
+            </div>
+            <div class="explanation">
+              Select up to 3 variables to compute their individual frequency distributions. This shows how often each value appears in the dataset.
+            </div>
+            
+            <div class="control-group">
+              <label>Select Variables (max 3)</label>
+              <div id="varChecklist">Load data first</div>
+              <div class="btn-group">
+                <button class="btn" id="btnComputeUni" disabled>Compute Univariate Distributions</button>
+              </div>
+            </div>
+            
+            <div id="uniResults"></div>
           </div>
-          <div id="biOutput" class="table-wrap"></div>
+
+          <div class="step-container">
+            <div class="step-title">
+              <span class="step-number">4</span>
+              Bivariate Analysis (Optional)
+            </div>
+            <div class="explanation">
+              Create a cross-tabulation between two variables to examine their relationship. This shows how the combination of values from two variables are distributed.
+            </div>
+            
+            <div class="controls-grid">
+              <div class="control-group">
+                <label for="biVarX">Variable X</label>
+                <select id="biVarX">
+                  <option value="">-- Select Variable --</option>
+                </select>
+              </div>
+              <div class="control-group">
+                <label for="biVarY">Variable Y</label>
+                <select id="biVarY">
+                  <option value="">-- Select Variable --</option>
+                </select>
+              </div>
+            </div>
+            <div class="btn-group">
+              <button class="btn" id="btnComputeBi" disabled>Generate Cross-tabulation</button>
+            </div>
+            <div id="biResults"></div>
+          </div>
         </div>
       </div>
 
-      <!-- PART B -->
-      <h2 class="section-title">Part B — Text Analysis & Caesar Cipher</h2>
-      <div class="card-lite">
-        <div class="control">
-          <label for="plainText"><strong>Input Text</strong></label>
-          <textarea id="plainText" rows="5" placeholder="Type or paste your text here..." class="mono"></textarea>
+      <!-- PART B: Text Analysis & Caesar Cipher -->
+      <div class="hw-section">
+        <div class="section-header" data-section="partB">
+          <span>Part B — Text Analysis & Caesar Cipher</span>
+          <span class="chevron">▼</span>
         </div>
-        <div class="btn-row">
-          <button class="btn" id="btnLetterDist">Compute Letter Distribution</button>
-          <button class="btn secondary" id="btnShowDistChart">Show/Update Distribution Chart</button>
-        </div>
-        <div class="row">
-          <div class="col table-wrap" id="letterTableWrap"></div>
-          <div class="col"><canvas id="letterChart" width="600" height="260"></canvas></div>
-        </div>
-      </div>
+        <div class="section-content" id="partB-content">
+          
+          <div class="step-container">
+            <div class="step-title">
+              <span class="step-number">1</span>
+              Text Input & Letter Distribution
+            </div>
+            <div class="explanation">
+              Enter text to analyze its letter frequency distribution. This forms the foundation for cryptographic analysis.
+            </div>
+            
+            <div class="control-group">
+              <label for="plainText">Input Text</label>
+              <textarea id="plainText" rows="4" placeholder="Enter your text here...">The quick brown fox jumps over the lazy dog. This text contains every letter of the alphabet at least once.</textarea>
+            </div>
+            
+            <div class="btn-group">
+              <button class="btn" id="btnAnalyzeText">Analyze Letter Distribution</button>
+              <button class="btn secondary" id="btnClearText">Clear Text</button>
+            </div>
+            
+            <div id="textAnalysisResults"></div>
+          </div>
 
-      <div class="card-lite">
-        <h3>Caesar Cipher</h3>
-        <div class="row">
-          <div class="col">
-            <div class="control">
-              <label for="shift"><strong>Shift (0–25)</strong></label>
-              <input type="number" id="shift" min="0" max="25" value="3"/>
+          <div class="step-container">
+            <div class="step-title">
+              <span class="step-number">2</span>
+              Caesar Cipher Encryption
             </div>
-            <div class="btn-row">
-              <button class="btn" id="btnEncrypt">Encrypt</button>
-              <button class="btn secondary" id="btnDecryptKnown">Decrypt (Known Shift)</button>
+            <div class="explanation">
+              Apply a Caesar cipher with a specified shift value. Each letter is shifted by a fixed number of positions in the alphabet.
             </div>
-            <div class="control">
-              <label for="cipherText"><strong>Ciphertext</strong></label>
-              <textarea id="cipherText" rows="4" class="mono" placeholder="Result will appear here..."></textarea>
+            
+            <div class="controls-grid">
+              <div class="control-group">
+                <label for="shift">Shift Value (0-25)</label>
+                <input type="number" id="shift" min="0" max="25" value="3"/>
+              </div>
+              <div class="control-group">
+                <div class="btn-group">
+                  <button class="btn" id="btnEncrypt">Encrypt Text</button>
+                </div>
+              </div>
+            </div>
+            
+            <div class="control-group">
+              <label for="cipherText">Encrypted Text</label>
+              <textarea id="cipherText" rows="4" readonly placeholder="Encrypted text will appear here..."></textarea>
             </div>
           </div>
-          <div class="col">
-            <div class="btn-row">
-              <button class="btn" id="btnBruteForce">Decode (Unknown Shift — brute force)</button>
-              <button class="btn ghost" id="btnLanguageDecode">Decode using Language Distribution</button>
+
+          <div class="step-container">
+            <div class="step-title">
+              <span class="step-number">3</span>
+              Decryption (Unknown Shift)
             </div>
-            <div id="bfResults" class="table-wrap"></div>
-            <p class="hint">Language-based decoder uses English letter frequencies and a chi-squared score to identify the most likely shift.</p>
+            <div class="explanation">
+              Attempt to decode the encrypted text without knowing the shift value using two approaches:
+              <br>• <strong>Brute Force:</strong> Try all possible shifts (0-25)
+              <br>• <strong>Language Analysis:</strong> Compare letter frequencies with known language patterns
+            </div>
+            
+            <div class="controls-grid">
+              <div class="control-group">
+                <label for="languageSelect">Language for Frequency Analysis</label>
+                <select id="languageSelect">
+                  <option value="english">English</option>
+                  <option value="italian">Italian</option>
+                  <option value="spanish">Spanish</option>
+                  <option value="french">French</option>
+                  <option value="german">German</option>
+                </select>
+              </div>
+              <div class="control-group">
+                <div class="btn-group">
+                  <button class="btn" id="btnBruteForce">Brute Force Analysis</button>
+                  <button class="btn secondary" id="btnLanguageDecode">Language-Based Decode</button>
+                </div>
+              </div>
+            </div>
+            
+            <div id="decryptionResults"></div>
+          </div>
+
+          <div class="step-container">
+            <div class="step-title">
+              <span class="step-number">4</span>
+              Results & Verification
+            </div>
+            <div class="explanation">
+              Compare the decrypted text with the original to verify the accuracy of the decryption methods.
+            </div>
+            <div id="verificationResults"></div>
           </div>
         </div>
       </div>
 
       <div class="centered">
-        <a href="homework.html" class="btn">Back to Homework</a>
+        <a href="homework.html" class="btn">← Back to Homework List</a>
       </div>
     </section>
   </main>
@@ -185,6 +498,6 @@
   </footer>
 
   <script src="script.js"></script>
-  <script src="hw2.js"></script>
+  <script src="hw2-enhanced.js"></script>
 </body>
 </html>
