@@ -1,25 +1,15 @@
 /* ================================
-   Homework 2 JavaScript
-   Functionality intact, all sections visible by default
+   Enhanced Homework 2 Implementation
+   Distribution-based Caesar Cipher Analysis
    ================================ */
 
-// Language frequency data
 const LANGUAGE_FREQUENCIES = {
   english: { A:8.17, B:1.49, C:2.78, D:4.25, E:12.70, F:2.23, G:2.02, H:6.09, I:6.97, J:0.15,
              K:0.77, L:4.03, M:2.41, N:6.75, O:7.51, P:1.93, Q:0.10, R:5.99, S:6.33, T:9.06,
              U:2.76, V:0.98, W:2.36, X:0.15, Y:1.97, Z:0.07 },
   italian: { A:11.74, B:0.92, C:4.50, D:3.73, E:11.79, F:0.95, G:1.64, H:1.54, I:11.28, J:0,
              K:0, L:6.51, M:2.51, N:6.88, O:9.83, P:3.05, Q:0.51, R:6.37, S:4.98, T:5.62,
-             U:3.01, V:2.10, W:0, X:0, Y:0, Z:0.49 },
-  spanish: { A:12.53, B:1.42, C:4.68, D:5.86, E:13.68, F:0.69, G:1.01, H:0.70, I:6.25, J:0.44,
-             K:0, L:4.97, M:3.15, N:6.71, O:8.68, P:2.51, Q:0.88, R:6.87, S:7.98, T:4.63,
-             U:3.93, V:0.90, W:0, X:0.22, Y:0.90, Z:0.52 },
-  french: { A:7.64, B:0.90, C:3.26, D:3.67, E:14.72, F:1.06, G:0.87, H:0.74, I:7.53, J:0.61,
-            K:0, L:5.46, M:2.97, N:7.10, O:5.38, P:2.93, Q:1.36, R:6.55, S:7.95, T:7.24,
-            U:6.31, V:1.83, W:0, X:0.43, Y:0.13, Z:0.21 },
-  german: { A:6.51, B:1.89, C:3.06, D:5.08, E:17.40, F:1.66, G:3.01, H:4.76, I:7.55, J:0.27,
-            K:1.21, L:3.44, M:2.53, N:9.78, O:2.51, P:0.79, Q:0.02, R:7.00, S:7.27, T:6.15,
-            U:4.35, V:0.67, W:1.89, X:0.03, Y:0.04, Z:1.13 }
+             U:3.01, V:2.10, W:0, X:0, Y:0, Z:0.49 }
 };
 
 const SAMPLE_CSV = `Department,Age,LoginFailures,MalwareDetected,SecurityTraining
@@ -46,9 +36,11 @@ IT,23,1,No,Yes`;
 
 let appState = {
   dataset: { headers: [], rows: [] },
-  currentText: '',
+  originalText: '',
   cipherText: '',
-  selectedLanguage: 'english'
+  actualShift: 0,
+  originalDistribution: {},
+  cipherDistribution: {}
 };
 
 const $ = sel => document.querySelector(sel);
@@ -70,7 +62,7 @@ function showAlert(msg, type='info') {
   const container = $('.hw-detail');
   if(container) {
     container.prepend(alert);
-    setTimeout(() => alert.remove(), 4000);
+    setTimeout(() => alert.remove(), 5000);
   }
 }
 
@@ -87,6 +79,7 @@ function parseCSV(text) {
   return { headers, rows };
 }
 
+// Part A functions (unchanged from previous version)
 function initPartA() {
   $('#csvFile')?.addEventListener('change', async e => {
     const f = e.target.files[0];
@@ -167,9 +160,9 @@ function updateDatasetUI(hasData) {
   
   varChecklist.innerHTML = '';
   appState.dataset.headers.forEach(h => {
-    varChecklist.appendChild(createEl('label', {}, [
-      createEl('input', { type: 'checkbox', name: 'uni-var', value: h }),
-      ` ${h}`
+    varChecklist.appendChild(createEl('label', { style: 'display: block; margin: 0.5rem 0;' }, [
+      createEl('input', { type: 'checkbox', name: 'uni-var', value: h, style: 'margin-right: 0.5rem;' }),
+      h
     ]));
   });
   
@@ -192,6 +185,7 @@ function computeUnivariate(vars) {
     const freq = computeFrequency(v);
     renderUnivariate(v, freq, i+1);
   });
+  showAlert('Univariate distributions computed', 'success');
 }
 
 function computeFrequency(variable) {
@@ -206,7 +200,9 @@ function computeFrequency(variable) {
 function renderUnivariate(variable, freq, index) {
   const cont = createEl('div', { class: 'result-box' });
   const title = createEl('h4', { innerHTML:`Univariate Distribution #${index}: <span style="color:#18e0e6;">${variable}</span>` });
-  const expl = createEl('div', { class: 'explanation', innerHTML:`This distribution shows how frequently each distinct value of <strong>${variable}</strong> appears.` });
+  const expl = createEl('div', { class: 'explanation', innerHTML:`This distribution shows how frequently each distinct value of <strong>${variable}</strong> appears in the dataset.` });
+  
+  const visualization = createEl('div', { class: 'visualization-container' });
   const tableDiv = createEl('div', { class: 'data-table' });
   const table = createEl('table');
   table.innerHTML = `
@@ -219,13 +215,16 @@ function renderUnivariate(variable, freq, index) {
   tableDiv.appendChild(table);
   
   const chartCont = createEl('div', { class: 'chart-container' });
-  const canvas = createEl('canvas', { width:'600', height:'300' });
+  const canvas = createEl('canvas', { width:'800', height:'400' });
   chartCont.appendChild(canvas);
   
-  cont.append(title, expl, tableDiv, chartCont);
+  visualization.appendChild(tableDiv);
+  visualization.appendChild(chartCont);
+  
+  cont.append(title, expl, visualization);
   $('#uniResults').appendChild(cont);
   
-  setTimeout(() => drawBarChart(canvas, freq.map(f=>f.val), freq.map(f=>f.count), `${variable} Distribution`), 50);
+  setTimeout(() => drawBarChart(canvas, freq.map(f=>f.val), freq.map(f=>f.count), `${variable} Distribution`), 100);
 }
 
 function computeBivariate(varX, varY) {
@@ -247,7 +246,7 @@ function computeBivariate(varX, varY) {
 
   const cont = createEl('div', { class: 'result-box' });
   const title = createEl('h4', { innerHTML:`Bivariate Distribution: <span style="color:#18e0e6">${varX}</span> vs <span style="color:#18e0e6">${varY}</span>` });
-  const expl = createEl('div', { class: 'explanation', innerHTML: 'Cross-tabulation showing counts for each pair combination.' });
+  const expl = createEl('div', { class: 'explanation', innerHTML: 'Cross-tabulation showing the joint frequency of value combinations from both variables.' });
 
   const tableDiv = createEl('div', { class: 'data-table' });
   const table = createEl('table');
@@ -281,15 +280,17 @@ function computeBivariate(varX, varY) {
 
   cont.append(title, expl, tableDiv);
   $('#biResults').appendChild(cont);
+  showAlert('Bivariate distribution computed', 'success');
 }
 
+// Part B - Enhanced with distribution comparison
 function initPartB() {
   $('#btnAnalyzeText')?.addEventListener('click', analyzeTextDistribution);
   $('#btnClearText')?.addEventListener('click', clearTextAnalysis);
   $('#btnEncrypt')?.addEventListener('click', encryptText);
+  $('#btnRandomShift')?.addEventListener('click', randomShiftAndEncrypt);
+  $('#btnDistributionDecode')?.addEventListener('click', distributionBasedDecrypt);
   $('#btnBruteForce')?.addEventListener('click', bruteForceDecrypt);
-  $('#btnLanguageDecode')?.addEventListener('click', languageBasedDecrypt);
-  $('#languageSelect')?.addEventListener('change', e => appState.selectedLanguage = e.target.value);
 }
 
 function analyzeTextDistribution() {
@@ -298,9 +299,9 @@ function analyzeTextDistribution() {
     showAlert('Please enter text for analysis', 'alert');
     return;
   }
-  appState.currentText = text;
-  const dist = computeLetterDistribution(text);
-  renderTextAnalysis(dist);
+  appState.originalText = text;
+  appState.originalDistribution = computeLetterDistribution(text);
+  renderTextAnalysis(appState.originalDistribution);
   showAlert('Letter distribution analyzed', 'success');
 }
 
@@ -308,11 +309,14 @@ function clearTextAnalysis() {
   $('#plainText').value = '';
   $('#cipherText').value = '';
   $('#textAnalysisResults').innerHTML = '';
+  $('#distributionAnalysisResults').innerHTML = '';
   $('#decryptionResults').innerHTML = '';
   $('#verificationResults').innerHTML = '';
-  appState.currentText = '';
+  appState.originalText = '';
   appState.cipherText = '';
-  showAlert('Text cleared', 'success');
+  appState.originalDistribution = {};
+  appState.cipherDistribution = {};
+  showAlert('Analysis cleared', 'success');
 }
 
 function computeLetterDistribution(text) {
@@ -320,51 +324,60 @@ function computeLetterDistribution(text) {
   let counts = {};
   letters.split('').forEach(l => counts[l] = 0);
   let totalLetters = 0;
+  
   for(const ch of text.toUpperCase()) {
     if(letters.includes(ch)) {
       counts[ch]++;
       totalLetters++;
     }
   }
+  
   const distribution = {};
   letters.split('').forEach(l => distribution[l] = {
     count: counts[l],
     percent: totalLetters ? ((counts[l]/totalLetters)*100).toFixed(2) : 0
   });
+  
   return { distribution, totalLetters };
 }
 
 function renderTextAnalysis(data) {
   const container = createEl('div', { class:'result-box' });
-  const title = createEl('h4', { innerHTML:'Letter Frequency Analysis', style:'color:#18e0e6' });
+  const title = createEl('h4', { innerHTML:'Original Text - Letter Frequency Analysis', style:'color:#18e0e6' });
   const expl = createEl('div', { class:'explanation', innerHTML: `
-    Total letters: <strong>${data.totalLetters}</strong><br>
-    Total characters: <strong>${appState.currentText.length}</strong><br>
-    Frequency of each letter in the text.
+    <strong>Text Statistics:</strong><br>
+    • Total letters: ${data.totalLetters}<br>
+    • Total characters: ${appState.originalText.length}<br>
+    • This distribution will serve as baseline for comparison with encrypted text.
   ` });
 
+  const visualization = createEl('div', { class:'visualization-container' });
   const tableDiv = createEl('div', { class:'data-table' });
   const table = createEl('table');
   table.innerHTML = `
-    <thead><tr><th>Letter</th><th>Count</th><th>Frequency (%)</th><th>Bar</th></tr></thead>
+    <thead><tr><th>Letter</th><th>Count</th><th>Frequency (%)</th><th>Visual Bar</th></tr></thead>
     <tbody>
       ${Object.entries(data.distribution).map(([l,v])=>`
-      <tr><td>${l}</td><td>${v.count}</td><td>${v.percent}</td>
-      <td><div style="background:#18e0e6; height:10px; width:${Math.min(v.percent*2,100)}%; border-radius: 2px;"></div></td></tr>`).join('')}
+      <tr><td><strong>${l}</strong></td><td>${v.count}</td><td>${v.percent}</td>
+      <td><div style="background:#18e0e6; height:12px; width:${Math.min(parseFloat(v.percent)*3,100)}%; border-radius: 2px;"></div></td></tr>`).join('')}
     </tbody>
   `;
   tableDiv.appendChild(table);
 
   const chartCont = createEl('div', { class:'chart-container' });
-  const canvas = createEl('canvas', { id:'text-analysis-chart', width:'600', height:'300' });
+  const canvas = createEl('canvas', { id:'original-text-chart', width:'800', height:'400' });
   chartCont.appendChild(canvas);
-
-  container.append(title, expl, tableDiv, chartCont);
+  
+  visualization.appendChild(tableDiv);
+  visualization.appendChild(chartCont);
+  container.append(title, expl, visualization);
 
   $('#textAnalysisResults').innerHTML = '';
   $('#textAnalysisResults').appendChild(container);
 
-  setTimeout(() => drawBarChart(canvas, Object.keys(data.distribution), Object.values(data.distribution).map(d=>d.count), 'Letter Frequency Distribution'), 100);
+  setTimeout(() => {
+    drawBarChart(canvas, Object.keys(data.distribution), Object.values(data.distribution).map(d=>d.count), 'Original Text - Letter Frequency');
+  }, 100);
 }
 
 function encryptText() {
@@ -374,9 +387,26 @@ function encryptText() {
     showAlert('Enter text to encrypt', 'alert');
     return;
   }
+  appState.actualShift = shift;
   appState.cipherText = caesarCipher(text, shift);
+  appState.cipherDistribution = computeLetterDistribution(appState.cipherText);
   $('#cipherText').value = appState.cipherText;
-  showAlert(`Encrypted with shift ${shift}`, 'success');
+  showAlert(`Text encrypted with shift ${shift}`, 'success');
+}
+
+function randomShiftAndEncrypt() {
+  const text = $('#plainText').value;
+  if(!text.trim()) {
+    showAlert('Enter text to encrypt', 'alert');
+    return;
+  }
+  const randomShift = Math.floor(Math.random() * 26);
+  $('#shift').value = randomShift;
+  appState.actualShift = randomShift;
+  appState.cipherText = caesarCipher(text, randomShift);
+  appState.cipherDistribution = computeLetterDistribution(appState.cipherText);
+  $('#cipherText').value = appState.cipherText;
+  showAlert(`Text encrypted with random shift ${randomShift}`, 'success');
 }
 
 function caesarCipher(text, shift) {
@@ -386,32 +416,211 @@ function caesarCipher(text, shift) {
   });
 }
 
+function distributionBasedDecrypt() {
+  if(!appState.originalText || !appState.cipherText) {
+    showAlert('Please analyze text and encrypt it first', 'alert');
+    return;
+  }
+  
+  // Compare distributions for all possible shifts
+  const candidates = [];
+  
+  for(let testShift = 0; testShift < 26; testShift++) {
+    const decryptedText = caesarCipher(appState.cipherText, 26 - testShift);
+    const decryptedDist = computeLetterDistribution(decryptedText);
+    
+    // Calculate similarity score with original distribution
+    let similarityScore = 0;
+    let totalDifference = 0;
+    
+    Object.keys(appState.originalDistribution.distribution).forEach(letter => {
+      const originalPercent = parseFloat(appState.originalDistribution.distribution[letter].percent);
+      const decryptedPercent = parseFloat(decryptedDist.distribution[letter].percent);
+      const diff = Math.abs(originalPercent - decryptedPercent);
+      totalDifference += diff;
+      // Similarity is inverse of difference
+      similarityScore += Math.max(0, 15 - diff); // Max 15 points per letter match
+    });
+    
+    candidates.push({
+      shift: testShift,
+      similarityScore: similarityScore,
+      totalDifference: totalDifference.toFixed(2),
+      decryptedText: decryptedText,
+      distribution: decryptedDist
+    });
+  }
+  
+  // Sort by similarity score (higher is better)
+  candidates.sort((a,b) => b.similarityScore - a.similarityScore);
+  const bestCandidate = candidates[0];
+  
+  // Update fields with best result
+  $('#shift').value = bestCandidate.shift;
+  $('#plainText').value = bestCandidate.decryptedText;
+  
+  renderDistributionAnalysis(candidates, bestCandidate);
+  renderVerification(appState.originalText, bestCandidate.decryptedText, bestCandidate.shift);
+  
+  showAlert(`Distribution analysis complete! Detected shift: ${bestCandidate.shift}`, 'success');
+}
+
+function renderDistributionAnalysis(candidates, best) {
+  const container = createEl('div', { class: 'result-box' });
+  const title = createEl('h4', { innerHTML: 'Distribution-Based Decryption Analysis', style: 'color:#18e0e6' });
+  
+  const explanation = createEl('div', { class: 'explanation', innerHTML: `
+    <strong>Analysis Method:</strong><br>
+    1. For each possible shift (0-25), decrypt the cipher text<br>
+    2. Calculate letter frequency distribution of decrypted text<br>
+    3. Compare this distribution with the original text distribution<br>
+    4. Calculate similarity score (higher = better match)<br>
+    5. The shift with highest similarity is the correct one<br><br>
+    <strong>Best Match Found:</strong> Shift ${best.shift} with similarity score ${best.similarityScore.toFixed(1)}
+  `});
+  
+  // Summary of top candidates
+  const summary = createEl('div', { class: 'analysis-summary' });
+  const summaryTitle = createEl('h5', { textContent: 'Top 5 Shift Candidates', style: 'color:#18e0e6; margin-bottom: 1rem;' });
+  summary.appendChild(summaryTitle);
+  
+  candidates.slice(0, 5).forEach((candidate, index) => {
+    const candidateDiv = createEl('div', { 
+      class: `shift-candidate ${index === 0 ? 'best' : ''}`,
+      innerHTML: `
+        <strong>Shift ${candidate.shift}</strong> - Similarity: ${candidate.similarityScore.toFixed(1)} | 
+        Difference: ${candidate.totalDifference}% | 
+        Preview: "${candidate.decryptedText.substring(0, 50)}${candidate.decryptedText.length > 50 ? '...' : ''}"
+      `
+    });
+    summary.appendChild(candidateDiv);
+  });
+  
+  // Comparative charts
+  const chartSection = createEl('div', { class: 'dual-chart-container' });
+  
+  const originalChartCont = createEl('div', { class: 'chart-container' });
+  const originalCanvas = createEl('canvas', { width:'800', height:'400' });
+  originalChartCont.appendChild(createEl('h6', { textContent: 'Original Text Distribution', style: 'color:#18e0e6; margin-bottom: 1rem;' }));
+  originalChartCont.appendChild(originalCanvas);
+  
+  const decryptedChartCont = createEl('div', { class: 'chart-container' });
+  const decryptedCanvas = createEl('canvas', { width:'800', height:'400' });
+  decryptedChartCont.appendChild(createEl('h6', { textContent: `Best Match Distribution (Shift ${best.shift})`, style: 'color:#18e0e6; margin-bottom: 1rem;' }));
+  decryptedChartCont.appendChild(decryptedCanvas);
+  
+  chartSection.appendChild(originalChartCont);
+  chartSection.appendChild(decryptedChartCont);
+  
+  container.append(title, explanation, summary, chartSection);
+  
+  $('#distributionAnalysisResults').innerHTML = '';
+  $('#distributionAnalysisResults').appendChild(container);
+  
+  // Draw comparison charts
+  setTimeout(() => {
+    const letters = Object.keys(appState.originalDistribution.distribution);
+    const originalCounts = letters.map(l => appState.originalDistribution.distribution[l].count);
+    const decryptedCounts = letters.map(l => best.distribution.distribution[l].count);
+    
+    drawBarChart(originalCanvas, letters, originalCounts, 'Original Text Distribution');
+    drawBarChart(decryptedCanvas, letters, decryptedCounts, `Decrypted Text Distribution (Shift ${best.shift})`);
+  }, 100);
+}
+
+function renderVerification(original, decrypted, detectedShift) {
+  if(!original || !decrypted) return;
+  
+  const container = createEl('div', { class: 'result-box' });
+  const title = createEl('h4', { textContent: 'Verification Results', style: 'color:#18e0e6' });
+  
+  const isTextMatch = original.toLowerCase().replace(/[^a-z]/g,'') === decrypted.toLowerCase().replace(/[^a-z]/g,'');
+  const isShiftCorrect = detectedShift === appState.actualShift;
+  
+  const verification = createEl('div', { class: 'explanation', innerHTML: `
+    <strong>Decryption Verification:</strong><br><br>
+    <strong>Shift Analysis:</strong><br>
+    • Actual shift used: ${appState.actualShift}<br>
+    • Detected shift: ${detectedShift}<br>
+    • Shift detection: <span style="color: ${isShiftCorrect ? '#4caf50' : '#ff5722'}; font-weight: bold;">
+      ${isShiftCorrect ? '✓ CORRECT' : '✗ INCORRECT'}
+    </span><br><br>
+    
+    <strong>Text Comparison:</strong><br>
+    • Original length: ${original.length} characters<br>
+    • Decrypted length: ${decrypted.length} characters<br>
+    • Text match: <span style="color: ${isTextMatch ? '#4caf50' : '#ff5722'}; font-weight: bold;">
+      ${isTextMatch ? '✓ PERFECT MATCH' : '✗ MISMATCH'}
+    </span><br><br>
+    
+    <strong>Analysis Success:</strong><br>
+    ${(isTextMatch && isShiftCorrect) ? 
+      'The distribution-based analysis successfully recovered both the correct shift and original text!' :
+      'The analysis shows differences. This could be due to text length, character distribution, or algorithm limitations.'
+    }
+  `});
+  
+  // Show text comparison if there are differences
+  if(!isTextMatch || !isShiftCorrect) {
+    const textComparison = createEl('div', { class: 'comparison-grid' });
+    
+    const originalBox = createEl('div', { class: 'result-box' });
+    originalBox.appendChild(createEl('h6', { textContent: 'Original Text', style: 'color:#4a9eff; margin-bottom: 0.5rem;' }));
+    originalBox.appendChild(createEl('p', { textContent: original, style: 'font-family: monospace; font-size: 0.9rem; line-height: 1.4;' }));
+    
+    const decryptedBox = createEl('div', { class: 'result-box' });
+    decryptedBox.appendChild(createEl('h6', { textContent: 'Decrypted Text', style: 'color:#4a9eff; margin-bottom: 0.5rem;' }));
+    decryptedBox.appendChild(createEl('p', { textContent: decrypted, style: 'font-family: monospace; font-size: 0.9rem; line-height: 1.4;' }));
+    
+    const analysisBox = createEl('div', { class: 'result-box' });
+    analysisBox.appendChild(createEl('h6', { textContent: 'Why Differences Occur', style: 'color:#4a9eff; margin-bottom: 0.5rem;' }));
+    analysisBox.appendChild(createEl('p', { 
+      innerHTML: `• Short texts may not have representative letter distributions<br>
+                  • Punctuation and spaces affect frequency analysis<br>
+                  • Some letters may not appear in small text samples<br>
+                  • Multiple shifts might produce similar distribution patterns`,
+      style: 'font-size: 0.9rem; line-height: 1.4;'
+    }));
+    
+    textComparison.appendChild(originalBox);
+    textComparison.appendChild(decryptedBox);
+    textComparison.appendChild(analysisBox);
+    
+    verification.appendChild(textComparison);
+  }
+  
+  container.append(title, verification);
+  
+  $('#verificationResults').innerHTML = '';
+  $('#verificationResults').appendChild(container);
+}
+
 function bruteForceDecrypt() {
   const cipher = $('#cipherText').value.trim();
   if(!cipher) {
-    showAlert('Encrypt text first', 'alert');
+    showAlert('Please encrypt text first', 'alert');
     return;
   }
   const results = [];
   for(let s=0; s<26; s++) {
     const dec = caesarCipher(cipher, 26 - s);
-    results.push({ shift: s, preview: dec.slice(0, 100) + (dec.length > 100 ? '...' : '') });
+    results.push({ shift: s, preview: dec.slice(0, 80) + (dec.length > 80 ? '...' : '') });
   }
   renderBruteForceResults(results);
-  showAlert('Brute force done', 'success');
+  showAlert('Brute force analysis complete', 'success');
 }
 
 function renderBruteForceResults(results) {
   const container = createEl('div', { class:'result-box' });
-  const title = createEl('h4', { innerHTML:'Brute Force Results', style:'color:#18e0e6' });
-  const expl = createEl('div', { class:'explanation', textContent:'Try shifts 0-25 to find meaningful text.' });
+  const title = createEl('h4', { innerHTML:'Brute Force Analysis - All Possible Shifts', style:'color:#18e0e6' });
+  const expl = createEl('div', { class:'explanation', textContent:'All 26 possible decryptions. Look for meaningful text to identify the correct shift.' });
   const tableDiv = createEl('div', { class:'data-table' });
   const table = createEl('table');
   table.innerHTML = `
-    <thead><tr><th>Shift</th><th>Text (first 100 chars)</th></tr></thead>
+    <thead><tr><th>Shift</th><th>Decrypted Text (first 80 chars)</th></tr></thead>
     <tbody>
       ${results.map(r => 
-        `<tr><td><span style="background:#18e0e6;color:#0a1628;padding:2px 8px;border-radius:10px;font-weight:700;">${r.shift}</span></td><td style="font-family: monospace;">${r.preview}</td></tr>`
+        `<tr><td><span style="background:${r.shift === appState.actualShift ? '#18e0e6' : '#4a6ba8'};color:#0a1628;padding:4px 10px;border-radius:12px;font-weight:700;">${r.shift}</span></td><td style="font-family: monospace; font-size: 0.85rem;">${r.preview}</td></tr>`
       ).join('')}
     </tbody>
   `;
@@ -419,77 +628,6 @@ function renderBruteForceResults(results) {
   container.append(title, expl, tableDiv);
   $('#decryptionResults').innerHTML = '';
   $('#decryptionResults').appendChild(container);
-}
-
-function languageBasedDecrypt() {
-  const cipher = $('#cipherText').value.trim();
-  if(!cipher) {
-    showAlert('Encrypt text first', 'alert');
-    return;
-  }
-  const lang = appState.selectedLanguage || 'english';
-  const bestShift = findBestShiftByLanguage(cipher, lang);
-  const decrypted = caesarCipher(cipher, 26 - bestShift.shift);
-  $('#shift').value = bestShift.shift;
-  $('#plainText').value = decrypted;
-  renderLanguageResult(bestShift, decrypted);
-  renderVerification(appState.currentText, decrypted);
-  showAlert(`Detected shift: ${bestShift.shift}`, 'success');
-}
-
-function findBestShiftByLanguage(cipherText, language) {
-  const expectedFreq = LANGUAGE_FREQUENCIES[language];
-  const cipherDist = computeLetterDistribution(cipherText);
-  let best = { shift: 0, score: Infinity };
-
-  for(let s=0; s<26; s++) {
-    let chi2 = 0;
-    Object.keys(expectedFreq).forEach(letter => {
-      const shiftedIdx = (letter.charCodeAt(0) - 65 - s + 26) % 26;
-      const shiftedLetter = String.fromCharCode(65 + shiftedIdx);
-      const observed = parseFloat(cipherDist.distribution[shiftedLetter].percent);
-      const expected = expectedFreq[letter];
-      chi2 += Math.pow(observed - expected, 2) / (expected + 0.01);
-    });
-    if(chi2<best.score) best = {shift: s, score: chi2};
-  }
-  return best;
-}
-
-function renderLanguageResult(analysis, decrypted) {
-  const cont = createEl('div', { class:'result-box' });
-  const title = createEl('h4', { innerHTML: `Language Analysis (${appState.selectedLanguage})`, style:'color:#18e0e6' });
-  const expl = createEl('div', { class:'explanation', innerHTML: `
-    Best shift: <strong>${analysis.shift}</strong><br>
-    Chi2 score: ${analysis.score.toFixed(3)}<br>
-    Comparison with language letter frequency.
-  `});
-  const decryptedBox = createEl('div', {
-    class: 'result-box',
-    style: 'margin-top:1rem; background: rgba(24,224,230,0.05); padding: 1rem;border-radius:6px; font-family: monospace;'
-  });
-  decryptedBox.textContent = decrypted;
-  cont.append(title, expl, decryptedBox);
-  $('#decryptionResults').appendChild(cont);
-}
-
-function renderVerification(original, decrypted) {
-  if(!original || !decrypted) return;
-  const cont = createEl('div', { class:'result-box' });
-  const title = createEl('h4', { textContent: 'Verification & Comparison', style:'color:#18e0e6' });
-  const isMatch = original.toLowerCase().replace(/[^a-z]/g,'') === decrypted.toLowerCase().replace(/[^a-z]/g,'');
-  const expl = createEl('div', {
-    class:'explanation',
-    innerHTML: `
-      Original length: ${original.length}<br>
-      Decrypted length: ${decrypted.length}<br>
-      Match: <strong style="color: ${isMatch ? '#4caf50' : '#ff5722'};">${isMatch ? '✓ Perfect' : '✗ Mismatch'}</strong><br>
-      ${isMatch ? 'Decryption matches original!' : 'Mismatch, check settings.'}
-    `
-  });
-  cont.append(title, expl);
-  $('#verificationResults').innerHTML = '';
-  $('#verificationResults').appendChild(cont);
 }
 
 function drawBarChart(canvas, labels, values, title) {
@@ -504,15 +642,17 @@ function drawBarChart(canvas, labels, values, title) {
   ctx.fillStyle = gradient;
   ctx.fillRect(0,0,width,height);
 
-  const margin = { top: 50, right: 30, bottom: 80, left: 60 };
+  const margin = { top: 60, right: 40, bottom: 100, left: 70 };
   const chartWidth = width - margin.left - margin.right;
   const chartHeight = height - margin.top - margin.bottom;
 
+  // Title
   ctx.fillStyle = '#18e0e6';
-  ctx.font = 'bold 16px Montserrat';
+  ctx.font = 'bold 18px Montserrat';
   ctx.textAlign = 'center';
-  ctx.fillText(title, width/2, 25);
+  ctx.fillText(title, width/2, 35);
 
+  // Axes
   ctx.strokeStyle = '#4a6ba8';
   ctx.lineWidth = 1;
   ctx.beginPath();
@@ -522,37 +662,40 @@ function drawBarChart(canvas, labels, values, title) {
   ctx.stroke();
 
   const maxValue = Math.max(...values,1);
-  const barWidth = chartWidth / labels.length * 0.8;
-  const barSpacing = chartWidth / labels.length * 0.2;
+  const barWidth = chartWidth / labels.length * 0.75;
+  const barSpacing = chartWidth / labels.length * 0.25;
 
   labels.forEach((label,i) => {
     const val = values[i];
-    const barHeight = (val / maxValue) * chartHeight;
+    const barHeight = (val / maxValue) * (chartHeight - 20);
     const x = margin.left + i * (barWidth + barSpacing) + barSpacing / 2;
     const y = margin.top + chartHeight - barHeight;
 
+    // Bar gradient
     const barGradient = ctx.createLinearGradient(x,y,x,y + barHeight);
     barGradient.addColorStop(0,'#18e0e6');
     barGradient.addColorStop(1,'#2bd4d9');
     ctx.fillStyle = barGradient;
     ctx.fillRect(x,y,barWidth,barHeight);
 
+    // Value on top of bar
     if(val > 0) {
       ctx.fillStyle = '#e9f2ff';
-      ctx.font = '12px Montserrat';
+      ctx.font = 'bold 13px Montserrat';
       ctx.textAlign = 'center';
-      ctx.fillText(val.toString(), x + barWidth/2, y - 5);
+      ctx.fillText(val.toString(), x + barWidth/2, y - 8);
     }
 
+    // Letter labels
     ctx.fillStyle = '#b8d4ff';
-    ctx.font = '11px Montserrat';
+    ctx.font = 'bold 14px Montserrat';
     ctx.textAlign = 'center';
-    const disp = label.length>10 ? label.slice(0,10)+'…' : label;
-    ctx.fillText(disp, x + barWidth/2, height - 15);
+    ctx.fillText(label, x + barWidth/2, height - 20);
   });
 }
 
 document.addEventListener('DOMContentLoaded', () => {
+  // Mobile nav toggle
   document.getElementById('navToggle')?.addEventListener('click', () => {
     const navLinks = document.getElementById('navLinks');
     navLinks.style.display = navLinks.style.display === 'flex' ? 'none' : 'flex';
