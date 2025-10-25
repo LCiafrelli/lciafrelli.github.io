@@ -1,10 +1,8 @@
 /* ================================
    Homework 3: RSA Encryption & Frequency Analysis
    Author: Lorenzo Ciafrelli
-   UPDATED: Added parameter change detection and reset functionality
    ================================ */
 
-// Global state
 let rsaState = {
   p: 0,
   q: 0,
@@ -21,7 +19,6 @@ let rsaState = {
 };
 
 const $ = sel => document.querySelector(sel);
-const $$ = sel => document.querySelectorAll(sel);
 
 function log(msg) {
   console.log(`[HW3] ${msg}`);
@@ -48,31 +45,20 @@ function showAlert(msg, type='info') {
   }
 }
 
-// ============ RESET FUNCTIONALITY ============
-
 function resetEncryptionResults() {
   log('Resetting all encryption/decryption results');
   
-  // Clear state
   rsaState.plaintext = '';
   rsaState.ciphertext = [];
   rsaState.originalDistribution = {};
   
-  // Clear UI
   const cipherTextEl = $('#cipherText');
   const decryptedTextEl = $('#decryptedText');
   
   if (cipherTextEl) cipherTextEl.value = '';
   if (decryptedTextEl) decryptedTextEl.value = '';
   
-  // Clear result containers
-  const containers = [
-    '#encryptionSteps',
-    '#decryptionSteps',
-    '#frequencyAttackResults',
-    '#verificationResults'
-  ];
-  
+  const containers = ['#encryptionSteps', '#decryptionSteps', '#frequencyAttackResults', '#verificationResults'];
   containers.forEach(sel => {
     const el = $(sel);
     if (el) el.innerHTML = '';
@@ -81,40 +67,30 @@ function resetEncryptionResults() {
   log('Encryption results reset complete');
 }
 
-// ============ PARAMETER CHANGE DETECTION ============
-
 function setupParameterChangeDetection() {
   const pInput = $('#primep');
   const qInput = $('#primeq');
   const eInput = $('#publice');
   const warning = $('#parameterWarning');
   
-  if (!pInput || !qInput || !eInput || !warning) return;
+  if (!pInput || !qInput || !eInput || !warning) {
+    log('Warning: parameter inputs not found');
+    return;
+  }
   
   const showWarning = () => {
-    if (rsaState.keysGenerated) {
+    if (rsaState.keysGenerated && (rsaState.ciphertext.length > 0 || rsaState.plaintext !== '')) {
       warning.classList.add('show');
+      log('Parameter warning shown');
     }
-  };
-  
-  const hideWarning = () => {
-    warning.classList.remove('show');
   };
   
   pInput.addEventListener('input', showWarning);
   qInput.addEventListener('input', showWarning);
   eInput.addEventListener('input', showWarning);
   
-  // Hide warning when keys are regenerated
-  const originalGenerateKeys = generateRSAKeys;
-  window.generateRSAKeys = function() {
-    hideWarning();
-    resetEncryptionResults();
-    originalGenerateKeys.call(this);
-  };
+  log('Parameter change detection setup complete');
 }
-
-// ============ MATH UTILITIES ============
 
 function isPrime(n) {
   if (n < 2) return false;
@@ -170,24 +146,30 @@ function modPow(base, exp, mod) {
   return result;
 }
 
-// ============ RSA KEY GENERATION ============
-
 function initRSA() {
   log('Initializing RSA interface');
   
-  $('#btnGenerateKeys')?.addEventListener('click', generateRSAKeys);
-  $('#btnRandomPrimes')?.addEventListener('click', useRandomPrimes);
-  $('#btnEncrypt')?.addEventListener('click', encryptMessage);
-  $('#btnShowEncSteps')?.addEventListener('click', showEncryptionSteps);
-  $('#btnDecrypt')?.addEventListener('click', decryptMessage);
-  $('#btnShowDecSteps')?.addEventListener('click', showDecryptionSteps);
-  $('#btnFrequencyAttack')?.addEventListener('click', frequencyAnalysisAttack);
+  const btnGenerateKeys = $('#btnGenerateKeys');
+  const btnRandomPrimes = $('#btnRandomPrimes');
+  const btnEncrypt = $('#btnEncrypt');
+  const btnShowEncSteps = $('#btnShowEncSteps');
+  const btnDecrypt = $('#btnDecrypt');
+  const btnShowDecSteps = $('#btnShowDecSteps');
+  const btnFrequencyAttack = $('#btnFrequencyAttack');
   
-  // Setup parameter change detection
+  if(btnGenerateKeys) btnGenerateKeys.addEventListener('click', generateRSAKeys);
+  if(btnRandomPrimes) btnRandomPrimes.addEventListener('click', useRandomPrimes);
+  if(btnEncrypt) btnEncrypt.addEventListener('click', encryptMessage);
+  if(btnShowEncSteps) btnShowEncSteps.addEventListener('click', showEncryptionSteps);
+  if(btnDecrypt) btnDecrypt.addEventListener('click', decryptMessage);
+  if(btnShowDecSteps) btnShowDecSteps.addEventListener('click', showDecryptionSteps);
+  if(btnFrequencyAttack) btnFrequencyAttack.addEventListener('click', frequencyAnalysisAttack);
+  
   setupParameterChangeDetection();
 }
 
 function useRandomPrimes() {
+  log('Using random primes');
   const primes = getSmallPrimes(50);
   const p = primes[Math.floor(Math.random() * primes.length)];
   let q = primes[Math.floor(Math.random() * primes.length)];
@@ -198,18 +180,21 @@ function useRandomPrimes() {
   
   $('#primep').value = p;
   $('#primeq').value = q;
+  $('#publice').value = '';
   
-  showAlert(`Random primes selected: p=${p}, q=${q}`, 'success');
+  showAlert(`Random primes selected: p=${p}, q=${q}. Click "Generate RSA Keys" to create keys.`, 'success');
 }
 
 function generateRSAKeys() {
   log('Generating RSA keys');
   
+  const warning = $('#parameterWarning');
+  if(warning) warning.classList.remove('show');
+  
   const p = parseInt($('#primep').value);
   const q = parseInt($('#primeq').value);
   const eInput = $('#publice').value;
   
-  // Validation
   if (!isPrime(p)) {
     showAlert(`p=${p} is not prime! Please choose a prime number.`, 'alert');
     return;
@@ -241,6 +226,8 @@ function generateRSAKeys() {
   
   const d = modInverse(e, phi);
   
+  const wasGenerated = rsaState.keysGenerated;
+  
   rsaState = {
     p, q, n, phi, e, d,
     publicKey: { e, n },
@@ -251,6 +238,10 @@ function generateRSAKeys() {
     keysGenerated: true
   };
   
+  if(wasGenerated) {
+    resetEncryptionResults();
+  }
+  
   log(`Keys generated: p=${p}, q=${q}, n=${n}, φ=${phi}, e=${e}, d=${d}`);
   
   renderKeyGeneration();
@@ -259,7 +250,6 @@ function generateRSAKeys() {
 
 function renderKeyGeneration() {
   const container = createEl('div', { class: 'result-box' });
-  
   const title = createEl('h4', { innerHTML: 'Generated RSA Keys', style: 'color:#18e0e6' });
   
   const keysDisplay = createEl('div', { style: 'display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin: 1rem 0;' });
@@ -280,7 +270,6 @@ function renderKeyGeneration() {
   
   keysDisplay.appendChild(publicKeyBox);
   keysDisplay.appendChild(privateKeyBox);
-  
   container.appendChild(title);
   container.appendChild(keysDisplay);
   
@@ -300,23 +289,19 @@ function renderKeyGenSteps() {
       <div class="math-step-title">Step 1: Prime Selection</div>
       <div class="math-calculation">p = <span class="highlight-number">${rsaState.p}</span>, q = <span class="highlight-number">${rsaState.q}</span></div>
     </div>
-    
     <div class="math-step">
       <div class="math-step-title">Step 2: Calculate Modulus n</div>
       <div class="math-calculation">n = p × q = ${rsaState.p} × ${rsaState.q} = <span class="highlight-number">${rsaState.n}</span></div>
     </div>
-    
     <div class="math-step">
       <div class="math-step-title">Step 3: Calculate Euler's Totient φ(n)</div>
       <div class="math-calculation">φ(n) = (p-1) × (q-1) = ${rsaState.p-1} × ${rsaState.q-1} = <span class="highlight-number">${rsaState.phi}</span></div>
     </div>
-    
     <div class="math-step">
       <div class="math-step-title">Step 4: Select Public Exponent e</div>
       <div class="math-calculation">e = <span class="highlight-number">${rsaState.e}</span></div>
       <div class="math-calculation">Verify: gcd(${rsaState.e}, ${rsaState.phi}) = ${gcd(rsaState.e, rsaState.phi)} ✓</div>
     </div>
-    
     <div class="math-step">
       <div class="math-step-title">Step 5: Calculate Private Exponent d</div>
       <div class="math-calculation">d ≡ e⁻¹ (mod φ(n))</div>
@@ -331,8 +316,6 @@ function renderKeyGenSteps() {
   $('#keyGenSteps').innerHTML = '';
   $('#keyGenSteps').appendChild(container);
 }
-
-// ============ RSA ENCRYPTION ============
 
 function letterToNumber(letter) {
   return letter.toUpperCase().charCodeAt(0) - 65;
@@ -370,7 +353,7 @@ function encryptMessage() {
   $('#cipherText').value = rsaState.ciphertext.join(' ');
   rsaState.originalDistribution = computeLetterDistribution(plaintext);
   
-  log(`Encrypted: "${plaintext}" -> [${rsaState.ciphertext.slice(0, 10).join(', ')}...]`);
+  log(`Encrypted: "${plaintext}"`);
   showAlert('Message encrypted successfully!', 'success');
 }
 
@@ -382,49 +365,38 @@ function showEncryptionSteps() {
   
   const container = createEl('div', { class: 'result-box' });
   const title = createEl('h4', { innerHTML: 'Encryption Process (Letter-by-Letter)', style: 'color:#18e0e6; margin-bottom: 1rem;' });
-  
   const stepsContainer = createEl('div', { class: 'encryption-steps' });
   
   let letterIndex = 0;
-  for (let i = 0; i < rsaState.plaintext.length; i++) {
+  for (let i = 0; i < rsaState.plaintext.length && letterIndex < 20; i++) {
     const char = rsaState.plaintext[i];
-    
     if (/[A-Za-z]/.test(char)) {
       const m = letterToNumber(char);
       const c = rsaState.ciphertext[i];
-      
       const step = createEl('div', { class: 'letter-encryption' });
-      step.innerHTML = `
-        <strong>Letter "${char.toUpperCase()}"</strong> (position ${letterIndex + 1})<br>
-        M = ${m} → C = M<sup>e</sup> mod n = ${m}<sup>${rsaState.e}</sup> mod ${rsaState.n} = <span class="highlight-number">${c}</span>
-      `;
+      step.innerHTML = `<strong>Letter "${char.toUpperCase()}"</strong> (position ${letterIndex + 1})<br>M = ${m} → C = M<sup>e</sup> mod n = ${m}<sup>${rsaState.e}</sup> mod ${rsaState.n} = <span class="highlight-number">${c}</span>`;
       stepsContainer.appendChild(step);
       letterIndex++;
-      
-      if (letterIndex >= 20) {
-        const more = createEl('div', { class: 'letter-encryption' });
-        more.innerHTML = `<em>... and ${rsaState.ciphertext.filter(x => x >= 0).length - 20} more letters</em>`;
-        stepsContainer.appendChild(more);
-        break;
-      }
     }
+  }
+  
+  if(rsaState.ciphertext.filter(x => x >= 0).length > 20) {
+    const more = createEl('div', { class: 'letter-encryption' });
+    more.innerHTML = `<em>... and ${rsaState.ciphertext.filter(x => x >= 0).length - 20} more letters</em>`;
+    stepsContainer.appendChild(more);
   }
   
   container.appendChild(title);
   container.appendChild(stepsContainer);
-  
   $('#encryptionSteps').innerHTML = '';
   $('#encryptionSteps').appendChild(container);
 }
-
-// ============ RSA DECRYPTION ============
 
 function decryptMessage() {
   if (!rsaState.keysGenerated) {
     showAlert('Please generate RSA keys first!', 'alert');
     return;
   }
-  
   if (rsaState.ciphertext.length === 0) {
     showAlert('Please encrypt a message first', 'alert');
     return;
@@ -432,8 +404,7 @@ function decryptMessage() {
   
   const decrypted = decryptWithKey(rsaState.ciphertext, rsaState.d, rsaState.n, rsaState.plaintext);
   $('#decryptedText').value = decrypted;
-  
-  log(`Decrypted with private key: "${decrypted}"`);
+  log(`Decrypted: "${decrypted}"`);
   showAlert('Message decrypted with private key!', 'success');
 }
 
@@ -450,7 +421,6 @@ function decryptWithKey(ciphertext, d, n, originalText) {
     }
     origIndex++;
   }
-  
   return decrypted;
 }
 
@@ -462,42 +432,32 @@ function showDecryptionSteps() {
   
   const container = createEl('div', { class: 'result-box' });
   const title = createEl('h4', { innerHTML: 'Decryption Process (Using Private Key)', style: 'color:#18e0e6; margin-bottom: 1rem;' });
-  
   const stepsContainer = createEl('div', { class: 'encryption-steps' });
   
   let letterIndex = 0;
-  for (let i = 0; i < rsaState.ciphertext.length; i++) {
+  for (let i = 0; i < rsaState.ciphertext.length && letterIndex < 20; i++) {
     const c = rsaState.ciphertext[i];
-    
     if (c >= 0) {
       const m = modPow(c, rsaState.d, rsaState.n);
       const letter = numberToLetter(m);
-      
       const step = createEl('div', { class: 'letter-encryption' });
-      step.innerHTML = `
-        <strong>Ciphertext ${c}</strong> (position ${letterIndex + 1})<br>
-        M = C<sup>d</sup> mod n = ${c}<sup>${rsaState.d}</sup> mod ${rsaState.n} = ${m} → Letter "<span class="highlight-number">${letter}</span>"
-      `;
+      step.innerHTML = `<strong>Ciphertext ${c}</strong> (position ${letterIndex + 1})<br>M = C<sup>d</sup> mod n = ${c}<sup>${rsaState.d}</sup> mod ${rsaState.n} = ${m} → Letter "<span class="highlight-number">${letter}</span>"`;
       stepsContainer.appendChild(step);
       letterIndex++;
-      
-      if (letterIndex >= 20) {
-        const more = createEl('div', { class: 'letter-encryption' });
-        more.innerHTML = `<em>... and ${rsaState.ciphertext.filter(x => x >= 0).length - 20} more letters</em>`;
-        stepsContainer.appendChild(more);
-        break;
-      }
     }
+  }
+  
+  if(rsaState.ciphertext.filter(x => x >= 0).length > 20) {
+    const more = createEl('div', { class: 'letter-encryption' });
+    more.innerHTML = `<em>... and ${rsaState.ciphertext.filter(x => x >= 0).length - 20} more letters</em>`;
+    stepsContainer.appendChild(more);
   }
   
   container.appendChild(title);
   container.appendChild(stepsContainer);
-  
   $('#decryptionSteps').innerHTML = '';
   $('#decryptionSteps').appendChild(container);
 }
-
-// ============ FREQUENCY ANALYSIS ATTACK ============
 
 function computeLetterDistribution(text) {
   const letters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
@@ -530,7 +490,6 @@ function chiSquaredScore(dist1, dist2) {
     const exp = parseFloat(dist2.distribution[letter].percent);
     score += Math.pow(obs - exp, 2) / (exp + 0.01);
   }
-  
   return score;
 }
 
@@ -544,31 +503,21 @@ function frequencyAnalysisAttack() {
   showAlert('Analyzing all possible decryption keys...', 'info');
   
   const candidates = [];
-  
   for (let testD = 1; testD < rsaState.phi; testD++) {
     if ((rsaState.e * testD) % rsaState.phi !== 1) continue;
-    
     const decrypted = decryptWithKey(rsaState.ciphertext, testD, rsaState.n, rsaState.plaintext);
     const decryptedDist = computeLetterDistribution(decrypted);
     const score = chiSquaredScore(rsaState.originalDistribution, decryptedDist);
-    
-    candidates.push({
-      d: testD,
-      decrypted,
-      distribution: decryptedDist,
-      score
-    });
+    candidates.push({ d: testD, decrypted, distribution: decryptedDist, score });
   }
   
   candidates.sort((a, b) => a.score - b.score);
   const best = candidates[0];
   
-  log(`Frequency attack complete: found d=${best.d}, score=${best.score.toFixed(3)}`);
-  
+  log(`Frequency attack complete: d=${best.d}`);
   renderFrequencyAttackResults(candidates.slice(0, 10), best);
   renderVerification(best);
-  
-  showAlert(`Attack successful! Discovered private key d=${best.d}`, 'success');
+  showAlert(`Attack successful! Discovered d=${best.d}`, 'success');
 }
 
 function renderFrequencyAttackResults(topCandidates, best) {
@@ -577,15 +526,9 @@ function renderFrequencyAttackResults(topCandidates, best) {
   
   const explanation = createEl('div', { class: 'explanation', innerHTML: `
     <strong>Attack Method:</strong> Frequency Distribution Comparison<br><br>
-    <strong>Algorithm:</strong><br>
-    1. Compute letter frequency distribution of original plaintext<br>
-    2. For each valid private key d (where e×d ≡ 1 mod φ(n)), decrypt ciphertext<br>
-    3. Compute frequency distribution of decrypted text<br>
-    4. Calculate chi-squared score comparing distributions (lower = better match)<br>
-    5. Select key with lowest score<br><br>
     <strong>Best Match:</strong> d = <span class="highlight-number">${best.d}</span> (score: ${best.score.toFixed(3)})<br>
     <strong>Actual Private Key:</strong> d = <span class="highlight-number">${rsaState.d}</span><br>
-    <strong>Result:</strong> ${best.d === rsaState.d ? '<span style="color:#4caf50;">✓ CORRECT KEY FOUND</span>' : '<span style="color:#ff9800;">⚠ Different key (may still produce valid text)</span>'}
+    <strong>Result:</strong> ${best.d === rsaState.d ? '<span style="color:#4caf50;">✓ CORRECT KEY FOUND</span>' : '<span style="color:#ff9800;">⚠ Different key</span>'}
   `});
   
   const candidatesBox = createEl('div', { class: 'result-box', style: 'margin-top: 1rem;' });
@@ -596,16 +539,11 @@ function renderFrequencyAttackResults(topCandidates, best) {
     const isActual = candidate.d === rsaState.d;
     const candidateDiv = createEl('div', { 
       class: 'shift-candidate' + (idx === 0 ? ' best' : ''),
-      innerHTML: `
-        <strong>d = ${candidate.d}</strong> ${isActual ? '(ACTUAL KEY)' : ''} - 
-        Score: ${candidate.score.toFixed(3)} | 
-        Preview: "${candidate.decrypted.substring(0, 50)}${candidate.decrypted.length > 50 ? '...' : ''}"
-      `
+      innerHTML: `<strong>d = ${candidate.d}</strong> ${isActual ? '(ACTUAL KEY)' : ''} - Score: ${candidate.score.toFixed(3)} | Preview: "${candidate.decrypted.substring(0, 50)}${candidate.decrypted.length > 50 ? '...' : ''}"`
     });
     candidatesBox.appendChild(candidateDiv);
   });
   
-  // MODIFICATO: Grafici uno sotto l'altro
   const chartSection = createEl('div', { class: 'dual-chart-container', style: 'margin-top: 2rem;' });
   
   const originalChartCont = createEl('div', { class: 'chart-container' });
@@ -633,7 +571,6 @@ function renderFrequencyAttackResults(topCandidates, best) {
     const letters = Object.keys(rsaState.originalDistribution.distribution);
     const originalCounts = letters.map(l => rsaState.originalDistribution.distribution[l].count);
     const decryptedCounts = letters.map(l => best.distribution.distribution[l].count);
-    
     drawBarChart(originalCanvas, letters, originalCounts, 'Original Plaintext Distribution');
     drawBarChart(decryptedCanvas, letters, decryptedCounts, `Decrypted Text Distribution (d=${best.d})`);
   }, 100);
@@ -644,45 +581,26 @@ function renderVerification(best) {
   const title = createEl('h4', { textContent: 'Attack Verification', style: 'color:#18e0e6' });
   
   const isKeyCorrect = best.d === rsaState.d;
-  const isTextCorrect = best.decrypted.toUpperCase().replace(/[^A-Z]/g, '') === 
-                        rsaState.plaintext.toUpperCase().replace(/[^A-Z]/g, '');
+  const isTextCorrect = best.decrypted.toUpperCase().replace(/[^A-Z]/g, '') === rsaState.plaintext.toUpperCase().replace(/[^A-Z]/g, '');
   
   const verification = createEl('div', { class: 'explanation', innerHTML: `
     <strong>Attack Success Metrics:</strong><br><br>
-    
     <strong>Key Recovery:</strong><br>
-    • Actual private key d: <span class="highlight-number">${rsaState.d}</span><br>
-    • Discovered key d: <span class="highlight-number">${best.d}</span><br>
-    • Key match: <span style="color: ${isKeyCorrect ? '#4caf50' : '#ff5722'}; font-weight: bold;">
-      ${isKeyCorrect ? '✓ EXACT MATCH' : '✗ DIFFERENT KEY'}
-    </span><br><br>
-    
+    • Actual: d = <span class="highlight-number">${rsaState.d}</span><br>
+    • Discovered: d = <span class="highlight-number">${best.d}</span><br>
+    • Match: <span style="color: ${isKeyCorrect ? '#4caf50' : '#ff5722'}; font-weight: bold;">${isKeyCorrect ? '✓ EXACT' : '✗ DIFFERENT'}</span><br><br>
     <strong>Text Recovery:</strong><br>
-    • Original plaintext: "${rsaState.plaintext}"<br>
-    • Decrypted text: "${best.decrypted}"<br>
-    • Text match: <span style="color: ${isTextCorrect ? '#4caf50' : '#ff5722'}; font-weight: bold;">
-      ${isTextCorrect ? '✓ PERFECT MATCH' : '✗ MISMATCH'}
-    </span><br><br>
-    
-    <strong>Algorithm Performance:</strong><br>
-    • Search space: φ(n) = ${rsaState.phi} possible keys<br>
-    • Valid keys tested: ${Math.floor(rsaState.phi / gcd(rsaState.phi, rsaState.e))}<br>
-    • Complexity: O(φ(n) × m × 26) where m = ${rsaState.plaintext.length}<br>
-    • Chi-squared score: ${best.score.toFixed(3)} (lower is better)<br><br>
-    
-    ${isKeyCorrect && isTextCorrect ? 
-      '<strong style="color:#4caf50;">🎉 SUCCESS!</strong> The frequency analysis attack successfully recovered both the private key and original message.' :
-      '<strong style="color:#ff9800;">⚠ NOTE:</strong> With small primes and short messages, multiple keys may produce similar distributions. The algorithm correctly identified the best statistical match.'}
+    • Original: "${rsaState.plaintext}"<br>
+    • Decrypted: "${best.decrypted}"<br>
+    • Match: <span style="color: ${isTextCorrect ? '#4caf50' : '#ff5722'}; font-weight: bold;">${isTextCorrect ? '✓ PERFECT' : '✗ MISMATCH'}</span><br><br>
+    ${isKeyCorrect && isTextCorrect ? '<strong style="color:#4caf50;">🎉 SUCCESS!</strong> Attack recovered key and message.' : '<strong style="color:#ff9800;">⚠ NOTE:</strong> Small primes may produce similar distributions.'}
   `});
   
   container.appendChild(title);
   container.appendChild(verification);
-  
   $('#verificationResults').innerHTML = '';
   $('#verificationResults').appendChild(container);
 }
-
-// ============ CHART DRAWING ============
 
 function drawBarChart(canvas, labels, values, title) {
   try {
@@ -747,10 +665,8 @@ function drawBarChart(canvas, labels, values, title) {
   }
 }
 
-// ============ INITIALIZATION ============
-
 document.addEventListener('DOMContentLoaded', () => {
-  log('DOM loaded - Initializing RSA Homework 3');
+  log('DOM loaded - Initializing RSA');
   
   document.getElementById('navToggle')?.addEventListener('click', () => {
     const navLinks = document.getElementById('navLinks');
@@ -760,5 +676,5 @@ document.addEventListener('DOMContentLoaded', () => {
   });
 
   initRSA();
-  log('RSA interface initialized');
+  log('RSA initialized');
 });
