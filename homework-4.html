@@ -85,7 +85,8 @@
     }
     
     .control-group input[type="number"],
-    .control-group input[type="range"] {
+    .control-group input[type="range"],
+    .control-group select {
       width: 100%;
       padding: 0.75rem;
       border-radius: 8px;
@@ -268,6 +269,15 @@
       color: #18e0e6;
       font-weight: bold;
     }
+
+    .experiment-info {
+      background: rgba(24,224,230,0.1);
+      border: 1px solid #18e0e6;
+      border-radius: 8px;
+      padding: 1rem;
+      margin: 1rem 0;
+      font-size: 0.9rem;
+    }
   </style>
 </head>
 <body>
@@ -300,7 +310,7 @@
           <div class="explanation">
             <p>The <strong>Law of Large Numbers (LLN)</strong> is a fundamental theorem in probability theory stating that as the number of trials increases, the empirical average converges to the expected value.</p>
             
-            <p style="margin-top: 1rem;"><strong>Intuition:</strong> If you flip a fair coin many times, the proportion of heads will get closer and closer to 0.5 as the number of flips increases.</p>
+            <p style="margin-top: 1rem;"><strong>Intuition:</strong> Whether flipping a fair coin or rolling a die, as you repeat the experiment many times, the observed proportion approaches the theoretical probability.</p>
           </div>
 
           <div class="math-formula">
@@ -312,13 +322,10 @@
               lim (n→∞) [ (X₁ + X₂ + ... + Xₙ) / n ] = μ
             </div>
             <div style="margin: 1rem 0;">
-              Or equivalently, for relative frequency f(n) of successes:
+              For relative frequency f(n):
             </div>
             <div style="margin: 1rem 0; text-align: center; font-size: 1.1rem;">
-              f(n) = (number of successes) / n  →  p  as n → ∞
-            </div>
-            <div style="margin-top: 1rem; color: #b8d4ff;">
-              Where p is the true probability of success
+              f(n) = (successes) / n  →  p  as n → ∞
             </div>
           </div>
         </div>
@@ -330,64 +337,70 @@
           </div>
           
           <div class="explanation">
-            <p><strong>Weak Law of Large Numbers (WLLN):</strong></p>
-            <p>States that f(n) converges to p <em>in probability</em>. For any ε > 0:</p>
+            <p><strong>Weak Law (WLLN):</strong> Convergence in probability</p>
             <div class="math-formula" style="margin: 0.5rem 0;">
               P( |f(n) - p| > ε ) → 0  as n → ∞
             </div>
-            <p style="margin-top: 1rem;">This means the probability that f(n) deviates from p by more than ε becomes arbitrarily small.</p>
 
-            <p style="margin-top: 1.5rem;"><strong>Strong Law of Large Numbers (SLLN):</strong></p>
-            <p>States that f(n) converges to p <em>almost surely</em> (with probability 1):</p>
+            <p style="margin-top: 1.5rem;"><strong>Strong Law (SLLN):</strong> Almost sure convergence</p>
             <div class="math-formula" style="margin: 0.5rem 0;">
               P( lim(n→∞) f(n) = p ) = 1
             </div>
-            <p style="margin-top: 1rem;">This is a stronger statement: almost every sequence of trials will converge to p.</p>
           </div>
         </div>
 
         <div class="step-container">
           <div class="step-title">
             <span class="step-number">3</span>
-            Convergence Properties
+            Variance Reduction & Convergence
           </div>
 
           <div class="explanation">
-            <p><strong>Variance Reduction:</strong> As n increases, the variance of f(n) decreases:</p>
+            <p><strong>Variance decreases with n:</strong></p>
             <div class="math-formula" style="margin: 1rem 0;">
               Var(f(n)) = p(1-p) / n
             </div>
-            <p>For a fair coin (p=0.5): Var(f(n)) = 0.25 / n</p>
-            <ul style="margin-left: 1.5rem; margin-top: 0.5rem; line-height: 1.8;">
-              <li>n = 10: Var = 0.025 (high variability)</li>
-              <li>n = 100: Var = 0.0025 (moderate variability)</li>
-              <li>n = 1000: Var = 0.00025 (low variability)</li>
+
+            <p style="margin-top: 1rem;"><strong>For Fair Coin (p=0.5):</strong></p>
+            <ul style="margin-left: 1.5rem; line-height: 1.8;">
+              <li>Variance: 0.25/n</li>
+              <li>Standard Error: 0.5/√n</li>
+              <li>Maximum variance among all probabilities</li>
             </ul>
 
-            <p style="margin-top: 1.5rem;"><strong>Standard Error:</strong> The standard deviation of f(n):</p>
-            <div class="math-formula" style="margin: 1rem 0;">
-              SE(f(n)) = √[p(1-p)/n] ≈ 0.5/√n  (for p=0.5)
-            </div>
-            <p>This shows error decreases proportionally to 1/√n, not 1/n.</p>
+            <p style="margin-top: 1rem;"><strong>For Fair Die (p=1/6 ≈ 0.167):</strong></p>
+            <ul style="margin-left: 1.5rem; line-height: 1.8;">
+              <li>Variance: (1/6)(5/6)/n ≈ 0.139/n</li>
+              <li>Standard Error: √(5/36)/√n ≈ 0.373/√n</li>
+              <li>Lower variance than coin, faster convergence</li>
+            </ul>
           </div>
         </div>
 
         <div class="step-container">
           <div class="step-title">
             <span class="step-number">4</span>
-            Why Use p = 0.5 and Fair Coin Flips?
+            Why These Experiments?
           </div>
 
           <div class="explanation">
-            <p><strong>Choice of p = 0.5 (Fair Coin):</strong></p>
+            <p><strong>Fair Coin (p=0.5):</strong></p>
             <ul style="margin-left: 1.5rem; line-height: 1.8;">
-              <li><strong>Maximum variance:</strong> p(1-p) is maximized at p=0.5, giving variance of 0.25. This represents the "hardest" case for convergence.</li>
-              <li><strong>Symmetry:</strong> Results are symmetric around 0.5, making visual interpretation clearer.</li>
-              <li><strong>Intuitive:</strong> Everyone understands a fair coin flip - it's the canonical example in probability.</li>
-              <li><strong>Educational value:</strong> Shows convergence even in the worst-case scenario for variance.</li>
+              <li>Maximum variance: p(1-p) peaks at 0.25 when p=0.5</li>
+              <li>Represents the "worst case" for convergence speed</li>
+              <li>Symmetric and intuitive</li>
+              <li>Classic probability example</li>
             </ul>
 
-            <p style="margin-top: 1rem;"><strong>Interpretation:</strong> If the LLN works well for p=0.5 (maximum uncertainty), it will work even better for other values of p.</p>
+            <p style="margin-top: 1rem;"><strong>Fair Die Rolling 6 (p=1/6):</strong></p>
+            <ul style="margin-left: 1.5rem; line-height: 1.8;">
+              <li>Lower probability event (p≈0.167 vs 0.5)</li>
+              <li>Shows LLN works for asymmetric cases</li>
+              <li>Lower variance → potentially faster convergence</li>
+              <li>More discrete outcomes to observe</li>
+            </ul>
+
+            <p style="margin-top: 1rem;"><strong>Educational Value:</strong> Comparing both experiments shows that LLN is universal—it works regardless of the specific probability value.</p>
           </div>
         </div>
       </div>
@@ -403,20 +416,31 @@
           </div>
           
           <div class="explanation">
-            <p><strong>m (trajectories):</strong> Number of independent simulation runs</p>
-            <p><strong>n (trials):</strong> Number of coin flips per trajectory</p>
-            <p><strong>p (probability):</strong> Fixed at 0.5 for fair coin flips</p>
-            <p><strong>Animation speed:</strong> Control how fast the simulation runs</p>
+            <p>Choose your experiment type and configure simulation parameters:</p>
+            <ul style="margin-left: 1.5rem; line-height: 1.8;">
+              <li><strong>Experiment:</strong> Coin flip or die roll</li>
+              <li><strong>m (trajectories):</strong> Number of independent simulation runs</li>
+              <li><strong>n (trials):</strong> Number of repetitions per trajectory</li>
+              <li><strong>Animation speed:</strong> Control visualization speed</li>
+            </ul>
           </div>
 
           <div class="controls-grid">
             <div class="control-group">
-              <label for="numTrajectories">Number of Trajectories (m)</label>
+              <label for="experimentType">Experiment Type</label>
+              <select id="experimentType">
+                <option value="coin">Fair Coin (Heads: p=0.5)</option>
+                <option value="die">Fair Die (Rolling 6: p≈0.167)</option>
+              </select>
+              <small style="color: #a0b0d0;">Changes probability distribution</small>
+            </div>
+            <div class="control-group">
+              <label for="numTrajectories">Trajectories (m)</label>
               <input type="number" id="numTrajectories" value="50" min="1" max="200" step="1"/>
               <small style="color: #a0b0d0;">Recommended: 20-100</small>
             </div>
             <div class="control-group">
-              <label for="numTrials">Number of Trials per Trajectory (n)</label>
+              <label for="numTrials">Trials per Trajectory (n)</label>
               <input type="number" id="numTrials" value="500" min="10" max="2000" step="10"/>
               <small style="color: #a0b0d0;">Recommended: 100-1000</small>
             </div>
@@ -428,6 +452,13 @@
               </div>
               <small style="color: #a0b0d0;">1 (slow) - 100 (fast)</small>
             </div>
+          </div>
+
+          <div class="experiment-info" id="experimentInfo">
+            <strong>📊 Current Experiment:</strong> Fair Coin<br>
+            <strong>Success Event:</strong> Getting Heads<br>
+            <strong>Probability (p):</strong> 0.5<br>
+            <strong>Variance:</strong> p(1-p)/n = 0.25/n
           </div>
 
           <div class="btn-group">
@@ -448,8 +479,8 @@
           </div>
 
           <div class="explanation">
-            <p><strong>Main Chart (left):</strong> Shows m trajectories of f(n) converging to p=0.5</p>
-            <p><strong>Histogram (right):</strong> Distribution of f(n) values at current n, showing concentration around p</p>
+            <p><strong>Main Chart (left):</strong> m trajectories of f(n) converging to theoretical probability p</p>
+            <p><strong>Histogram (right):</strong> Distribution of f(n) values at current n</p>
           </div>
 
           <div class="simulation-container">
@@ -483,6 +514,6 @@
   </footer>
 
   <script src="script.js"></script>
-  <script src="hw4.js"></script>
+  <script src="hw4.js?v=2"></script>
 </body>
 </html>
