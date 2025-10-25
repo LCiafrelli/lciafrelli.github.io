@@ -25,6 +25,21 @@
       border-left: 4px solid #18e0e6;
       overflow: visible;
     }
+
+    .parameter-warning {
+      background: rgba(255,193,7,0.15);
+      border: 2px solid #ffc107;
+      border-radius: 10px;
+      padding: 1rem;
+      margin: 1rem 0;
+      color: #ffd54f;
+      font-weight: 500;
+      display: none;
+    }
+
+    .parameter-warning.show {
+      display: block;
+    }
     
     .step-title {
       color: #18e0e6;
@@ -222,15 +237,9 @@
 
     .dual-chart-container {
       display: grid;
-      grid-template-columns: 1fr 1fr;
+      grid-template-columns: 1fr;
       gap: 2rem;
       margin: 2rem 0;
-    }
-
-    @media (max-width: 1200px) {
-      .dual-chart-container {
-        grid-template-columns: 1fr;
-      }
     }
 
     /* Complexity table */
@@ -545,6 +554,10 @@
           </div>
           <div class="explanation">
             Choose two small prime numbers to generate RSA key pair. The tool will compute n, φ(n), e, and d automatically.
+          </div>
+
+           <div class="parameter-warning" id="parameterWarning">
+            ⚠️ Changing parameters will reset all encryption/decryption results. You'll need to re-encrypt your message with the new keys.
           </div>
           
           <div class="controls-grid">
