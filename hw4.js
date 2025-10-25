@@ -143,12 +143,12 @@ function startSimulation() {
   const m = parseInt($('#numTrajectories').value);
   const n = parseInt($('#numTrials').value);
   
-  if(isNaN(m) || m < 1 || m > 200) {
-    showAlert('Trajectories: 1-200', 'alert');
+  if(isNaN(m) || m < 1 || m > 500) {
+    showAlert('Trajectories: 1-500', 'alert');
     return;
   }
-  if(isNaN(n) || n < 10 || n > 2000) {
-    showAlert('Trials: 10-2000', 'alert');
+  if(isNaN(n) || n < 10 || n > 5000) {
+    showAlert('Trials: 10-5000', 'alert');
     return;
   }
   
