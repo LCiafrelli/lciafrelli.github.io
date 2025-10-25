@@ -1,0 +1,670 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Homework 3 — RSA Encryption & Frequency Analysis</title>
+  <link rel="stylesheet" href="style.css"/>
+  <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;600;700&family=Orbitron:wght@600&display=swap" rel="stylesheet">
+  <style>
+    /* Reuse styles from HW2 with enhancements */
+    .hw-section {
+      background: rgba(30,44,74,0.95);
+      border-radius: 16px;
+      margin: 2rem 0;
+      padding: 2rem;
+      box-shadow: 0 8px 32px rgba(24,224,230,0.15);
+      overflow: visible;
+    }
+    
+    .step-container {
+      background: rgba(20,32,66,0.6);
+      border-radius: 12px;
+      padding: 1.5rem;
+      margin: 1.5rem 0;
+      border-left: 4px solid #18e0e6;
+      overflow: visible;
+    }
+    
+    .step-title {
+      color: #18e0e6;
+      font-weight: 600;
+      font-size: 1.1rem;
+      margin-bottom: 1rem;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+    
+    .step-number {
+      background: #18e0e6;
+      color: #0a1628;
+      width: 28px;
+      height: 28px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 0.9rem;
+      font-weight: bold;
+    }
+    
+    .explanation {
+      background: rgba(15,25,55,0.7);
+      border-radius: 8px;
+      padding: 1.25rem;
+      margin: 1rem 0;
+      border-left: 3px solid #4a9eff;
+      font-size: 0.95rem;
+      line-height: 1.6;
+    }
+    
+    .result-box {
+      background: rgba(12,20,45,0.8);
+      border-radius: 12px;
+      padding: 1.5rem;
+      margin: 1.5rem 0;
+      border: 1px solid #2d4a7a;
+      overflow: visible;
+    }
+    
+    .controls-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+      gap: 1.5rem;
+      margin: 1.5rem 0;
+    }
+    
+    .control-group {
+      background: rgba(15,25,55,0.5);
+      padding: 1.25rem;
+      border-radius: 8px;
+    }
+    
+    .control-group label {
+      display: block;
+      margin-bottom: 0.75rem;
+      color: #b8d4ff;
+      font-weight: 500;
+    }
+    
+    .control-group input,
+    .control-group select,
+    .control-group textarea {
+      width: 100%;
+      padding: 0.75rem;
+      border-radius: 8px;
+      border: 1px solid #3a5a8a;
+      background: #0f1937;
+      color: #e9f2ff;
+      font-family: inherit;
+      box-sizing: border-box;
+      font-size: 0.95rem;
+    }
+    
+    .control-group textarea {
+      font-family: 'Courier New', monospace;
+      resize: vertical;
+      min-height: 100px;
+    }
+    
+    .btn-group {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 1rem;
+      margin: 1.25rem 0;
+    }
+    
+    .btn {
+      background: linear-gradient(135deg, #18e0e6 0%, #2bd4d9 100%);
+      color: #0a1628;
+      border: none;
+      padding: 0.75rem 1.5rem;
+      border-radius: 25px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      text-decoration: none;
+      display: inline-block;
+      text-align: center;
+      font-size: 0.95rem;
+    }
+    
+    .btn:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 4px 15px rgba(24,224,230,0.3);
+    }
+    
+    .btn:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+      transform: none;
+    }
+    
+    .btn.secondary {
+      background: linear-gradient(135deg, #4a9eff 0%, #6bb6ff 100%);
+    }
+    
+    .btn.ghost {
+      background: transparent;
+      color: #18e0e6;
+      border: 2px solid #18e0e6;
+    }
+    
+    .alert {
+      background: rgba(255,193,7,0.1);
+      border: 1px solid #ffc107;
+      color: #ffd54f;
+      padding: 1rem;
+      border-radius: 8px;
+      margin: 1rem 0;
+    }
+    
+    .alert.success {
+      background: rgba(76,175,80,0.1);
+      border: 1px solid #4caf50;
+      color: #81c784;
+    }
+
+    /* Math formula styles */
+    .math-formula {
+      background: rgba(8,15,35,0.95);
+      border-radius: 10px;
+      padding: 1.25rem;
+      margin: 1rem 0;
+      border-left: 3px solid #18e0e6;
+      font-family: 'Courier New', monospace;
+      font-size: 1.05rem;
+      color: #e9f2ff;
+      overflow-x: auto;
+    }
+
+    .math-step {
+      background: rgba(24,224,230,0.05);
+      border-radius: 8px;
+      padding: 1rem;
+      margin: 0.75rem 0;
+      border-left: 2px solid #4a9eff;
+    }
+
+    .math-step-title {
+      color: #18e0e6;
+      font-weight: 600;
+      margin-bottom: 0.5rem;
+      font-size: 0.95rem;
+    }
+
+    .math-calculation {
+      font-family: 'Courier New', monospace;
+      color: #b8d4ff;
+      line-height: 1.8;
+      margin: 0.5rem 0;
+    }
+
+    .highlight-number {
+      color: #18e0e6;
+      font-weight: bold;
+    }
+
+    /* Enhanced chart container for bigger graphs */
+    .chart-container {
+      background: rgba(8,15,35,0.9);
+      border-radius: 12px;
+      padding: 1.5rem;
+      min-height: 450px;
+    }
+    
+    canvas {
+      width: 100%;
+      height: 420px !important;
+      border-radius: 8px;
+    }
+
+    .dual-chart-container {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 2rem;
+      margin: 2rem 0;
+    }
+
+    @media (max-width: 1200px) {
+      .dual-chart-container {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    /* Complexity table */
+    .complexity-table {
+      background: rgba(8,15,35,0.9);
+      border-radius: 12px;
+      padding: 1.5rem;
+      margin: 1.5rem 0;
+      overflow-x: auto;
+    }
+
+    .complexity-table table {
+      width: 100%;
+      border-collapse: collapse;
+    }
+
+    .complexity-table th,
+    .complexity-table td {
+      padding: 0.75rem 1rem;
+      text-align: left;
+      border-bottom: 1px solid #2d4a7a;
+    }
+
+    .complexity-table th {
+      background: rgba(24,224,230,0.1);
+      color: #18e0e6;
+      font-weight: 600;
+    }
+
+    .complexity-best {
+      background: rgba(76,175,80,0.1);
+      color: #81c784;
+      font-weight: bold;
+    }
+
+    .key-display {
+      background: rgba(24,224,230,0.08);
+      border: 1px solid #18e0e6;
+      border-radius: 10px;
+      padding: 1rem;
+      margin: 1rem 0;
+      font-family: 'Courier New', monospace;
+    }
+
+    .key-label {
+      color: #4a9eff;
+      font-weight: 600;
+      margin-bottom: 0.5rem;
+    }
+
+    .key-value {
+      color: #18e0e6;
+      font-size: 1.1rem;
+      font-weight: bold;
+    }
+
+    .encryption-steps {
+      background: rgba(15,25,55,0.6);
+      border-radius: 10px;
+      padding: 1.25rem;
+      margin: 1rem 0;
+      max-height: 400px;
+      overflow-y: auto;
+    }
+
+    .letter-encryption {
+      background: rgba(8,15,35,0.8);
+      border-radius: 6px;
+      padding: 0.75rem;
+      margin: 0.5rem 0;
+      border-left: 2px solid #18e0e6;
+      font-family: 'Courier New', monospace;
+      font-size: 0.9rem;
+    }
+
+    html, body {
+      scroll-behavior: smooth;
+      overflow-x: hidden;
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <nav class="navbar">
+      <div class="logo">Statistics<span class="cyber">Cyber</span></div>
+      <ul id="navLinks">
+        <li><a href="index.html">Home</a></li>
+        <li><a href="homework.html">Homework</a></li>
+        <li><a href="about.html">About</a></li>
+      </ul>
+      <button class="nav-toggle" id="navToggle">&#9776;</button>
+    </nav>
+  </header>
+
+  <main>
+    <section class="hw-detail">
+      <h1>Homework 3: RSA Encryption & Frequency Analysis</h1>
+      <p class="subtle">This assignment explores RSA cryptography with small primes and demonstrates cryptanalysis through frequency distribution comparison.</p>
+
+      <!-- PART A: RSA Theory -->
+      <div class="hw-section">
+        <h2 style="color: #18e0e6; margin-bottom: 1.5rem;">Part A — RSA Theory & Mathematical Foundation</h2>
+        
+        <div class="step-container">
+          <div class="step-title">
+            <span class="step-number">1</span>
+            RSA Algorithm Overview
+          </div>
+          <div class="explanation">
+            <p><strong>RSA (Rivest-Shamir-Adleman)</strong> is an asymmetric cryptographic algorithm based on the computational difficulty of factoring large numbers. It uses a pair of keys:</p>
+            <ul style="margin-left: 1.5rem; line-height: 1.8;">
+              <li><strong>Public Key (e, n):</strong> Used for encryption, can be shared publicly</li>
+              <li><strong>Private Key (d, n):</strong> Used for decryption, must be kept secret</li>
+            </ul>
+            <p style="margin-top: 1rem;"><strong>Security:</strong> The security relies on the difficulty of factoring n into its prime factors p and q. With large primes (1024+ bits), factorization is computationally infeasible. For this homework, we use small primes for educational purposes.</p>
+          </div>
+
+          <div class="math-formula">
+            <div style="color: #18e0e6; font-weight: bold; margin-bottom: 1rem;">RSA Key Generation Steps:</div>
+            <div class="math-step">
+              <div class="math-step-title">Step 1: Choose two distinct prime numbers p and q</div>
+              <div class="math-calculation">Example: p = <span class="highlight-number">11</span>, q = <span class="highlight-number">13</span></div>
+            </div>
+            <div class="math-step">
+              <div class="math-step-title">Step 2: Compute n = p × q</div>
+              <div class="math-calculation">n = 11 × 13 = <span class="highlight-number">143</span></div>
+              <div class="math-calculation" style="font-size: 0.85rem; color: #a0b0d0;">(n is the modulus for both public and private keys)</div>
+            </div>
+            <div class="math-step">
+              <div class="math-step-title">Step 3: Compute Euler's totient φ(n) = (p-1)(q-1)</div>
+              <div class="math-calculation">φ(143) = (11-1)(13-1) = 10 × 12 = <span class="highlight-number">120</span></div>
+              <div class="math-calculation" style="font-size: 0.85rem; color: #a0b0d0;">(φ(n) counts integers coprime to n)</div>
+            </div>
+            <div class="math-step">
+              <div class="math-step-title">Step 4: Choose public exponent e such that 1 < e < φ(n) and gcd(e, φ(n)) = 1</div>
+              <div class="math-calculation">Commonly: e = <span class="highlight-number">7</span> (or 3, 17, 65537)</div>
+              <div class="math-calculation">Verify: gcd(7, 120) = 1 ✓</div>
+            </div>
+            <div class="math-step">
+              <div class="math-step-title">Step 5: Compute private exponent d ≡ e⁻¹ (mod φ(n))</div>
+              <div class="math-calculation">d × e ≡ 1 (mod φ(n))</div>
+              <div class="math-calculation">d = <span class="highlight-number">103</span> because 103 × 7 = 721 = 6×120 + 1</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="step-container">
+          <div class="step-title">
+            <span class="step-number">2</span>
+            Encryption & Decryption Formulas
+          </div>
+          
+          <div class="math-formula">
+            <div style="color: #18e0e6; font-weight: bold; margin-bottom: 1rem;">Encryption (Letter → Ciphertext):</div>
+            <div class="math-calculation" style="font-size: 1.15rem; text-align: center; margin: 1rem 0;">
+              C = M<sup>e</sup> mod n
+            </div>
+            <div style="margin: 1rem 0; color: #b8d4ff;">
+              Where:<br>
+              • M = plaintext letter mapped to number (A=0, B=1, ..., Z=25)<br>
+              • e = public exponent<br>
+              • n = modulus<br>
+              • C = ciphertext number
+            </div>
+            <div class="math-step">
+              <div class="math-step-title">Example: Encrypt letter 'H' (M=7) with e=7, n=143</div>
+              <div class="math-calculation">C = 7<sup>7</sup> mod 143</div>
+              <div class="math-calculation">7<sup>7</sup> = 823,543</div>
+              <div class="math-calculation">823,543 mod 143 = <span class="highlight-number">106</span></div>
+            </div>
+          </div>
+
+          <div class="math-formula" style="margin-top: 1.5rem;">
+            <div style="color: #18e0e6; font-weight: bold; margin-bottom: 1rem;">Decryption (Ciphertext → Letter):</div>
+            <div class="math-calculation" style="font-size: 1.15rem; text-align: center; margin: 1rem 0;">
+              M = C<sup>d</sup> mod n
+            </div>
+            <div style="margin: 1rem 0; color: #b8d4ff;">
+              Where:<br>
+              • C = ciphertext number<br>
+              • d = private exponent<br>
+              • n = modulus<br>
+              • M = recovered plaintext number
+            </div>
+            <div class="math-step">
+              <div class="math-step-title">Example: Decrypt C=106 with d=103, n=143</div>
+              <div class="math-calculation">M = 106<sup>103</sup> mod 143</div>
+              <div class="math-calculation">Using modular exponentiation: M = <span class="highlight-number">7</span></div>
+              <div class="math-calculation">7 → Letter 'H' ✓</div>
+            </div>
+          </div>
+
+          <div class="explanation" style="margin-top: 1.5rem;">
+            <strong>Why RSA Works (Correctness Proof):</strong><br>
+            By Euler's theorem: M<sup>φ(n)</sup> ≡ 1 (mod n) for gcd(M,n)=1<br>
+            Since d×e ≡ 1 (mod φ(n)), then d×e = 1 + k×φ(n) for some integer k<br>
+            Therefore: C<sup>d</sup> = (M<sup>e</sup>)<sup>d</sup> = M<sup>ed</sup> = M<sup>1+k×φ(n)</sup> = M × (M<sup>φ(n)</sup>)<sup>k</sup> ≡ M × 1<sup>k</sup> ≡ M (mod n)
+          </div>
+        </div>
+
+        <div class="step-container">
+          <div class="step-title">
+            <span class="step-number">3</span>
+            Computational Complexity Analysis
+          </div>
+
+          <div class="explanation">
+            <p><strong>Optimization Goal:</strong> Minimize computational complexity for all operations (key generation, encryption, decryption, and cryptanalysis).</p>
+          </div>
+
+          <div class="complexity-table">
+            <table>
+              <thead>
+                <tr>
+                  <th>Operation</th>
+                  <th>Algorithm</th>
+                  <th>Complexity</th>
+                  <th>Notes</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td><strong>Key Generation</strong></td>
+                  <td>Extended Euclidean Algorithm</td>
+                  <td class="complexity-best">O(log φ(n))</td>
+                  <td>Compute modular inverse for d</td>
+                </tr>
+                <tr>
+                  <td><strong>Encryption (per letter)</strong></td>
+                  <td>Fast Modular Exponentiation</td>
+                  <td class="complexity-best">O(log e)</td>
+                  <td>Binary exponentiation method</td>
+                </tr>
+                <tr>
+                  <td><strong>Decryption (per letter)</strong></td>
+                  <td>Fast Modular Exponentiation</td>
+                  <td class="complexity-best">O(log d)</td>
+                  <td>Same algorithm as encryption</td>
+                </tr>
+                <tr>
+                  <td><strong>Full Text Encryption</strong></td>
+                  <td>Letter-by-letter processing</td>
+                  <td class="complexity-best">O(m × log e)</td>
+                  <td>m = message length</td>
+                </tr>
+                <tr>
+                  <td><strong>Factorization Attack</strong></td>
+                  <td>Trial Division (excluded)</td>
+                  <td>O(√n)</td>
+                  <td>Not used - small primes make this trivial</td>
+                </tr>
+                <tr>
+                  <td><strong>Brute Force Attack</strong></td>
+                  <td>Try all d values (excluded)</td>
+                  <td>O(φ(n) × log d)</td>
+                  <td>Not used - limited keyspace for small n</td>
+                </tr>
+                <tr style="background: rgba(24,224,230,0.08);">
+                  <td><strong>Frequency Analysis Attack</strong></td>
+                  <td>Distribution Comparison</td>
+                  <td class="complexity-best">O(26² × m)</td>
+                  <td><strong>OPTIMAL CHOICE:</strong> 26 letters, m ciphertext length</td>
+                </tr>
+                <tr>
+                  <td><strong>Distribution Comparison</strong></td>
+                  <td>Chi-squared test</td>
+                  <td class="complexity-best">O(26)</td>
+                  <td>Constant for alphabet size</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+
+          <div class="explanation">
+            <strong>Why Frequency Analysis is Optimal:</strong>
+            <ul style="margin-left: 1.5rem; margin-top: 0.5rem; line-height: 1.8;">
+              <li><strong>Factorization excluded:</strong> With small primes (p, q < 100), factoring n is trivial. Not required by assignment, so excluded.</li>
+              <li><strong>Brute force excluded:</strong> Limited keyspace for small n makes exhaustive search feasible but not explicitly requested.</li>
+              <li><strong>Frequency analysis chosen:</strong> Directly addresses the assignment requirement to "analyze language's alphabet distribution". Complexity O(26² × m) is linear in message length and independent of key size, making it the most practical approach for any RSA parameters.</li>
+              <li><strong>Distribution comparison:</strong> Chi-squared test in O(26) time provides statistical measure of fit, enabling automated decryption key selection.</li>
+            </ul>
+          </div>
+        </div>
+
+        <div class="step-container">
+          <div class="step-title">
+            <span class="step-number">4</span>
+            Handling Non-Alphabetic Characters
+          </div>
+          <div class="explanation">
+            <p><strong>Design Decision:</strong> Non-alphabetic characters (spaces, punctuation, numbers) are preserved unchanged in the ciphertext.</p>
+            <p><strong>Rationale:</strong></p>
+            <ul style="margin-left: 1.5rem; line-height: 1.8;">
+              <li><strong>Maintains message structure:</strong> Word boundaries and sentence structure remain visible, aiding readability</li>
+              <li><strong>Simplifies implementation:</strong> Only 26 letters need encryption/decryption mapping</li>
+              <li><strong>Reflects real-world practice:</strong> Many classical ciphers preserve formatting</li>
+              <li><strong>Security note:</strong> This leaks some information (word lengths, sentence structure) but is acceptable for educational demonstration. Production systems would encrypt all characters or use padding.</li>
+            </ul>
+            <p style="margin-top: 1rem;"><strong>Example:</strong> "Hello, World!" → Encrypted letters: "Xueer" + preserved ", !" → "Xueer, Resco!"</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- PART B: RSA Implementation -->
+      <div class="hw-section">
+        <h2 style="color: #18e0e6; margin-bottom: 1.5rem;">Part B — RSA Implementation & Cryptanalysis</h2>
+        
+        <div class="step-container">
+          <div class="step-title">
+            <span class="step-number">1</span>
+            Generate RSA Keys
+          </div>
+          <div class="explanation">
+            Choose two small prime numbers to generate RSA key pair. The tool will compute n, φ(n), e, and d automatically.
+          </div>
+          
+          <div class="controls-grid">
+            <div class="control-group">
+              <label for="primep">Prime p (small prime)</label>
+              <input type="number" id="primep" value="11" min="2" max="100"/>
+            </div>
+            <div class="control-group">
+              <label for="primeq">Prime q (different from p)</label>
+              <input type="number" id="primeq" value="13" min="2" max="100"/>
+            </div>
+            <div class="control-group">
+              <label for="publice">Public exponent e (optional)</label>
+              <input type="number" id="publice" placeholder="Auto-select (e.g., 7)" min="3" max="65537"/>
+            </div>
+          </div>
+          
+          <div class="btn-group">
+            <button class="btn" id="btnGenerateKeys">Generate RSA Keys</button>
+            <button class="btn secondary" id="btnRandomPrimes">Use Random Small Primes</button>
+          </div>
+          
+          <div id="keyGenResults"></div>
+          <div id="keyGenSteps"></div>
+        </div>
+
+        <div class="step-container">
+          <div class="step-title">
+            <span class="step-number">2</span>
+            RSA Encryption (Letter-by-Letter)
+          </div>
+          <div class="explanation">
+            Encrypt plaintext using the public key (e, n). Each letter is encrypted individually using the formula C = M<sup>e</sup> mod n.
+          </div>
+          
+          <div class="control-group">
+            <label for="plainText">Plaintext Message</label>
+            <textarea id="plainText" rows="4" placeholder="Enter message to encrypt...">HELLO WORLD</textarea>
+          </div>
+          
+          <div class="btn-group">
+            <button class="btn" id="btnEncrypt">Encrypt Message</button>
+            <button class="btn ghost" id="btnShowEncSteps">Show Encryption Steps</button>
+          </div>
+          
+          <div class="control-group">
+            <label>Ciphertext (encrypted numbers)</label>
+            <textarea id="cipherText" rows="4" readonly placeholder="Encrypted message will appear here..."></textarea>
+          </div>
+          
+          <div id="encryptionSteps"></div>
+        </div>
+
+        <div class="step-container">
+          <div class="step-title">
+            <span class="step-number">3</span>
+            RSA Decryption with Private Key
+          </div>
+          <div class="explanation">
+            Decrypt ciphertext using the private key (d, n). Each encrypted number is decrypted using M = C<sup>d</sup> mod n.
+          </div>
+          
+          <div class="btn-group">
+            <button class="btn" id="btnDecrypt">Decrypt with Private Key</button>
+            <button class="btn ghost" id="btnShowDecSteps">Show Decryption Steps</button>
+          </div>
+          
+          <div class="control-group">
+            <label>Decrypted Message</label>
+            <textarea id="decryptedText" rows="4" readonly placeholder="Decrypted message will appear here..."></textarea>
+          </div>
+          
+          <div id="decryptionSteps"></div>
+        </div>
+
+        <div class="step-container">
+          <div class="step-title">
+            <span class="step-number">4</span>
+            Cryptanalysis: Frequency Distribution Attack
+          </div>
+          <div class="explanation">
+            <p><strong>Attack Method:</strong> Decrypt the ciphertext by comparing letter frequency distributions without knowing the private key.</p>
+            <p><strong>Algorithm:</strong></p>
+            <ol style="margin-left: 1.5rem; line-height: 1.8;">
+              <li>Compute frequency distribution of the original plaintext letters</li>
+              <li>For each possible decryption key d (1 to φ(n)), decrypt the ciphertext</li>
+              <li>Compute frequency distribution of decrypted text</li>
+              <li>Calculate similarity score (chi-squared test) between original and decrypted distributions</li>
+              <li>Select the key d with the best matching distribution</li>
+            </ol>
+            <p style="margin-top: 1rem;"><strong>Complexity:</strong> O(φ(n) × m × 26) where m is message length. For small n, this is highly efficient.</p>
+          </div>
+          
+          <div class="btn-group">
+            <button class="btn" id="btnFrequencyAttack">Launch Frequency Analysis Attack</button>
+          </div>
+          
+          <div id="frequencyAttackResults"></div>
+        </div>
+
+        <div class="step-container">
+          <div class="step-title">
+            <span class="step-number">5</span>
+            Verification & Results
+          </div>
+          <div id="verificationResults"></div>
+        </div>
+      </div>
+
+      <div class="centered">
+        <a href="homework.html" class="btn">← Back to Homework List</a>
+      </div>
+    </section>
+  </main>
+
+  <footer>
+    <span>&copy; 2025 Lorenzo Ciafrelli | MS Cybersecurity, Sapienza University of Rome</span>
+  </footer>
+
+  <script src="script.js"></script>
+  <script src="hw3.js"></script>
+</body>
+</html>
