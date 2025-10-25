@@ -171,17 +171,18 @@
       font-weight: bold;
     }
 
-    .simulation-container {
+     .simulation-container {
       display: grid;
       grid-template-columns: 3fr 1fr;
       gap: 1.5rem;
       margin: 2rem 0;
-      min-height: 500px;
+      min-height: 600px;
     }
 
     @media (max-width: 1200px) {
       .simulation-container {
         grid-template-columns: 1fr;
+        min-height: auto;
       }
     }
 
@@ -189,14 +190,16 @@
       background: rgba(8,15,35,0.9);
       border-radius: 12px;
       padding: 1.5rem;
-      min-height: 500px;
+      min-height: 600px;
+      display: flex;
+      flex-direction: column;
     }
 
     .histogram-container {
       background: rgba(8,15,35,0.9);
       border-radius: 12px;
       padding: 1.5rem;
-      min-height: 500px;
+      min-height: 600px;
       display: flex;
       flex-direction: column;
       justify-content: center;
@@ -204,8 +207,17 @@
     
     canvas {
       width: 100% !important;
-      height: auto !important;
+      height: 100% !important;
       border-radius: 8px;
+      min-height: 550px;
+    }
+
+    #mainChart {
+      flex: 1;
+    }
+
+    #histogramChart {
+      flex: 1;
     }
 
     .stats-display {
@@ -485,10 +497,10 @@
 
           <div class="simulation-container">
             <div class="main-chart-container">
-              <canvas id="mainChart" width="900" height="500"></canvas>
+              <canvas id="mainChart"></canvas>
             </div>
             <div class="histogram-container">
-              <canvas id="histogramChart" width="300" height="500"></canvas>
+              <canvas id="histogramChart"></canvas>
             </div>
           </div>
         </div>
