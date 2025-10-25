@@ -1,7 +1,7 @@
 /* ================================
    Homework 3: RSA Encryption & Frequency Analysis
    Author: Lorenzo Ciafrelli
-   Features: RSA implementation, frequency analysis attack, step-by-step visualization
+   UPDATED: Added parameter change detection and reset functionality
    ================================ */
 
 // Global state
@@ -48,9 +48,74 @@ function showAlert(msg, type='info') {
   }
 }
 
+// ============ RESET FUNCTIONALITY ============
+
+function resetEncryptionResults() {
+  log('Resetting all encryption/decryption results');
+  
+  // Clear state
+  rsaState.plaintext = '';
+  rsaState.ciphertext = [];
+  rsaState.originalDistribution = {};
+  
+  // Clear UI
+  const cipherTextEl = $('#cipherText');
+  const decryptedTextEl = $('#decryptedText');
+  
+  if (cipherTextEl) cipherTextEl.value = '';
+  if (decryptedTextEl) decryptedTextEl.value = '';
+  
+  // Clear result containers
+  const containers = [
+    '#encryptionSteps',
+    '#decryptionSteps',
+    '#frequencyAttackResults',
+    '#verificationResults'
+  ];
+  
+  containers.forEach(sel => {
+    const el = $(sel);
+    if (el) el.innerHTML = '';
+  });
+  
+  log('Encryption results reset complete');
+}
+
+// ============ PARAMETER CHANGE DETECTION ============
+
+function setupParameterChangeDetection() {
+  const pInput = $('#primep');
+  const qInput = $('#primeq');
+  const eInput = $('#publice');
+  const warning = $('#parameterWarning');
+  
+  if (!pInput || !qInput || !eInput || !warning) return;
+  
+  const showWarning = () => {
+    if (rsaState.keysGenerated) {
+      warning.classList.add('show');
+    }
+  };
+  
+  const hideWarning = () => {
+    warning.classList.remove('show');
+  };
+  
+  pInput.addEventListener('input', showWarning);
+  qInput.addEventListener('input', showWarning);
+  eInput.addEventListener('input', showWarning);
+  
+  // Hide warning when keys are regenerated
+  const originalGenerateKeys = generateRSAKeys;
+  window.generateRSAKeys = function() {
+    hideWarning();
+    resetEncryptionResults();
+    originalGenerateKeys.call(this);
+  };
+}
+
 // ============ MATH UTILITIES ============
 
-// Check if number is prime
 function isPrime(n) {
   if (n < 2) return false;
   if (n === 2) return true;
@@ -61,7 +126,6 @@ function isPrime(n) {
   return true;
 }
 
-// Get small primes up to limit
 function getSmallPrimes(limit = 100) {
   const primes = [];
   for (let i = 2; i <= limit; i++) {
@@ -70,7 +134,6 @@ function getSmallPrimes(limit = 100) {
   return primes;
 }
 
-// GCD using Euclidean algorithm
 function gcd(a, b) {
   while (b !== 0) {
     const temp = b;
@@ -80,8 +143,6 @@ function gcd(a, b) {
   return a;
 }
 
-// Extended Euclidean Algorithm for modular inverse
-// Returns d such that (e * d) % phi === 1
 function modInverse(e, phi) {
   let [old_r, r] = [e, phi];
   let [old_s, s] = [1, 0];
@@ -92,12 +153,9 @@ function modInverse(e, phi) {
     [old_s, s] = [s, old_s - quotient * s];
   }
   
-  // Make sure result is positive
   return old_s < 0 ? old_s + phi : old_s;
 }
 
-// Fast modular exponentiation: (base^exp) % mod
-// Complexity: O(log exp)
 function modPow(base, exp, mod) {
   if (mod === 1) return 0;
   let result = 1;
@@ -124,14 +182,16 @@ function initRSA() {
   $('#btnDecrypt')?.addEventListener('click', decryptMessage);
   $('#btnShowDecSteps')?.addEventListener('click', showDecryptionSteps);
   $('#btnFrequencyAttack')?.addEventListener('click', frequencyAnalysisAttack);
+  
+  // Setup parameter change detection
+  setupParameterChangeDetection();
 }
 
 function useRandomPrimes() {
-  const primes = getSmallPrimes(50); // Primes up to 50 for manageability
+  const primes = getSmallPrimes(50);
   const p = primes[Math.floor(Math.random() * primes.length)];
   let q = primes[Math.floor(Math.random() * primes.length)];
   
-  // Make sure p !== q
   while (q === p) {
     q = primes[Math.floor(Math.random() * primes.length)];
   }
@@ -163,11 +223,9 @@ function generateRSAKeys() {
     return;
   }
   
-  // Calculate n and phi
   const n = p * q;
   const phi = (p - 1) * (q - 1);
   
-  // Choose e
   let e;
   if (eInput && eInput.trim() !== '') {
     e = parseInt(eInput);
@@ -176,16 +234,13 @@ function generateRSAKeys() {
       return;
     }
   } else {
-    // Auto-select e
     const candidates = [3, 5, 7, 11, 13, 17, 19, 23, 29, 31];
     e = candidates.find(candidate => candidate < phi && gcd(candidate, phi) === 1) || 3;
     $('#publice').value = e;
   }
   
-  // Calculate d using Extended Euclidean Algorithm
   const d = modInverse(e, phi);
   
-  // Update state
   rsaState = {
     p, q, n, phi, e, d,
     publicKey: { e, n },
@@ -207,7 +262,6 @@ function renderKeyGeneration() {
   
   const title = createEl('h4', { innerHTML: 'Generated RSA Keys', style: 'color:#18e0e6' });
   
-  // Display keys
   const keysDisplay = createEl('div', { style: 'display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin: 1rem 0;' });
   
   const publicKeyBox = createEl('div', { class: 'key-display' });
@@ -233,7 +287,6 @@ function renderKeyGeneration() {
   $('#keyGenResults').innerHTML = '';
   $('#keyGenResults').appendChild(container);
   
-  // Render step-by-step calculation
   renderKeyGenSteps();
 }
 
@@ -282,12 +335,10 @@ function renderKeyGenSteps() {
 // ============ RSA ENCRYPTION ============
 
 function letterToNumber(letter) {
-  // A=0, B=1, ..., Z=25
   return letter.toUpperCase().charCodeAt(0) - 65;
 }
 
 function numberToLetter(num) {
-  // 0=A, 1=B, ..., 25=Z
   return String.fromCharCode(num + 65);
 }
 
@@ -306,22 +357,17 @@ function encryptMessage() {
   rsaState.plaintext = plaintext;
   rsaState.ciphertext = [];
   
-  // Encrypt letter by letter
   for (const char of plaintext) {
     if (/[A-Za-z]/.test(char)) {
       const m = letterToNumber(char);
       const c = modPow(m, rsaState.e, rsaState.n);
       rsaState.ciphertext.push(c);
     } else {
-      // Keep non-alphabetic characters as-is (encoded as negative to distinguish)
-      rsaState.ciphertext.push(-1); // Placeholder for non-letter
+      rsaState.ciphertext.push(-1);
     }
   }
   
-  // Display ciphertext
   $('#cipherText').value = rsaState.ciphertext.join(' ');
-  
-  // Calculate original distribution
   rsaState.originalDistribution = computeLetterDistribution(plaintext);
   
   log(`Encrypted: "${plaintext}" -> [${rsaState.ciphertext.slice(0, 10).join(', ')}...]`);
@@ -355,7 +401,6 @@ function showEncryptionSteps() {
       stepsContainer.appendChild(step);
       letterIndex++;
       
-      // Limit display to first 20 letters for readability
       if (letterIndex >= 20) {
         const more = createEl('div', { class: 'letter-encryption' });
         more.innerHTML = `<em>... and ${rsaState.ciphertext.filter(x => x >= 0).length - 20} more letters</em>`;
@@ -398,7 +443,6 @@ function decryptWithKey(ciphertext, d, n, originalText) {
   
   for (const c of ciphertext) {
     if (c === -1) {
-      // Non-alphabetic character, get from original
       decrypted += originalText[origIndex];
     } else {
       const m = modPow(c, d, n);
@@ -484,7 +528,7 @@ function chiSquaredScore(dist1, dist2) {
   for (const letter of letters) {
     const obs = parseFloat(dist1.distribution[letter].percent);
     const exp = parseFloat(dist2.distribution[letter].percent);
-    score += Math.pow(obs - exp, 2) / (exp + 0.01); // Add small epsilon
+    score += Math.pow(obs - exp, 2) / (exp + 0.01);
   }
   
   return score;
@@ -501,16 +545,11 @@ function frequencyAnalysisAttack() {
   
   const candidates = [];
   
-  // Try all possible values of d from 1 to phi
   for (let testD = 1; testD < rsaState.phi; testD++) {
-    // Verify this is a valid private key: (e * testD) mod phi should be 1
     if ((rsaState.e * testD) % rsaState.phi !== 1) continue;
     
-    // Decrypt with this candidate key
     const decrypted = decryptWithKey(rsaState.ciphertext, testD, rsaState.n, rsaState.plaintext);
     const decryptedDist = computeLetterDistribution(decrypted);
-    
-    // Calculate similarity with original distribution
     const score = chiSquaredScore(rsaState.originalDistribution, decryptedDist);
     
     candidates.push({
@@ -521,7 +560,6 @@ function frequencyAnalysisAttack() {
     });
   }
   
-  // Sort by score (lower is better)
   candidates.sort((a, b) => a.score - b.score);
   const best = candidates[0];
   
@@ -550,7 +588,6 @@ function renderFrequencyAttackResults(topCandidates, best) {
     <strong>Result:</strong> ${best.d === rsaState.d ? '<span style="color:#4caf50;">✓ CORRECT KEY FOUND</span>' : '<span style="color:#ff9800;">⚠ Different key (may still produce valid text)</span>'}
   `});
   
-  // Top candidates
   const candidatesBox = createEl('div', { class: 'result-box', style: 'margin-top: 1rem;' });
   const candidatesTitle = createEl('h5', { textContent: 'Top 10 Candidate Keys', style: 'color:#18e0e6; margin-bottom: 1rem;' });
   candidatesBox.appendChild(candidatesTitle);
@@ -568,7 +605,7 @@ function renderFrequencyAttackResults(topCandidates, best) {
     candidatesBox.appendChild(candidateDiv);
   });
   
-  // Comparative charts
+  // MODIFICATO: Grafici uno sotto l'altro
   const chartSection = createEl('div', { class: 'dual-chart-container', style: 'margin-top: 2rem;' });
   
   const originalChartCont = createEl('div', { class: 'chart-container' });
@@ -592,7 +629,6 @@ function renderFrequencyAttackResults(topCandidates, best) {
   $('#frequencyAttackResults').innerHTML = '';
   $('#frequencyAttackResults').appendChild(container);
   
-  // Draw charts
   setTimeout(() => {
     const letters = Object.keys(rsaState.originalDistribution.distribution);
     const originalCounts = letters.map(l => rsaState.originalDistribution.distribution[l].count);
@@ -655,7 +691,6 @@ function drawBarChart(canvas, labels, values, title) {
     const height = canvas.height;
     ctx.clearRect(0, 0, width, height);
 
-    // Background
     const gradient = ctx.createLinearGradient(0, 0, 0, height);
     gradient.addColorStop(0, '#0a1628');
     gradient.addColorStop(1, '#142042');
@@ -666,13 +701,11 @@ function drawBarChart(canvas, labels, values, title) {
     const chartWidth = width - margin.left - margin.right;
     const chartHeight = height - margin.top - margin.bottom;
 
-    // Title
     ctx.fillStyle = '#18e0e6';
     ctx.font = 'bold 20px Montserrat, Arial, sans-serif';
     ctx.textAlign = 'center';
     ctx.fillText(title, width / 2, 40);
 
-    // Axes
     ctx.strokeStyle = '#4a6ba8';
     ctx.lineWidth = 2;
     ctx.beginPath();
@@ -691,14 +724,12 @@ function drawBarChart(canvas, labels, values, title) {
       const x = margin.left + i * (barWidth + barSpacing) + barSpacing / 2;
       const y = margin.top + chartHeight - barHeight;
 
-      // Bar gradient
       const barGradient = ctx.createLinearGradient(x, y, x, y + barHeight);
       barGradient.addColorStop(0, '#18e0e6');
       barGradient.addColorStop(1, '#2bd4d9');
       ctx.fillStyle = barGradient;
       ctx.fillRect(x, y, barWidth, barHeight);
 
-      // Value on top
       if (val > 0) {
         ctx.fillStyle = '#e9f2ff';
         ctx.font = 'bold 14px Montserrat, Arial, sans-serif';
@@ -706,7 +737,6 @@ function drawBarChart(canvas, labels, values, title) {
         ctx.fillText(val.toString(), x + barWidth / 2, y - 8);
       }
 
-      // Letter labels
       ctx.fillStyle = '#b8d4ff';
       ctx.font = 'bold 16px Montserrat, Arial, sans-serif';
       ctx.textAlign = 'center';
@@ -722,7 +752,6 @@ function drawBarChart(canvas, labels, values, title) {
 document.addEventListener('DOMContentLoaded', () => {
   log('DOM loaded - Initializing RSA Homework 3');
   
-  // Mobile nav
   document.getElementById('navToggle')?.addEventListener('click', () => {
     const navLinks = document.getElementById('navLinks');
     if (navLinks) {
