@@ -1,10 +1,10 @@
 /* ================================
    Homework 4: Law of Large Numbers Simulation
    Author: Lorenzo Ciafrelli
-   FIXED: Animation, event listeners, and chart rendering
    ================================ */
 
 let simState = {
+  experimentType: 'coin',  // 'coin' or 'die'
   m: 50,
   n: 500,
   p: 0.5,
@@ -34,6 +34,38 @@ function showAlert(msg, type='info') {
   }
 }
 
+function updateExperimentInfo() {
+  const experimentType = $('#experimentType');
+  const experimentInfo = $('#experimentInfo');
+  
+  if(!experimentType || !experimentInfo) return;
+  
+  const type = experimentType.value;
+  simState.experimentType = type;
+  
+  if(type === 'coin') {
+    simState.p = 0.5;
+    experimentInfo.innerHTML = `
+      <strong>📊 Current Experiment:</strong> Fair Coin Flip<br>
+      <strong>Success Event:</strong> Getting Heads<br>
+      <strong>Probability (p):</strong> 0.5 (50%)<br>
+      <strong>Variance:</strong> p(1-p)/n = 0.25/n<br>
+      <strong>Convergence:</strong> Slowest (maximum variance)
+    `;
+  } else {
+    simState.p = 1/6;
+    experimentInfo.innerHTML = `
+      <strong>📊 Current Experiment:</strong> Fair Die Roll<br>
+      <strong>Success Event:</strong> Rolling a 6<br>
+      <strong>Probability (p):</strong> 0.167 (16.7%)<br>
+      <strong>Variance:</strong> p(1-p)/n ≈ 0.139/n<br>
+      <strong>Convergence:</strong> Faster (lower variance)
+    `;
+  }
+  
+  log(`Experiment changed to: ${type}, p=${simState.p.toFixed(3)}`);
+}
+
 function initSimulation() {
   log('Initializing LLN simulation');
   
@@ -42,11 +74,24 @@ function initSimulation() {
   const btnReset = $('#btnResetSim');
   const speedSlider = $('#animSpeed');
   const speedValue = $('#speedValue');
+  const experimentType = $('#experimentType');
   
-  if(!btnStart || !btnPause || !btnReset || !speedSlider) {
+  if(!btnStart || !btnPause || !btnReset || !speedSlider || !experimentType) {
     log('ERROR: UI elements not found');
     return;
   }
+  
+  // Experiment type selector
+  experimentType.addEventListener('change', () => {
+    updateExperimentInfo();
+    if(!simState.isRunning) {
+      drawMainChart();
+      drawHistogram();
+    }
+  });
+  
+  // Initialize experiment info
+  updateExperimentInfo();
   
   // Speed slider
   speedSlider.addEventListener('input', (e) => {
@@ -55,19 +100,17 @@ function initSimulation() {
     log(`Speed changed to: ${simState.speed}`);
   });
   
-  // Start button
+  // Buttons
   btnStart.addEventListener('click', () => {
     log('Start button clicked');
     startSimulation();
   });
   
-  // Pause button
   btnPause.addEventListener('click', () => {
     log('Pause button clicked');
     togglePause();
   });
   
-  // Reset button
   btnReset.addEventListener('click', () => {
     log('Reset button clicked');
     resetSimulation();
@@ -85,7 +128,7 @@ function startSimulation() {
   const m = parseInt($('#numTrajectories').value);
   const n = parseInt($('#numTrials').value);
   
-  log(`Starting simulation: m=${m}, n=${n}`);
+  log(`Starting simulation: m=${m}, n=${n}, experiment=${simState.experimentType}, p=${simState.p.toFixed(3)}`);
   
   if(isNaN(m) || m < 1 || m > 200) {
     showAlert('Number of trajectories must be between 1 and 200', 'alert');
@@ -125,8 +168,9 @@ function startSimulation() {
   $('#btnPauseSim').disabled = false;
   $('#numTrajectories').disabled = true;
   $('#numTrials').disabled = true;
+  $('#experimentType').disabled = true;
   
-  showAlert('Simulation started!', 'success');
+  showAlert(`Simulation started! (${simState.experimentType === 'coin' ? 'Coin Flip' : 'Die Roll'})`, 'success');
   
   // Start animation loop
   runSimulationStep();
@@ -134,7 +178,6 @@ function startSimulation() {
 
 function runSimulationStep() {
   if(!simState.isRunning || simState.isPaused) {
-    log('Simulation paused or stopped');
     return;
   }
   
@@ -179,6 +222,7 @@ function completeSimulation() {
   $('#btnPauseSim').disabled = true;
   $('#numTrajectories').disabled = false;
   $('#numTrials').disabled = false;
+  $('#experimentType').disabled = false;
   
   drawMainChart();
   drawHistogram();
@@ -227,6 +271,7 @@ function resetSimulation() {
   $('#btnPauseSim').textContent = '⏸ Pause';
   $('#numTrajectories').disabled = false;
   $('#numTrials').disabled = false;
+  $('#experimentType').disabled = false;
   
   const progressBar = $('#progressBar');
   if(progressBar) {
@@ -251,12 +296,13 @@ function updateProgressBar() {
   }
 }
 
+function getExperimentLabel() {
+  return simState.experimentType === 'coin' ? 'Coin Flip' : 'Die Roll (6)';
+}
+
 function drawMainChart() {
   const canvas = $('#mainChart');
-  if(!canvas) {
-    log('Main chart canvas not found');
-    return;
-  }
+  if(!canvas) return;
   
   const ctx = canvas.getContext('2d');
   const width = canvas.width;
@@ -271,7 +317,7 @@ function drawMainChart() {
   ctx.fillStyle = gradient;
   ctx.fillRect(0, 0, width, height);
   
-  const margin = { top: 60, right: 40, bottom: 70, left: 80 };
+  const margin = { top: 70, right: 40, bottom: 70, left: 80 };
   const chartWidth = width - margin.left - margin.right;
   const chartHeight = height - margin.top - margin.bottom;
   
@@ -279,7 +325,11 @@ function drawMainChart() {
   ctx.fillStyle = '#18e0e6';
   ctx.font = 'bold 18px Montserrat, Arial, sans-serif';
   ctx.textAlign = 'center';
-  ctx.fillText('Trajectories of Relative Frequency f(n)', width / 2, 30);
+  ctx.fillText(`Trajectories: ${getExperimentLabel()}`, width / 2, 30);
+  
+  ctx.font = '12px Montserrat, Arial, sans-serif';
+  ctx.fillStyle = '#b8d4ff';
+  ctx.fillText(`p = ${simState.p.toFixed(3)} | m = ${simState.m} | n = ${simState.currentStep}/${simState.n}`, width / 2, 50);
   
   // Axes
   ctx.strokeStyle = '#4a6ba8';
@@ -297,7 +347,7 @@ function drawMainChart() {
   ctx.textAlign = 'center';
   ctx.translate(25, margin.top + chartHeight / 2);
   ctx.rotate(-Math.PI / 2);
-  ctx.fillText('f(n)', 0, 0);
+  ctx.fillText('Relative Frequency f(n)', 0, 0);
   ctx.restore();
   
   // X-axis label
@@ -306,7 +356,7 @@ function drawMainChart() {
   ctx.textAlign = 'center';
   ctx.fillText('Number of Trials (n)', margin.left + chartWidth / 2, height - 20);
   
-  // Draw p=0.5 line
+  // Draw p reference line
   ctx.strokeStyle = '#ff5722';
   ctx.lineWidth = 2;
   ctx.setLineDash([5, 5]);
@@ -320,7 +370,7 @@ function drawMainChart() {
   ctx.fillStyle = '#ff5722';
   ctx.font = 'bold 12px Montserrat, Arial, sans-serif';
   ctx.textAlign = 'left';
-  ctx.fillText('p = 0.5', margin.left + 10, yRef - 5);
+  ctx.fillText(`p = ${simState.p.toFixed(3)}`, margin.left + 10, yRef - 5);
   
   // Draw trajectories
   if(simState.trajectories.length > 0 && simState.currentStep > 0) {
@@ -380,10 +430,7 @@ function drawMainChart() {
 
 function drawHistogram() {
   const canvas = $('#histogramChart');
-  if(!canvas) {
-    log('Histogram canvas not found');
-    return;
-  }
+  if(!canvas) return;
   
   const ctx = canvas.getContext('2d');
   const width = canvas.width;
@@ -401,7 +448,7 @@ function drawHistogram() {
     ctx.fillStyle = '#b8d4ff';
     ctx.font = '14px Montserrat, Arial, sans-serif';
     ctx.textAlign = 'center';
-    ctx.fillText('Histogram', width / 2, height / 2 - 10);
+    ctx.fillText('Distribution', width / 2, height / 2 - 10);
     ctx.fillText('(after start)', width / 2, height / 2 + 10);
     return;
   }
@@ -413,7 +460,9 @@ function drawHistogram() {
   ctx.fillStyle = '#18e0e6';
   ctx.font = 'bold 13px Montserrat, Arial, sans-serif';
   ctx.textAlign = 'center';
-  ctx.fillText(`n=${simState.currentStep}`, width / 2, 30);
+  ctx.fillText(`Distribution`, width / 2, 25);
+  ctx.font = '11px Montserrat, Arial, sans-serif';
+  ctx.fillText(`n=${simState.currentStep}`, width / 2, 40);
   
   const frequencies = simState.trajectories.map(t => t.frequencies[simState.currentStep]);
   const numBins = Math.min(15, Math.max(5, Math.floor(simState.m / 4)));
@@ -480,23 +529,26 @@ function updateStats() {
   const theoreticalVar = (simState.p * (1 - simState.p)) / simState.currentStep;
   const theoreticalStdDev = Math.sqrt(theoreticalVar);
   
+  const experimentName = simState.experimentType === 'coin' ? 'Coin' : 'Die';
+  
   const html = `
     <div class="stats-display">
+      <div class="stat-item"><div class="stat-label">Experiment</div><div class="stat-value">${experimentName}</div></div>
       <div class="stat-item"><div class="stat-label">Current n</div><div class="stat-value">${simState.currentStep}</div></div>
       <div class="stat-item"><div class="stat-label">Trajectories (m)</div><div class="stat-value">${simState.m}</div></div>
       <div class="stat-item"><div class="stat-label">Mean f(n)</div><div class="stat-value">${mean.toFixed(4)}</div></div>
-      <div class="stat-item"><div class="stat-label">True p</div><div class="stat-value">${simState.p.toFixed(2)}</div></div>
+      <div class="stat-item"><div class="stat-label">True p</div><div class="stat-value">${simState.p.toFixed(3)}</div></div>
       <div class="stat-item"><div class="stat-label">Empirical Std</div><div class="stat-value">${stdDev.toFixed(4)}</div></div>
       <div class="stat-item"><div class="stat-label">Theoretical Std</div><div class="stat-value">${theoreticalStdDev.toFixed(4)}</div></div>
       <div class="stat-item"><div class="stat-label">Mean |Error|</div><div class="stat-value">${meanError.toFixed(4)}</div></div>
-      <div class="stat-item"><div class="stat-label">Convergence</div><div class="stat-value">${meanError < 0.05 ? '✓ Good' : '~ Fair'}</div></div>
     </div>
     <div class="explanation">
-      <strong>Interpretation:</strong><br>
-      • Mean f(n) = ${mean.toFixed(4)} ${Math.abs(mean - simState.p) < 0.05 ? '≈' : '→'} p = ${simState.p}<br>
-      • Std Dev: Empirical ${stdDev.toFixed(4)} vs Theoretical ${theoreticalStdDev.toFixed(4)}<br>
-      • Variance decreases as 1/n: ${theoreticalVar.toFixed(6)}<br>
-      • Convergence quality: ${meanError < 0.05 ? 'Excellent' : meanError < 0.1 ? 'Good' : 'Moderate'}
+      <strong>Convergence Analysis:</strong><br>
+      • Mean f(n) = ${mean.toFixed(4)} ${Math.abs(mean - simState.p) < 0.05 ? '≈' : '→'} p = ${simState.p.toFixed(3)}<br>
+      • Empirical Std Dev: ${stdDev.toFixed(4)} vs Theoretical: ${theoreticalStdDev.toFixed(4)}<br>
+      • Variance = p(1-p)/n = ${theoreticalVar.toFixed(6)}<br>
+      • Mean absolute error: ${meanError.toFixed(4)}<br>
+      • Quality: ${meanError < 0.03 ? '✓ Excellent' : meanError < 0.08 ? '✓ Good' : '~ Moderate'}
     </div>
   `;
   
@@ -504,14 +556,22 @@ function updateStats() {
 }
 
 document.addEventListener('DOMContentLoaded', () => {
-  log('DOM loaded');
+  log('DOM loaded - Initializing simulation');
   
-  document.getElementById('navToggle')?.addEventListener('click', () => {
-    const navLinks = document.getElementById('navLinks');
-    if (navLinks) {
-      navLinks.style.display = navLinks.style.display === 'flex' ? 'none' : 'flex';
-    }
-  });
+  // Mobile nav
+  const navToggle = document.getElementById('navToggle');
+  if(navToggle) {
+    navToggle.addEventListener('click', () => {
+      const navLinks = document.getElementById('navLinks');
+      if (navLinks) {
+        navLinks.style.display = navLinks.style.display === 'flex' ? 'none' : 'flex';
+      }
+    });
+  }
 
-  initSimulation();
+  // Small delay to ensure DOM is fully ready
+  setTimeout(() => {
+    initSimulation();
+    log('Simulation ready');
+  }, 100);
 });
