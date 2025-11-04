@@ -453,14 +453,38 @@
       }
     }
 
-    code {
-      background: rgba(8,15,35,0.9);
-      padding: 0.3rem 0.6rem;
-      border-radius: 4px;
-      color: #18e0e6;
-      font-family: 'Courier New', monospace;
-      font-size: 0.85rem;
-    }
+        @media (max-width: 1024px) {
+  .comparison-results {
+    grid-template-columns: 1fr !important;
+  }
+}
+code {
+  background: rgba(8,15,35,0.9);
+  padding: 0.25rem 0.5rem;
+  border-radius: 4px;
+  color: #18e0e6;
+  font-family: 'Courier New', monospace;
+  font-size: 0.85rem;
+}
+.pseudocode {
+  white-space: pre-wrap;
+  word-break: break-word;
+}
+/* Better scrolling for step-by-step */
+#stepByStep {
+  scrollbar-width: thin;
+  scrollbar-color: #18e0e6 rgba(8,15,35,0.9);
+}
+#stepByStep::-webkit-scrollbar {
+  width: 8px;
+}
+#stepByStep::-webkit-scrollbar-track {
+  background: rgba(8,15,35,0.9);
+}
+#stepByStep::-webkit-scrollbar-thumb {
+  background: #18e0e6;
+  border-radius: 4px;
+}
 
     ul, ol {
       line-height: 1.9;
@@ -698,12 +722,56 @@
             <div class="formula-content">
               Let \(M_4^{(n)} = \sum_{i=1}^{n} (x_i - \bar{x}_n)^4\)
               <br><br>
+               $$\Delta' = \frac{\Delta}{n}$$
+              $$\delta' = 1 - \frac{1}{n}$$
+              $$M_4^{(n)} = M_4^{(n-1)} + \Delta((\Delta^2 - M_2^{(n-1)})\delta' - 4M_3^{(n-1)}\Delta' + M_2^{(n-1)} \Delta'^2)$$
+            </div>
+          </div>
+          <div class="math-formula">
+            <div class="formula-title">Standardized Moments:</div>
+            <div class="formula-content">
+              Skewness:
+              $$\gamma_1 = \frac{M_3^{(n)}}{(M_2^{(n)})^{3/2}}$$
+              
               Excess Kurtosis:
               $$\gamma_2 = \frac{M_4^{(n)}}{(M_2^{(n)})^2} - 3$$
             </div>
           </div>
         </div>
+        <div class="step-container">
+          <div class="step-title">
+            <span class="step-number">5</span>
+            Online Covariance and Correlation
+          </div>
+          
+          <div class="explanation">
+            For multivariate statistics, we need to compute covariance between variables incrementally.
+          </div>
+          <div class="math-formula">
+            <div class="formula-title">Bivariate Case:</div>
+            <div class="formula-content">
+              Given two variables \(X\) and \(Y\), track:
+              <ul>
+                <li>\(\bar{x}_{n-1}, \bar{y}_{n-1}\): Running means</li>
+                <li>\(M_{xx}^{(n-1)}, M_{yy}^{(n-1)}\): Sum of squared deviations (univariate)</li>
+                <li>\(M_{xy}^{(n-1)}\): Sum of cross-deviations (covariance term)</li>
+              </ul>
+            </div>
+          </div>
+          <div class="math-formula">
+            <div class="formula-title">Recurrence for Cross-Deviation:</div>
+            <div class="formula-content">
+              $$M_{xy}^{(n)} = M_{xy}^{(n-1)} + (x_n - \bar{x}_{n-1})(y_n - \bar{y}_n)$$
+              
+              Then covariance:
+              $$\text{Cov}(X,Y) = \frac{M_{xy}^{(n)}}{n-1}$$
+              
+              And Pearson correlation:
+              $$r = \frac{M_{xy}^{(n)}}{\sqrt{M_{xx}^{(n)} \cdot M_{yy}^{(n)}}}$$
       </div>
+            </div>
+          </div>
+        </div>
 
       <!-- PART B: Pseudocode & Algorithms -->
       <div class="hw-section">
@@ -716,31 +784,31 @@
           </div>
 
           <div class="pseudocode">
-<strong style="color: #18e0e6;">Algorithm: WELFORD_MEAN_VARIANCE</strong>
-<strong style="color: #ffc107;">Input:</strong> Stream of values x₁, x₂, ..., xₙ
-<strong style="color: #ffc107;">Output:</strong> Mean and Variance
-
-<strong style="color: #ff9800;">Initialize:</strong>
-  mean ← 0
-  M2 ← 0  <span style="color: #4caf50;">// sum of squared deviations</span>
-  
-<strong style="color: #ff9800;">For</strong> n = 1 to N:
-  Read next value xₙ
-  delta ← xₙ - mean
-  mean ← mean + delta / n
-  delta2 ← xₙ - mean
-  M2 ← M2 + delta × delta2
-  variance ← M2 / (n - 1)
-<strong style="color: #ff9800;">End For</strong>
-
-<span style="color: #4caf50;">// Complexity: O(1) per update; Total: O(n)</span>
-<span style="color: #4caf50;">// Space: O(1) for two accumulators</span>
+<div class="pseudocode-title">Algorithm: WELFORD_MEAN_VARIANCE</div>
+            <div class="pseudocode-line"><span class="keyword">Input:</span> Stream of values \(x_1, x_2, \ldots, x_n\)</div>
+            <div class="pseudocode-line"><span class="keyword">Output:</span> Mean and Variance</div>
+            <div class="pseudocode-line"></div>
+            <div class="pseudocode-line"><span class="keyword">Initialize:</span></div>
+            <div class="pseudocode-line">&nbsp;&nbsp;mean ← 0</div>
+            <div class="pseudocode-line">&nbsp;&nbsp;M2 ← 0 <span class="comment">// sum of squared deviations</span></div>
+            <div class="pseudocode-line"></div>
+            <div class="pseudocode-line"><span class="keyword">For</span> n = 1 to N:</div>
+            <div class="pseudocode-line">&nbsp;&nbsp;Read next value \(x_n\)</div>
+            <div class="pseudocode-line">&nbsp;&nbsp;delta ← xₙ - mean</div>
+            <div class="pseudocode-line">&nbsp;&nbsp;mean ← mean + delta / n</div>
+            <div class="pseudocode-line">&nbsp;&nbsp;delta2 ← xₙ - mean</div>
+            <div class="pseudocode-line">&nbsp;&nbsp;M2 ← M2 + delta × delta2</div>
+            <div class="pseudocode-line">&nbsp;&nbsp;variance ← M2 / (n - 1)</div>
+            <div class="pseudocode-line"><span class="keyword">End For</span></div>
+            <div class="pseudocode-line"></div>
+            <div class="pseudocode-line"><span class="comment">// Time: O(1) per update; Total: O(n)</span></div>
+            <div class="pseudocode-line"><span class="comment">// Space: O(1) for two accumulators</span></div>
           </div>
 
           <div class="comparison-box">
             <strong>Complexity Analysis:</strong>
             <ul style="margin-left: 1.5rem; line-height: 1.8;">
-              <li><strong>Time Complexity:</strong> \(\mathcal{O}(n)\) for \(n\) observations (constant \(\mathcal{O}(1)\) per update)</li>
+              <li><strong>Time Complexity:</strong> \(\mathcal{O}(n)\) for \(n\) observations</li>
               <li><strong>Space Complexity:</strong> \(\mathcal{O}(1)\) - only stores mean, M2, and count</li>
               <li><strong>Operations per update:</strong> 5 arithmetic operations</li>
               <li><strong>Memory Usage:</strong> 3 floating-point numbers</li>
@@ -750,58 +818,237 @@
 
         <div class="step-container">
           <div class="step-title">
-            <span class="step-number">2</span>
-            Comparison: Batch vs Online Algorithm
+            <span class="step-number">3</span>
+            Extended Algorithm: Mean, Variance, Skewness, Kurtosis
           </div>
 
-          <table>
-            <thead>
-              <tr>
-                <th>Property</th>
-                <th>Batch Algorithm</th>
-                <th>Online (Welford)</th>
-              </tr>
-            </thead>
-            <tbody>
-              <tr>
-                <td><strong>Time Complexity</strong></td>
-                <td>\(\mathcal{O}(n)\)</td>
-                <td>\(\mathcal{O}(n)\) (constant factor 2-3× better)</td>
-              </tr>
-              <tr>
-                <td><strong>Space Complexity</strong></td>
-                <td>\(\mathcal{O}(n)\) (stores all data)</td>
-                <td>\(\mathcal{O}(1)\)</td>
-              </tr>
-              <tr>
-                <td><strong>Numerical Stability</strong></td>
-                <td>Poor (catastrophic cancellation)</td>
-                <td>Excellent</td>
-              </tr>
-              <tr>
-                <td><strong>Error Growth</strong></td>
-                <td>\(\mathcal{O}(n^2 \varepsilon)\)</td>
-                <td>\(\mathcal{O}(n \varepsilon)\)</td>
-              </tr>
-              <tr>
-                <td><strong>Overflow Risk</strong></td>
-                <td>High (\(\sum x_i^2\))</td>
-                <td>Very Low (deltas)</td>
-              </tr>
-              <tr>
-                <td><strong>Streaming Data</strong></td>
-                <td>Impossible (needs all data)</td>
-                <td>Ideal (incremental)</td>
-              </tr>
-              <tr>
-                <td><strong>Memory for Large n</strong></td>
-                <td>Prohibitive</td>
-                <td>Constant regardless of \(n\)</td>
-              </tr>
-            </tbody>
-          </table>
+          <div class="pseudocode">
+            <div class="pseudocode-title">Algorithm: WELFORD_MOMENTS</div>
+            <div class="pseudocode-line"><span class="keyword">Input:</span> Stream of values \(x_1, x_2, \ldots, x_n\)</div>
+            <div class="pseudocode-line"><span class="keyword">Output:</span> Mean, Variance, Skewness, Kurtosis</div>
+            <div class="pseudocode-line"></div>
+            <div class="pseudocode-line"><span class="keyword">Initialize:</span></div>
+            <div class="pseudocode-line">&nbsp;&nbsp;mean ← 0</div>
+            <div class="pseudocode-line">&nbsp;&nbsp;M2, M3, M4 ← 0 <span class="comment">// central moments</span></div>
+            <div class="pseudocode-line"></div>
+            <div class="pseudocode-line"><span class="keyword">For</span> n = 1 to N:</div>
+            <div class="pseudocode-line">&nbsp;&nbsp;Read next value \(x_n\)</div>
+            <div class="pseudocode-line">&nbsp;&nbsp;delta ← xₙ - mean</div>
+            <div class="pseudocode-line">&nbsp;&nbsp;mean ← mean + delta / n</div>
+            <div class="pseudocode-line">&nbsp;&nbsp;delta2 ← xₙ - mean</div>
+            <div class="pseudocode-line">&nbsp;&nbsp;delta_n ← delta / n</div>
+            <div class="pseudocode-line">&nbsp;&nbsp;delta_n2 ← delta_n × delta_n</div>
+            <div class="pseudocode-line"></div>
+            <div class="pseudocode-line">&nbsp;&nbsp;M4 ← M4 + delta_n2 × delta_n2 × (n-1) × (n² - 3n + 3) + 6 × delta_n2 × M2 - 4 × delta_n × M3</div>
+            <div class="pseudocode-line">&nbsp;&nbsp;M3 ← M3 + delta_n2 × delta × (n-2) - 3 × delta_n × M2</div>
+            <div class="pseudocode-line">&nbsp;&nbsp;M2 ← M2 + delta × delta2</div>
+            <div class="pseudocode-line"><span class="keyword">End For</span></div>
+            <div class="pseudocode-line"></div>
+            <div class="pseudocode-line"><span class="keyword">Compute:</span></div>
+            <div class="pseudocode-line">&nbsp;&nbsp;variance ← M2 / (n - 1)</div>
+            <div class="pseudocode-line">&nbsp;&nbsp;skewness ← M3 / (M2)^(3/2)</div>
+            <div class="pseudocode-line">&nbsp;&nbsp;kurtosis ← M4 / (M2)² - 3</div>
+          </div>
+
+          <div class="comparison-box">
+            <strong>Complexity Analysis:</strong>
+            <ul style="margin-left: 1.5rem; line-height: 1.8;">
+              <li><strong>Time Complexity:</strong> \(\mathcal{O}(n)\) for \(n\) observations, \(\mathcal{O}(1)\) per update</li>
+              <li><strong>Space Complexity:</strong> \(\mathcal{O}(1)\) - only 4 moment accumulators</li>
+              <li><strong>Operations per update:</strong> ~15 arithmetic operations</li>
+              <li><strong>Numerical Stability:</strong> Excellent for all 4 moments</li>
+            </ul>
+          </div>
         </div>
       </div>
+
+      <!-- PART C: Numerical Stability Analysis -->
+      <div class="hw-section">
+        <h2 style="color: #18e0e6; margin-bottom: 1.5rem;">Part C — Numerical Stability & Error Analysis</h2>
+        
+        <div class="step-container">
+          <div class="step-title">
+            <span class="step-number">1</span>
+            Catastrophic Cancellation in Batch Algorithms
+          </div>
+          
+          <div class="explanation">
+            The traditional batch formula for variance suffers from catastrophic cancellation, a fundamental numerical stability problem.
+          </div>
+
+          <div class="math-formula">
+            <div class="formula-title">Naive Batch Variance Formula:</div>
+            <div class="formula-content">
+              $$s^2 = \frac{1}{n-1} \left( \sum_{i=1}^{n} x_i^2 - \frac{(\sum_{i=1}^{n} x_i)^2}{n} \right)$$
+              
+              This formula is susceptible to catastrophic cancellation because:
+              <ul>
+                <li>\(\sum x_i^2\) can be very large</li>
+                <li>\(\frac{(\sum x_i)^2}{n}\) is also very large</li>
+                <li>When both are large and nearly equal, their difference loses precision</li>
+              </ul>
+            </div>
+          </div>
+
+          <div class="math-formula">
+            <div class="formula-title">Numerical Example:</div>
+            <div class="formula-content">
+              Data: \(x = [10^8, 10^8 + 1, 10^8 + 2]\)<br><br>
+              True variance: \(s^2 = 1.0\)
+              <br><br>
+              <strong>Using batch formula (single precision, 6 significant digits):</strong>
+              <ul>
+                <li>\(\sum x_i = 3 \times 10^8 + 3\) → rounds to \(3 \times 10^8\)</li>
+                <li>\(\sum x_i^2 = (10^8)^2 \times 3 + 2 \times 10^8 + 5\) ≈ \(3 \times 10^{16}\)</li>
+                <li>\(\frac{(\sum x_i)^2}{n} = \frac{9 \times 10^{16}}{3}\) = \(3 \times 10^{16}\)</li>
+                <li>Difference: \(3 \times 10^{16} - 3 \times 10^{16}\) = \(0\) (or garbage due to rounding)</li>
+                <li>Computed variance: <strong>0 or wildly incorrect</strong></li>
+              </ul>
+            </div>
+          </div>
+
+          <div class="math-formula">
+            <div class="formula-title">Why Welford's Avoids This:</div>
+            <div class="formula-content">
+              Welford's algorithm never computes \(\sum x_i^2\) or the large cancellation. Instead:
+              <ul>
+                <li>Maintains running mean \(\bar{x}\) (moderate size)</li>
+                <li>Computes \(\delta = x_n - \bar{x}\) (small quantity)</li>
+                <li>Updates \(M_n = M_{n-1} + \delta \times \delta'\) (stable subtraction)</li>
+              </ul>
+              
+              With Welford's algorithm on the same data:
+              <ul>
+                <li>\(\delta_1 = 10^8 - 10^8 = 0\)</li>
+                <li>\(\delta_2 = (10^8 + 1) - 10^8 = 1\) ✓</li>
+                <li>\(\delta_3 = (10^8 + 2) - 10^8 = 2\) ✓</li>
+                <li>Computed variance: <strong>1.0 (correct)</strong></li>
+              </ul>
+            </div>
+          </div>
+
+          <div class="comparison-box">
+            <div class="pros">
+              <strong style="color: #81c784;">✓ Welford's Advantages:</strong>
+              <ul style="margin-left: 1.5rem; line-height: 1.8;">
+                <li>Never subtracts large numbers</li>
+                <li>Always operates on manageable deltas</li>
+                <li>No accumulated rounding errors</li>
+                <li>Works with extreme value magnitudes</li>
+              </ul>
+            </div>
+            <div class="cons">
+              <strong style="color: #ef5350;">✗ Batch Formula Issues:</strong>
+              <ul style="margin-left: 1.5rem; line-height: 1.8;">
+                <li>Subtracts two very large nearly-equal numbers</li>
+                <li>Cancellation eliminates all significant digits</li>
+                <li>Fails for data with large magnitudes</li>
+                <li>Requires careful scaling/shifting (cumbersome)</li>
+              </ul>
+            </div>
+          </div>
+        </div>
+
+        <div class="step-container">
+          <div class="step-title">
+            <span class="step-number">2</span>
+            Error Propagation Analysis
+          </div>
+          
+          <div class="explanation">
+            Analyze how computational errors accumulate in batch vs online algorithms.
+          </div>
+
+          <div class="math-formula">
+            <div class="formula-title">Rounding Error Model:</div>
+            <div class="formula-content">
+              For floating-point arithmetic with machine epsilon \(\varepsilon\):
+              <br><br>
+              <strong>Batch Algorithm Error:</strong>
+              $$\text{Error}_{batch} \approx \mathcal{O}(n \varepsilon (x_{\max}^2))$$
+              
+              Because:
+              <ul>
+                <li>Accumulates errors from \(n\) multiplications</li>
+                <li>Propagates through large sum \(\sum x_i^2\)</li>
+                <li>Amplified by cancellation: error ≈ \(\frac{\text{rounding error}}{\text{difference}}\)</li>
+              </ul>
+              
+              <strong>Welford's Algorithm Error:</strong>
+              $$\text{Error}_{Welford} \approx \mathcal{O}(n \varepsilon)$$
+              
+              Because:
+              <ul>
+                <li>Only accumulated deltas (magnitude bounded)</li>
+                <li>No amplification from cancellation</li>
+                <li>Error scale-independent of data magnitude</li>
+              </ul>
+            </div>
+          </div>
+
+          <div class="math-formula">
+            <div class="formula-title">Worst-Case Error Bounds:</div>
+            <div class="formula-content">
+              Batch: \(|\text{computed} - \text{true}| \lesssim \mathcal{O}(n^2 \varepsilon \cdot \text{scale}^2)\)<br>
+              Welford: \(|\text{computed} - \text{true}| \lesssim \mathcal{O}(n \varepsilon \cdot \text{scale})\)<br><br>
+              
+              For typical floating-point (double precision \(\varepsilon \approx 10^{-16}\)):
+              <ul>
+                <li><strong>Batch:</strong> Error grows quadratically with \(n\) and quadratically with data scale</li>
+                <li><strong>Welford:</strong> Error grows linearly with \(n\) and linearly with data scale</li>
+              </ul>
+            </div>
+          </div>
+        </div>
+
+        <div class="step-container">
+          <div class="step-title">
+            <span class="step-number">3</span>
+            Overflow and Underflow Prevention
+          </div>
+          
+          <div class="explanation">
+            Discuss how online algorithms naturally prevent overflow/underflow problems.
+          </div>
+
+          <div class="math-formula">
+            <div class="formula-title">Overflow Scenarios:</div>
+            <div class="formula-content">
+              <strong>Batch Algorithm:</strong>
+              <ul>
+                <li>\(\sum x_i^2\) can overflow if individual \(x_i^2\) are large</li>
+                <li>E.g., with \(n = 1000\) data points of magnitude \(10^{100}\): \(\sum x_i^2 \approx 10^{203}\) → overflow</li>
+                <li>Requires manual scaling: divide all data by 10^50 before computation (error-prone)</li>
+              </ul>
+              
+              <strong>Welford's Algorithm:</strong>
+              <ul>
+                <li>\(\delta = x_n - \bar{x}\) remains bounded: \(|\delta| \leq 2 \times 10^{100}\)</li>
+                <li>\(\delta \times \delta'\) also remains manageable</li>
+                <li>M2 grows linearly, not quadratically in data magnitude</li>
+                <li>No overflow unless result itself overflows (expected)</li>
+              </ul>
+            </div>
+          </div>
+
+          <div class="math-formula">
+            <div class="formula-title">Underflow Scenarios:</div>
+            <div class="formula-content">
+              <strong>Batch Algorithm:</strong>
+              <ul>
+                <li>With very small data (\(x_i \approx 10^{-100}\)): \(x_i^2 \approx 10^{-200}\) → underflow</li>
+                <li>Variance computation loses all significance</li>
+              </ul>
+              
+              <strong>Welford's Algorithm:</strong>
+              <ul>
+                <li>\(\delta = x_n - \bar{x}\) maintains precision even for small data</li>
+                <li>Deltas capture relative changes, not absolute magnitudes</li>
+                <li>Works reliably across extreme ranges (e.g., \(10^{-100}\) to \(10^{100}\))</li>
+              </ul>
+            </div>
+          </div>
+        </div>
 
       <!-- PART C: Numerical Stability Analysis -->
       <div class="hw-section">
