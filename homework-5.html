@@ -1,0 +1,1191 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Homework 5 — Location and Dispersion Measures</title>
+  <link rel="stylesheet" href="style.css"/>
+  <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;600;700&family=Orbitron:wght@600&display=swap" rel="stylesheet">
+  <script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
+  <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+  <style>
+    .hw-section {
+      background: rgba(30,44,74,0.95);
+      border-radius: 16px;
+      margin: 2rem 0;
+      padding: 2rem;
+      box-shadow: 0 8px 32px rgba(24,224,230,0.15);
+    }
+    
+    .step-container {
+      background: rgba(20,32,66,0.6);
+      border-radius: 12px;
+      padding: 1.5rem;
+      margin: 1.5rem 0;
+      border-left: 4px solid #18e0e6;
+    }
+    
+    .step-title {
+      color: #18e0e6;
+      font-weight: 600;
+      font-size: 1.1rem;
+      margin-bottom: 1rem;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+    
+    .step-number {
+      background: #18e0e6;
+      color: #0a1628;
+      width: 28px;
+      height: 28px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 0.9rem;
+      font-weight: bold;
+    }
+    
+    .explanation {
+      background: rgba(15,25,55,0.7);
+      border-radius: 8px;
+      padding: 1.25rem;
+      margin: 1rem 0;
+      border-left: 3px solid #4a9eff;
+      font-size: 0.95rem;
+      line-height: 1.8;
+    }
+
+    .math-formula {
+      background: rgba(8,15,35,0.95);
+      border-radius: 10px;
+      padding: 1.5rem;
+      margin: 1rem 0;
+      border-left: 3px solid #18e0e6;
+      color: #e9f2ff;
+      overflow-x: auto;
+    }
+
+    .formula-title {
+      color: #18e0e6;
+      font-weight: bold;
+      margin-bottom: 1rem;
+      font-size: 1.05rem;
+    }
+
+    .formula-content {
+      color: #b8d4ff;
+      line-height: 2;
+      margin: 1rem 0;
+      font-size: 1.05rem;
+    }
+
+    .formula-content ul {
+      margin-left: 1.5rem;
+      margin-top: 0.75rem;
+      line-height: 1.8;
+    }
+
+    .highlight-number {
+      color: #18e0e6;
+      font-weight: bold;
+    }
+
+    .comparison-box {
+      background: rgba(24,224,230,0.08);
+      border: 1px solid #18e0e6;
+      border-radius: 10px;
+      padding: 1.25rem;
+      margin: 1rem 0;
+    }
+
+    .pros-cons {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 1.5rem;
+      margin: 1rem 0;
+    }
+
+    @media (max-width: 768px) {
+      .pros-cons {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    .pros {
+      background: rgba(76,175,80,0.1);
+      border-left: 3px solid #4caf50;
+      padding: 1rem;
+      border-radius: 8px;
+    }
+
+    .cons {
+      background: rgba(244,67,54,0.1);
+      border-left: 3px solid #f44336;
+      padding: 1rem;
+      border-radius: 8px;
+    }
+
+    .pros h5, .cons h5 {
+      margin-top: 0;
+      margin-bottom: 0.75rem;
+    }
+
+    .pros h5 {
+      color: #81c784;
+    }
+
+    .cons h5 {
+      color: #ef5350;
+    }
+
+    .use-case {
+      background: rgba(33,150,243,0.08);
+      border: 1px solid #2196f3;
+      border-radius: 10px;
+      padding: 1.25rem;
+      margin: 1rem 0;
+    }
+
+    .use-case-title {
+      color: #64b5f6;
+      font-weight: 600;
+      margin-bottom: 0.75rem;
+      font-size: 1rem;
+    }
+
+    .use-case-content {
+      color: #b3e5fc;
+      line-height: 1.7;
+    }
+
+    .measure-card {
+      background: rgba(15,25,55,0.6);
+      border: 1px solid #4a9eff;
+      border-radius: 10px;
+      padding: 1.25rem;
+      margin: 1rem 0;
+    }
+
+    .measure-name {
+      color: #18e0e6;
+      font-weight: bold;
+      font-size: 1.05rem;
+      margin-bottom: 0.75rem;
+    }
+
+    .measure-symbol {
+      color: #4a9eff;
+      font-family: 'Courier New', monospace;
+      font-size: 0.9rem;
+      margin-bottom: 0.5rem;
+    }
+
+    .measure-desc {
+      color: #b8d4ff;
+      line-height: 1.6;
+      margin-bottom: 0.75rem;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      background: rgba(8,15,35,0.9);
+      border-radius: 10px;
+      overflow: hidden;
+      margin: 1rem 0;
+    }
+
+    th, td {
+      padding: 1rem;
+      text-align: left;
+      border-bottom: 1px solid #2d4a7a;
+      color: #b8d4ff;
+    }
+
+    th {
+      background: rgba(24,224,230,0.15);
+      color: #18e0e6;
+      font-weight: 600;
+    }
+
+    tr:hover {
+      background: rgba(24,224,230,0.08);
+    }
+
+    ul, ol {
+      line-height: 1.9;
+    }
+
+    li {
+      margin-bottom: 0.5rem;
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <nav class="navbar">
+      <div class="logo">Statistics<span class="cyber">Cyber</span></div>
+      <ul id="navLinks">
+        <li><a href="index.html">Home</a></li>
+        <li><a href="homework.html">Homework</a></li>
+        <li><a href="about.html">About</a></li>
+      </ul>
+      <button class="nav-toggle" id="navToggle">&#9776;</button>
+    </nav>
+  </header>
+
+  <main>
+    <section class="hw-detail">
+      <h1>Homework 5: Location and Dispersion Measures</h1>
+      <p class="subtle">Comprehensive theoretical analysis of descriptive statistics: measures of central tendency and variability, their mathematical foundations, applications, and cybersecurity use cases.</p>
+
+      <!-- PART A: Location Measures -->
+      <div class="hw-section">
+        <h2 style="color: #18e0e6; margin-bottom: 1.5rem;">Part A — Measures of Location (Central Tendency)</h2>
+        
+        <div class="step-container">
+          <div class="step-title">
+            <span class="step-number">1</span>
+            Introduction to Location Measures
+          </div>
+          <div class="explanation">
+            <p><strong>Measures of location</strong> (or central tendency) describe the center or typical value of a dataset. They answer the question: "Where is the middle of the data?" These measures are fundamental in summarizing large datasets into a single representative value.</p>
+            
+            <p style="margin-top: 1rem;"><strong>Classification of Location Measures:</strong></p>
+            <ul style="margin-left: 1.5rem; line-height: 1.8;">
+              <li><strong>Arithmetic Mean:</strong> Most common, sensitive to all values</li>
+              <li><strong>Weighted Mean:</strong> Incorporates importance weights</li>
+              <li><strong>Geometric Mean:</strong> Suitable for multiplicative processes</li>
+              <li><strong>Harmonic Mean:</strong> Appropriate for rates and ratios</li>
+              <li><strong>Quadratic Mean (RMS):</strong> Root Mean Square for variability measurement</li>
+              <li><strong>Trimmed Mean:</strong> Robust mean excluding extreme values</li>
+              <li><strong>Median:</strong> Middle value, robust to outliers</li>
+              <li><strong>Mode:</strong> Most frequent value, for categorical/discrete data</li>
+            </ul>
+          </div>
+        </div>
+
+        <div class="step-container">
+          <div class="step-title">
+            <span class="step-number">2</span>
+            Arithmetic Mean
+          </div>
+          
+          <div class="explanation">
+            The <strong>arithmetic mean</strong> (or average) is the sum of all values divided by the number of observations. It is the most widely used measure of central tendency.
+          </div>
+
+          <div class="math-formula">
+            <div class="formula-title">Definition:</div>
+            <div class="formula-content">
+              $$\mu = \frac{1}{n} \sum_{i=1}^{n} x_i \quad \text{(population)}$$
+              $$\bar{x} = \frac{1}{n} \sum_{i=1}^{n} x_i \quad \text{(sample)}$$
+              
+              Where:
+              <ul>
+                <li>$n$ = number of observations</li>
+                <li>$x_i$ = individual values</li>
+                <li>$\sum$ = summation operator</li>
+              </ul>
+            </div>
+          </div>
+
+          <div class="comparison-box">
+            <strong style="color: #81c784;">✓ Advantages:</strong>
+            <ul style="margin-left: 1.5rem; margin-top: 0.75rem; line-height: 1.8;">
+              <li>Uses all data points in calculation</li>
+              <li>Mathematically tractable and well-understood</li>
+              <li>Basis for many statistical tests and estimators</li>
+              <li>Efficient for normally distributed data</li>
+              <li>Minimizes squared deviations from center</li>
+            </ul>
+
+            <strong style="margin-top: 1rem; display: block; color: #ef5350;">✗ Disadvantages:</strong>
+            <ul style="margin-left: 1.5rem; margin-top: 0.75rem; line-height: 1.8;">
+              <li><strong>Sensitive to outliers:</strong> Extreme values heavily influence the mean</li>
+              <li>Can be misleading with skewed distributions</li>
+              <li>May not be a realistic value (e.g., average family size = 2.3 children)</li>
+              <li>Not appropriate for ordinal or categorical data</li>
+              <li>Affected by changes in any single observation</li>
+            </ul>
+          </div>
+
+          <div class="use-case">
+            <div class="use-case-title">🔒 Cybersecurity Application: Average Response Time</div>
+            <div class="use-case-content">
+              Use the arithmetic mean to calculate the average time security team members take to respond to alerts. This metric is essential for SLA (Service Level Agreement) compliance. However, if one response takes extremely long (e.g., during incident investigation), the mean can be skewed. The mean is useful here because response time data is typically normally distributed, and aggregating all response efforts is meaningful.
+            </div>
+          </div>
+        </div>
+
+        <div class="step-container">
+          <div class="step-title">
+            <span class="step-number">3</span>
+            Weighted Mean
+          </div>
+          
+          <div class="explanation">
+            The <strong>weighted mean</strong> assigns different importance weights to different observations, allowing some values to contribute more to the average than others.
+          </div>
+
+          <div class="math-formula">
+            <div class="formula-title">Definition:</div>
+            <div class="formula-content">
+              $$\bar{x}_w = \frac{\sum_{i=1}^{n} w_i \cdot x_i}{\sum_{i=1}^{n} w_i}$$
+              
+              Where:
+              <ul>
+                <li>$w_i$ = weight of observation $i$</li>
+                <li>$x_i$ = value of observation $i$</li>
+                <li>$\sum w_i$ = sum of all weights</li>
+              </ul>
+            </div>
+          </div>
+
+          <div class="comparison-box">
+            <strong style="color: #81c784;">✓ Advantages:</strong>
+            <ul style="margin-left: 1.5rem; margin-top: 0.75rem; line-height: 1.8;">
+              <li>Incorporates relative importance of observations</li>
+              <li>Flexible framework for various weighting schemes</li>
+              <li>Reduces computational burden for grouped data</li>
+              <li>Naturally handles non-uniform sampling</li>
+            </ul>
+
+            <strong style="margin-top: 1rem; display: block; color: #ef5350;">✗ Disadvantages:</strong>
+            <ul style="margin-left: 1.5rem; margin-top: 0.75rem; line-height: 1.8;">
+              <li>Choice of weights is subjective and requires domain expertise</li>
+              <li>More complex than simple mean</li>
+              <li>Still sensitive to outliers (especially high-weight outliers)</li>
+              <li>Incorrect weights can produce misleading results</li>
+            </ul>
+          </div>
+
+          <div class="use-case">
+            <div class="use-case-title">🔒 Cybersecurity Application: Weighted Security Score</div>
+            <div class="use-case-content">
+              Calculate a weighted mean of security metrics: network availability (weight 0.4), data encryption compliance (weight 0.35), and incident response time (weight 0.25). Critical systems receive higher weights. This allows combining heterogeneous metrics into a single security posture score. Weights reflect organizational priorities.
+            </div>
+          </div>
+        </div>
+
+        <div class="step-container">
+          <div class="step-title">
+            <span class="step-number">4</span>
+            Geometric Mean
+          </div>
+          
+          <div class="explanation">
+            The <strong>geometric mean</strong> is the nth root of the product of n values. It is particularly useful for data involving multiplication, exponential growth, or percentage changes.
+          </div>
+
+          <div class="math-formula">
+            <div class="formula-title">Definition:</div>
+            <div class="formula-content">
+              $$GM = \sqrt[n]{x_1 \cdot x_2 \cdot \ldots \cdot x_n} = \left(\prod_{i=1}^{n} x_i\right)^{1/n}$$
+              
+              Or equivalently (using logarithms):
+              $$\log(GM) = \frac{1}{n} \sum_{i=1}^{n} \log(x_i)$$
+              $$GM = 10^{\log(GM)}$$
+              
+              Constraint: All values must be positive ($x_i > 0$)
+            </div>
+          </div>
+
+          <div class="comparison-box">
+            <strong style="color: #81c784;">✓ Advantages:</strong>
+            <ul style="margin-left: 1.5rem; margin-top: 0.75rem; line-height: 1.8;">
+              <li>Ideal for multiplicative processes and growth rates</li>
+              <li>Less sensitive to extreme values than arithmetic mean</li>
+              <li>Appropriate for positively skewed data</li>
+              <li>Mathematically elegant for compound growth</li>
+              <li>Used in index calculations (e.g., inflation indices)</li>
+            </ul>
+
+            <strong style="margin-top: 1rem; display: block; color: #ef5350;">✗ Disadvantages:</strong>
+            <ul style="margin-left: 1.5rem; margin-top: 0.75rem; line-height: 1.8;">
+              <li>Cannot be applied to zero or negative values</li>
+              <li>More computationally demanding</li>
+              <li>Less intuitive interpretation than arithmetic mean</li>
+              <li>Unsuitable for additive processes</li>
+            </ul>
+          </div>
+
+          <div class="use-case">
+            <div class="use-case-title">🔒 Cybersecurity Application: Attack Growth Rate</div>
+            <div class="use-case-content">
+              Calculate the geometric mean of year-over-year attack growth rates (e.g., 1.15, 1.08, 1.22, 1.19). The GM gives the compound average growth rate of cyber threats over multiple years. If threats grew 15%, 8%, 22%, 19% annually, the geometric mean (≈1.15) shows the consistent annual growth rate that would achieve the same overall multiplication factor.
+            </div>
+          </div>
+        </div>
+
+        <div class="step-container">
+          <div class="step-title">
+            <span class="step-number">5</span>
+            Harmonic Mean
+          </div>
+          
+          <div class="explanation">
+            The <strong>harmonic mean</strong> is the reciprocal of the arithmetic mean of reciprocals. It is most appropriate for rates, speeds, and ratios.
+          </div>
+
+          <div class="math-formula">
+            <div class="formula-title">Definition:</div>
+            <div class="formula-content">
+              $$HM = \frac{n}{\sum_{i=1}^{n} \frac{1}{x_i}} = \frac{n}{\frac{1}{x_1} + \frac{1}{x_2} + \cdots + \frac{1}{x_n}}$$
+              
+              Constraint: All values must be non-zero and positive ($x_i \neq 0, x_i > 0$)
+            </div>
+          </div>
+
+          <div class="comparison-box">
+            <strong style="color: #81c784;">✓ Advantages:</strong>
+            <ul style="margin-left: 1.5rem; margin-top: 0.75rem; line-height: 1.8;">
+              <li>Correct measure for rates and speeds</li>
+              <li>Less affected by large values than arithmetic mean</li>
+              <li>Appropriate for unit-rate averaging</li>
+              <li>Mathematically rigorous for inverse relationships</li>
+            </ul>
+
+            <strong style="margin-top: 1rem; display: block; color: #ef5350;">✗ Disadvantages:</strong>
+            <ul style="margin-left: 1.5rem; margin-top: 0.75rem; line-height: 1.8;">
+              <li>Cannot be used with zero values</li>
+              <li>Highly sensitive to small values (they disproportionately reduce HM)</li>
+              <li>Less intuitive than arithmetic mean</li>
+              <li>Rarely used in practice outside specialized fields</li>
+            </ul>
+          </div>
+
+          <div class="use-case">
+            <div class="use-case-title">🔒 Cybersecurity Application: Average Scanning Speed</div>
+            <div class="use-case-content">
+              Calculate the harmonic mean of vulnerability scanning speeds across multiple systems (e.g., 50 hosts/hour, 75 hosts/hour, 60 hosts/hour). The HM correctly represents the combined scanning rate when aggregating heterogeneous rates. Using arithmetic mean would overstate efficiency because scanning speed is inversely related to time.
+            </div>
+          </div>
+        </div>
+
+        <div class="step-container">
+          <div class="step-title">
+            <span class="step-number">6</span>
+            Quadratic Mean (Root Mean Square)
+          </div>
+          
+          <div class="explanation">
+            The <strong>Quadratic Mean</strong> (also called Root Mean Square or RMS) is the square root of the arithmetic mean of squared values. It is useful for measuring variability in oscillating or alternating phenomena.
+          </div>
+
+          <div class="math-formula">
+            <div class="formula-title">Definition:</div>
+            <div class="formula-content">
+              $$QM = \sqrt{\frac{1}{n} \sum_{i=1}^{n} x_i^2} = \sqrt{\frac{x_1^2 + x_2^2 + \cdots + x_n^2}{n}}$$
+              
+              Relationship to standard deviation:
+              $$\text{RMS} = \sqrt{\sigma^2 + \mu^2}$$
+              
+              Where $\sigma$ is standard deviation and $\mu$ is mean
+            </div>
+          </div>
+
+          <div class="comparison-box">
+            <strong style="color: #81c784;">✓ Advantages:</strong>
+            <ul style="margin-left: 1.5rem; margin-top: 0.75rem; line-height: 1.8;">
+              <li>Captures magnitude of oscillations</li>
+              <li>Used in electrical engineering (voltage/current RMS values)</li>
+              <li>Incorporates both mean level and variability</li>
+              <li>Appropriate for symmetric variations around zero</li>
+            </ul>
+
+            <strong style="margin-top: 1rem; display: block; color: #ef5350;">✗ Disadvantages:</strong>
+            <ul style="margin-left: 1.5rem; margin-top: 0.75rem; line-height: 1.8;">
+              <li>Difficult intuitive interpretation</li>
+              <li>Rarely used in most statistical applications</li>
+              <li>Sensitive to outliers (squares amplify extremes)</li>
+              <li>Not suitable for typical location estimation</li>
+            </ul>
+          </div>
+
+          <div class="use-case">
+            <div class="use-case-title">🔒 Cybersecurity Application: Signal Strength Variability</div>
+            <div class="use-case-content">
+              Measure RMS of network signal fluctuations around baseline in wireless security sensors. RMS captures total variability from baseline (mean + oscillation magnitude), useful for distinguishing normal fluctuations from jamming attacks. A high RMS indicates either shifted mean or high variability—either could signal malicious interference.
+            </div>
+          </div>
+        </div>
+
+        <div class="step-container">
+          <div class="step-title">
+            <span class="step-number">7</span>
+            Trimmed Mean
+          </div>
+          
+          <div class="explanation">
+            The <strong>Trimmed Mean</strong> (or Truncated Mean) is calculated by removing a percentage of the smallest and largest values and computing the arithmetic mean of the remaining data. It combines robustness with mathematical tractability.
+          </div>
+
+          <div class="math-formula">
+            <div class="formula-title">Definition (k% Trimmed Mean):</div>
+            <div class="formula-content">
+              1. Sort data in ascending order: $x_{(1)} \leq x_{(2)} \leq \cdots \leq x_{(n)}$<br><br>
+              2. Remove $k\%$ of values from each tail.<br>
+              Let $m = \lfloor 0.01k \cdot n \rfloor$ (number to remove from each side)<br><br>
+              3. Calculate mean of remaining values:
+              $$\bar{x}_{tr} = \frac{1}{n-2m} \sum_{i=m+1}^{n-m} x_{(i)}$$
+              
+              Common choices: 5% or 10% trimmed mean
+            </div>
+          </div>
+
+          <div class="comparison-box">
+            <strong style="color: #81c784;">✓ Advantages:</strong>
+            <ul style="margin-left: 1.5rem; margin-top: 0.75rem; line-height: 1.8;">
+              <li>Robust to outliers while using most data</li>
+              <li>More mathematically tractable than median</li>
+              <li>Flexible trimming percentage allows tuning</li>
+              <li>Reduces impact of skewness</li>
+              <li>Better sampling properties than median</li>
+            </ul>
+
+            <strong style="margin-top: 1rem; display: block; color: #ef5350;">✗ Disadvantages:</strong>
+            <ul style="margin-left: 1.5rem; margin-top: 0.75rem; line-height: 1.8;">
+              <li>Choice of trimming percentage is arbitrary</li>
+              <li>Discards potentially valuable information</li>
+              <li>Less well-known, harder to communicate</li>
+              <li>Cannot fully replace mean or median</li>
+            </ul>
+          </div>
+
+          <div class="use-case">
+            <div class="use-case-title">🔒 Cybersecurity Application: Consistent Alert Latency</div>
+            <div class="use-case-content">
+              Use 10% trimmed mean for alert latency to balance robustness and stability. Remove fastest 5% (immediate cached responses) and slowest 5% (system crashes/hangs). The 10%-trimmed mean better represents normal operating performance than either raw mean (inflated by slow responses) or median (less sensitive to overall variability). This guides realistic SLA targets.
+            </div>
+          </div>
+        </div>
+
+        <div class="step-container">
+          <div class="step-title">
+            <span class="step-number">8</span>
+            Median
+          </div>
+          
+          <div class="explanation">
+            The <strong>median</strong> is the middle value that divides the dataset into two equal halves. For even-sized datasets, it is typically the average of the two middle values.
+          </div>
+
+          <div class="math-formula">
+            <div class="formula-title">Definition:</div>
+            <div class="formula-content">
+              For odd $n$:
+              $$\text{Median} = x_{\left(\frac{n+1}{2}\right)}$$
+              
+              For even $n$:
+              $$\text{Median} = \frac{x_{(n/2)} + x_{(n/2+1)}}{2}$$
+              
+              Where data is sorted in ascending order: $x_{(1)} \leq x_{(2)} \leq \cdots \leq x_{(n)}$
+            </div>
+          </div>
+
+          <div class="comparison-box">
+            <strong style="color: #81c784;">✓ Advantages:</strong>
+            <ul style="margin-left: 1.5rem; margin-top: 0.75rem; line-height: 1.8;">
+              <li><strong>Robust to outliers:</strong> Outlier values don't affect the median</li>
+              <li>Appropriate for skewed distributions</li>
+              <li>Intuitive interpretation: 50% of data below/above</li>
+              <li>Works with ordinal data (not just numerical)</li>
+              <li>Appropriate for open-ended class intervals</li>
+            </ul>
+
+            <strong style="margin-top: 1rem; display: block; color: #ef5350;">✗ Disadvantages:</strong>
+            <ul style="margin-left: 1.5rem; margin-top: 0.75rem; line-height: 1.8;">
+              <li>Ignores values beyond middle positions</li>
+              <li>Less mathematically tractable than mean</li>
+              <li>Not efficient for parametric statistical tests</li>
+              <li>Can be ambiguous with even-sized datasets</li>
+              <li>Sampling variability higher than for mean</li>
+            </ul>
+          </div>
+
+          <div class="use-case">
+            <div class="use-case-title">🔒 Cybersecurity Application: Median Malware File Size</div>
+            <div class="use-case-content">
+              Report median malware payload size instead of mean. Malware sizes follow a skewed distribution with occasional extremely large payloads (polymorphic engines, downloaders). The median better represents "typical" malware size for endpoint quarantine planning. A few massive malware variants don't artificially inflate the central estimate like the arithmetic mean would.
+            </div>
+          </div>
+        </div>
+
+        <div class="step-container">
+          <div class="step-title">
+            <span class="step-number">9</span>
+            Mode
+          </div>
+          
+          <div class="explanation">
+            The <strong>mode</strong> is the value that appears most frequently in the dataset. A dataset can have one mode (unimodal), multiple modes (multimodal), or no mode if all values appear with equal frequency.
+          </div>
+
+          <div class="math-formula">
+            <div class="formula-title">Definition:</div>
+            <div class="formula-content">
+              $$\text{Mode} = \arg\max_i (\text{frequency}(x_i))$$
+              
+              Properties:
+              <ul>
+                <li>Unimodal: One clear peak</li>
+                <li>Bimodal: Two equally frequent peaks</li>
+                <li>Multimodal: Multiple peaks</li>
+                <li>No mode: All values equally frequent</li>
+              </ul>
+            </div>
+          </div>
+
+          <div class="comparison-box">
+            <strong style="color: #81c784;">✓ Advantages:</strong>
+            <ul style="margin-left: 1.5rem; margin-top: 0.75rem; line-height: 1.8;">
+              <li>Only measure usable with categorical/nominal data</li>
+              <li>Requires no calculation (just observation)</li>
+              <li>Not affected by outliers or extreme values</li>
+              <li>Can identify data concentration patterns</li>
+            </ul>
+
+            <strong style="margin-top: 1rem; display: block; color: #ef5350;">✗ Disadvantages:</strong>
+            <ul style="margin-left: 1.5rem; margin-top: 0.75rem; line-height: 1.8;">
+              <li>May not exist or may be unstable in small samples</li>
+              <li>Less useful for continuous numerical data</li>
+              <li>Multimodal datasets difficult to characterize</li>
+              <li>Not amenable to mathematical derivation</li>
+              <li>Highly dependent on data grouping/binning</li>
+            </ul>
+          </div>
+
+          <div class="use-case">
+            <div class="use-case-title">🔒 Cybersecurity Application: Most Common Attack Type</div>
+            <div class="use-case-content">
+              Identify the mode of attack types (SQL Injection, Phishing, DDoS, Ransomware, Credential Stuffing, etc.). The most frequently occurring attack category represents the primary threat facing the organization. This categorical analysis informs training priorities, detection rules, and incident response resource allocation. Multiple modes would indicate diverse threat landscape.
+            </div>
+          </div>
+        </div>
+
+        <div class="step-container">
+          <div class="step-title">
+            <span class="step-number">10</span>
+            Comparative Summary & Mean Inequality
+          </div>
+          
+          <div class="explanation">
+            <p><strong>Important Relationship - The Mean Inequality:</strong></p>
+            <p>For positive data, these means have a fixed ordering:</p>
+          </div>
+
+          <div class="math-formula">
+            <div class="formula-title">The Mean Inequality (Power Mean Inequality):</div>
+            <div class="formula-content">
+              $$HM \leq GM \leq AM \leq QM$$
+              
+              With equality if and only if all values are identical.
+              <br><br>
+              Explicitly:
+              $$\frac{n}{\sum 1/x_i} \leq \sqrt[n]{\prod x_i} \leq \frac{\sum x_i}{n} \leq \sqrt{\frac{\sum x_i^2}{n}}$$
+              
+              This inequality is fundamental in mathematics and statistics.
+            </div>
+          </div>
+
+          <table>
+            <thead>
+              <tr>
+                <th>Measure</th>
+                <th>Data Type</th>
+                <th>Distribution</th>
+                <th>Outlier Sensitivity</th>
+                <th>Best Use Case</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td><strong>Arithmetic Mean</strong></td>
+                <td>Numerical</td>
+                <td>Normal/Symmetric</td>
+                <td>High</td>
+                <td>General purpose, parametric tests</td>
+              </tr>
+              <tr>
+                <td><strong>Weighted Mean</strong></td>
+                <td>Numerical</td>
+                <td>Any</td>
+                <td>High (varies)</td>
+                <td>Importance-weighted aggregation</td>
+              </tr>
+              <tr>
+                <td><strong>Geometric Mean</strong></td>
+                <td>Positive numerical</td>
+                <td>Positively skewed</td>
+                <td>Low-Medium</td>
+                <td>Growth rates, multiplicative</td>
+              </tr>
+              <tr>
+                <td><strong>Harmonic Mean</strong></td>
+                <td>Positive numerical (rates)</td>
+                <td>Any</td>
+                <td>Very high (small values)</td>
+                <td>Rates, speeds, efficiency</td>
+              </tr>
+              <tr>
+                <td><strong>Quadratic Mean (RMS)</strong></td>
+                <td>Numerical (deviations)</td>
+                <td>Symmetric variations</td>
+                <td>Very high</td>
+                <td>Signal processing, engineering</td>
+              </tr>
+              <tr>
+                <td><strong>Trimmed Mean</strong></td>
+                <td>Numerical</td>
+                <td>Any</td>
+                <td>Medium</td>
+                <td>Robust yet efficient</td>
+              </tr>
+              <tr>
+                <td><strong>Median</strong></td>
+                <td>Numerical, Ordinal</td>
+                <td>Skewed, any</td>
+                <td>None</td>
+                <td>Robust center, outliers present</td>
+              </tr>
+              <tr>
+                <td><strong>Mode</strong></td>
+                <td>Any (categorical)</td>
+                <td>Any</td>
+                <td>None</td>
+                <td>Most frequent category</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- PART B: Dispersion Measures -->
+      <div class="hw-section">
+        <h2 style="color: #18e0e6; margin-bottom: 1.5rem;">Part B — Measures of Dispersion (Variability)</h2>
+        
+        <div class="step-container">
+          <div class="step-title">
+            <span class="step-number">1</span>
+            Introduction to Dispersion Measures
+          </div>
+          <div class="explanation">
+            <p><strong>Measures of dispersion</strong> (or variability/spread) quantify how spread out or concentrated the data values are around the center. They answer: "How much do values vary?" Two datasets with the same mean can have drastically different variability.</p>
+            
+            <p style="margin-top: 1rem;"><strong>Types of dispersion measures:</strong></p>
+            <ul style="margin-left: 1.5rem; line-height: 1.8;">
+              <li><strong>Range:</strong> Difference between max and min</li>
+              <li><strong>Variance:</strong> Average squared deviation from mean</li>
+              <li><strong>Standard Deviation:</strong> Square root of variance</li>
+              <li><strong>Coefficient of Variation:</strong> Standardized measure (std dev / mean)</li>
+              <li><strong>Interquartile Range (IQR):</strong> Range of middle 50% of data</li>
+              <li><strong>Mean Absolute Deviation (MAD):</strong> Average absolute deviation from mean</li>
+            </ul>
+          </div>
+        </div>
+
+        <div class="step-container">
+          <div class="step-title">
+            <span class="step-number">2</span>
+            Range and Interquartile Range
+          </div>
+          
+          <div class="explanation">
+            The <strong>range</strong> is the simplest measure of dispersion. The <strong>Interquartile Range (IQR)</strong> is a more robust variant based on quartiles.
+          </div>
+
+          <div class="math-formula">
+            <div class="formula-title">Definition:</div>
+            <div class="formula-content">
+              Range:
+              $$R = \max(x_i) - \min(x_i)$$
+              
+              Interquartile Range:
+              $$\text{IQR} = Q_3 - Q_1$$
+              
+              Where $Q_1$ and $Q_3$ are the 25th and 75th percentiles respectively.
+            </div>
+          </div>
+
+          <div class="comparison-box">
+            <strong style="color: #81c784;">✓ Advantages:</strong>
+            <ul style="margin-left: 1.5rem; margin-top: 0.75rem; line-height: 1.8;">
+              <li>Extremely simple to calculate</li>
+              <li>Easy to understand and communicate</li>
+              <li>IQR completely robust to outliers</li>
+              <li>Shows absolute spread of data</li>
+            </ul>
+
+            <strong style="margin-top: 1rem; display: block; color: #ef5350;">✗ Disadvantages:</strong>
+            <ul style="margin-left: 1.5rem; margin-top: 0.75rem; line-height: 1.8;">
+              <li><strong>Range only uses two values:</strong> Ignores all interior points</li>
+              <li>Range extremely sensitive to outliers</li>
+              <li>Both increase with sample size</li>
+              <li>Not suitable for parametric inference</li>
+            </ul>
+          </div>
+
+          <div class="use-case">
+            <div class="use-case-title">🔒 Cybersecurity Application: Password Strength Range</div>
+            <div class="use-case-content">
+              Track IQR of password lengths (Q₁ = 10, Q₃ = 16 characters). The IQR tells us 50% of users choose passwords between 10-16 characters, indicating insufficient length diversity. Use IQR (not raw range) to avoid misleading conclusions from single extreme values.
+            </div>
+          </div>
+        </div>
+
+        <div class="step-container">
+          <div class="step-title">
+            <span class="step-number">3</span>
+            Variance and Standard Deviation
+          </div>
+          
+          <div class="explanation">
+            <strong>Variance</strong> measures the average squared deviation from the mean. <strong>Standard Deviation</strong> is the square root of variance, restoring units to match the original data.
+          </div>
+
+          <div class="math-formula">
+            <div class="formula-title">Definition:</div>
+            <div class="formula-content">
+              Population Variance:
+              $$\sigma^2 = \frac{1}{N} \sum_{i=1}^{N} (x_i - \mu)^2$$
+              
+              Sample Variance (unbiased):
+              $$s^2 = \frac{1}{n-1} \sum_{i=1}^{n} (x_i - \bar{x})^2$$
+              
+              Standard Deviation:
+              $$\sigma = \sqrt{\sigma^2} \quad \text{(population)}$$
+              $$s = \sqrt{s^2} \quad \text{(sample)}$$
+              
+              <strong>Why $(n-1)$?</strong> Bessel's correction: the sample variance using $n$ underestimates the population variance, so we divide by $(n-1)$ degrees of freedom for unbiased estimation.
+            </div>
+          </div>
+
+          <div class="comparison-box">
+            <strong style="color: #81c784;">✓ Advantages:</strong>
+            <ul style="margin-left: 1.5rem; margin-top: 0.75rem; line-height: 1.8;">
+              <li>Uses all data points in calculation</li>
+              <li>Mathematically tractable and well-behaved</li>
+              <li>Basis for parametric statistical tests (t-tests, ANOVA, etc.)</li>
+              <li>Standard deviation has same units as original data</li>
+              <li>Enables probability calculations (normal distribution)</li>
+            </ul>
+
+            <strong style="margin-top: 1rem; display: block; color: #ef5350;">✗ Disadvantages:</strong>
+            <ul style="margin-left: 1.5rem; margin-top: 0.75rem; line-height: 1.8;">
+              <li><strong>Sensitive to outliers:</strong> Squaring amplifies extreme values</li>
+              <li>Difficult intuitive interpretation (squared units for variance)</li>
+              <li>Assumes normality for many applications</li>
+              <li>Misleading with skewed distributions</li>
+            </ul>
+          </div>
+
+          <div class="use-case">
+            <div class="use-case-title">🔒 Cybersecurity Application: Network Latency Monitoring</div>
+            <div class="use-case-content">
+              Track standard deviation of network latency. High $\sigma$ (e.g., 50ms) indicates unstable connectivity despite acceptable mean latency. Alerts trigger when latency exceeds $\mu + 3\sigma$. Unlike range, std dev provides statistically robust baseline.
+            </div>
+          </div>
+        </div>
+
+        <div class="step-container">
+          <div class="step-title">
+            <span class="step-number">4</span>
+            Coefficient of Variation
+          </div>
+          
+          <div class="explanation">
+            The <strong>Coefficient of Variation (CV)</strong> is a standardized measure of dispersion, expressed as a percentage. It normalizes standard deviation by the mean, enabling comparison across datasets with different scales or units.
+          </div>
+
+          <div class="math-formula">
+            <div class="formula-title">Definition:</div>
+            <div class="formula-content">
+              $$CV = \frac{\sigma}{\mu} \times 100\% \quad \text{(population)}$$
+              $$CV = \frac{s}{\bar{x}} \times 100\% \quad \text{(sample)}$$
+              
+              Interpretation guidelines:
+              <ul>
+                <li>$CV < 15\%$: Low variability (consistent)</li>
+                <li>$CV \in [15\%, 30\%]$: Moderate variability</li>
+                <li>$CV > 30\%$: High variability (inconsistent)</li>
+              </ul>
+            </div>
+          </div>
+
+          <div class="comparison-box">
+            <strong style="color: #81c784;">✓ Advantages:</strong>
+            <ul style="margin-left: 1.5rem; margin-top: 0.75rem; line-height: 1.8;">
+              <li>Dimensionless: Enables comparison across different units</li>
+              <li>Standardized interpretation (as percentage)</li>
+              <li>Useful for comparing relative variability</li>
+              <li>Scales with magnitude of data</li>
+            </ul>
+
+            <strong style="margin-top: 1rem; display: block; color: #ef5350;">✗ Disadvantages:</strong>
+            <ul style="margin-left: 1.5rem; margin-top: 0.75rem; line-height: 1.8;">
+              <li>Undefined when mean = 0</li>
+              <li>Can be misleading with means near zero</li>
+              <li>Still sensitive to outliers (inherits std dev issues)</li>
+              <li>Assumes ratio scale data</li>
+            </ul>
+          </div>
+
+          <div class="use-case">
+            <div class="use-case-title">🔒 Cybersecurity Application: Comparing Security Metrics</div>
+            <div class="use-case-content">
+              Compare firewall effectiveness ($\bar{x} = 94.2\%$, $s = 2.1\%$, $CV \approx 2.2\%$) vs IDS detection ($\bar{x} = 78.5\%$, $s = 6.2\%$, $CV \approx 7.9\%$). The CV reveals IDS has higher relative inconsistency, enabling meaningful cross-metric comparison.
+            </div>
+          </div>
+        </div>
+
+        <div class="step-container">
+          <div class="step-title">
+            <span class="step-number">5</span>
+            Mean Absolute Deviation (MAD)
+          </div>
+          
+          <div class="explanation">
+            <strong>Mean Absolute Deviation</strong> is the average of absolute deviations from the mean (or median). It provides a robust alternative to standard deviation.
+          </div>
+
+          <div class="math-formula">
+            <div class="formula-title">Definition:</div>
+            <div class="formula-content">
+              Mean Absolute Deviation (around mean):
+              $$\text{MAD} = \frac{1}{n} \sum_{i=1}^{n} |x_i - \bar{x}|$$
+              
+              Mean Absolute Deviation (around median):
+              $$\text{MAD}_{\text{median}} = \frac{1}{n} \sum_{i=1}^{n} |x_i - \text{median}|$$
+              
+              Note: We use absolute values $|\cdot|$ rather than squaring to avoid over-amplifying extremes.
+            </div>
+          </div>
+
+          <div class="comparison-box">
+            <strong style="color: #81c784;">✓ Advantages:</strong>
+            <ul style="margin-left: 1.5rem; margin-top: 0.75rem; line-height: 1.8;">
+              <li>More robust to outliers than standard deviation</li>
+              <li>Easier intuitive interpretation (in original units)</li>
+              <li>Less affected by extreme values</li>
+              <li>Useful for non-normal distributions</li>
+            </ul>
+
+            <strong style="margin-top: 1rem; display: block; color: #ef5350;">✗ Disadvantages:</strong>
+            <ul style="margin-left: 1.5rem; margin-top: 0.75rem; line-height: 1.8;">
+              <li>Absolute value not differentiable at zero</li>
+              <li>Less mathematically convenient than variance</li>
+              <li>Rarely built into statistical software</li>
+              <li>Lower statistical efficiency for normal data</li>
+            </ul>
+          </div>
+
+          <div class="use-case">
+            <div class="use-case-title">🔒 Cybersecurity Application: Alert System Robustness</div>
+            <div class="use-case-content">
+              Use MAD for alert latency to account for occasional extreme delays. If $\text{MAD} = 15$ms, alerts are consistent (±15ms typical). This outlier-resistant metric better guides threshold tuning than variance.
+            </div>
+          </div>
+        </div>
+
+        <div class="step-container">
+          <div class="step-title">
+            <span class="step-number">6</span>
+            Comparative Summary: When to Use Which Measure
+          </div>
+          
+          <table>
+            <thead>
+              <tr>
+                <th>Measure</th>
+                <th>Robustness</th>
+                <th>Mathematical</th>
+                <th>Interpretation</th>
+                <th>Best Use Case</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td><strong>Range</strong></td>
+                <td>Very low</td>
+                <td>Simple</td>
+                <td>Very easy</td>
+                <td>Quick overview only (avoid in analysis)</td>
+              </tr>
+              <tr>
+                <td><strong>Variance/Std Dev</strong></td>
+                <td>Low</td>
+                <td>Excellent</td>
+                <td>Moderate ($\sigma$ in original units)</td>
+                <td>Parametric tests, normal data</td>
+              </tr>
+              <tr>
+                <td><strong>CV</strong></td>
+                <td>Low</td>
+                <td>Good</td>
+                <td>Easy (%)</td>
+                <td>Comparing variability across scales</td>
+              </tr>
+              <tr>
+                <td><strong>MAD</strong></td>
+                <td>High</td>
+                <td>Moderate</td>
+                <td>Easy (original units)</td>
+                <td>Robust variability estimation</td>
+              </tr>
+              <tr>
+                <td><strong>IQR</strong></td>
+                <td>Very high</td>
+                <td>Moderate</td>
+                <td>Easy (middle 50%)</td>
+                <td>Outlier detection, skewed data, box plots</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- PART C: Practical Implications -->
+      <div class="hw-section">
+        <h2 style="color: #18e0e6; margin-bottom: 1.5rem;">Part C — Practical Implications & Cybersecurity Case Studies</h2>
+        
+        <div class="step-container">
+          <div class="step-title">
+            <span class="step-number">1</span>
+            Choosing Measures for Real Data
+          </div>
+          <div class="explanation">
+            <p><strong>Key Decision Factors:</strong></p>
+            <ul style="margin-left: 1.5rem; margin-top: 1rem; line-height: 1.8;">
+              <li><strong>Distribution shape:</strong> Normal vs skewed determines mean vs median primacy</li>
+              <li><strong>Outlier presence:</strong> Outliers favor median, IQR, MAD over mean, std dev</li>
+              <li><strong>Data type:</strong> Categorical → mode; Ordinal → median; Numerical → all applicable</li>
+              <li><strong>Statistical purpose:</strong> Inference requires variance; robustness requires IQR/MAD</li>
+              <li><strong>Communication context:</strong> Audience expertise affects measure complexity</li>
+              <li><strong>Computational constraints:</strong> MAD simpler than variance; range fastest</li>
+            </ul>
+
+            <p style="margin-top: 1.5rem;"><strong>Integration Strategy:</strong> Use multiple measures in conjunction:</p>
+            <ul style="margin-left: 1.5rem; margin-top: 0.5rem; line-height: 1.8;">
+              <li>Report both mean and median to reveal distribution skewness</li>
+              <li>Compare std dev and IQR to identify outlier presence</li>
+              <li>Use CV to standardize across different metrics</li>
+              <li>Employ MAD as robustness check on std dev</li>
+            </ul>
+          </div>
+        </div>
+
+        <div class="step-container">
+          <div class="step-title">
+            <span class="step-number">2</span>
+            Cybersecurity Case Studies
+          </div>
+
+          <div class="use-case">
+            <div class="use-case-title">Case 1: Intrusion Detection False Positive Rate Analysis</div>
+            <div class="use-case-content">
+              Daily false positive rates: 2.1%, 2.3%, 2.0%, 2.2%, 18.5% (major incident day). <br><br>
+              <strong>Analysis:</strong><br>
+              • Mean = 5.4% (misleading - suggests high false positives)<br>
+              • Median = 2.1% (accurate representation of typical day)<br>
+              • Std Dev = 8.1% (inflated by one incident)<br>
+              • IQR = 0.2% (Q₁=2.0, Q₃=2.3; robust measure)<br>
+              • MAD = 0.14% (most robust)<br><br>
+              <strong>Decision:</strong> Use median (2.1%) for SLA reporting. The incident day is an outlier (legitimate but exceptional), not representative of system performance. IQR (0.2%) shows normal operational consistency.
+            </div>
+          </div>
+
+          <div class="use-case">
+            <div class="use-case-title">Case 2: Patch Deployment Time Tracking</div>
+            <div class="use-case-content">
+              Time to patch 100 systems (in minutes): concentrated around 45-55 minutes, with occasional outliers at 2-3 minutes (pre-patched systems) and one at 180 minutes (compatibility issue).<br><br>
+              <strong>Analysis:</strong><br>
+              • Mean ≈ 58 minutes (inflated by outlier)<br>
+              • Median ≈ 48 minutes (better representation)<br>
+              • Std Dev ≈ 35 minutes (high, driven by outliers)<br>
+              • IQR ≈ 8 minutes (Q₁=44, Q₃=52; typical deployment window)<br><br>
+              <strong>Decision:</strong> Use median for SLA definition ("95% of systems patched within 52 minutes"). Use IQR to identify that operational variability is actually low; extreme values are exceptional circumstances requiring separate analysis.
+            </div>
+          </div>
+
+          <div class="use-case">
+            <div class="use-case-title">Case 3: Multi-Metric Security Posture Scoring</div>
+            <div class="use-case-content">
+              Three departments' security metrics:<br>
+              • Dept A: Patch compliance: mean 87%, std dev 8%<br>
+              • Dept B: Update timeliness: mean 92%, std dev 15%<br>
+              • Dept C: Policy adherence: mean 78%, std dev 22%<br><br>
+              <strong>Analysis with CV:</strong><br>
+              • Dept A: CV = 9.2% (consistent)<br>
+              • Dept B: CV = 16.3% (moderate variance)<br>
+              • Dept C: CV = 28.2% (high variance - concerning)<br><br>
+              <strong>Decision:</strong> Dept C requires intervention despite reasonable mean (78%). High CV indicates inconsistency—some teams comply well, others don't. Investigate root causes: training gaps? Technical barriers? Weighted mean should penalize Dept C's inconsistency.
+            </div>
+          </div>
+
+          <div class="use-case">
+            <div class="use-case-title">Case 4: Network Traffic Baseline Establishment</div>
+            <div class="use-case-content">
+              Establish normal network bandwidth usage to detect anomalies. One week of traffic (GB/hour):<br><br>
+              <strong>Analysis:</strong><br>
+              • Mean = 4.2 GB/h<br>
+              • Median = 3.8 GB/h (skewed right due to backup spike)<br>
+              • Std Dev = 1.1 GB/h<br>
+              • IQR = 1.2 GB/h (Q₁=3.2, Q₃=4.4)<br><br>
+              <strong>Normal range:</strong> median ± 1.5×IQR = 3.8 ± 1.8 = [2.0, 5.6] GB/h<br>
+              <strong>Alert thresholds:</strong> Anomaly if >5.6 GB/h (upper fence)<br><br>
+              <strong>Decision:</strong> Use IQR method for robust baseline. Daily backups (7-8 GB/h) are detected as anomalies and handled separately, improving detection of genuine DDoS/data exfiltration patterns that would use 10+ GB/h.
+            </div>
+          </div>
+
+          <div class="use-case">
+            <div class="use-case-title">Case 5: Password Policy Compliance Rate</div>
+            <div class="use-case-content">
+              Department password lengths (in characters):<br>
+              Mean: 9.2 chars, Median: 9 chars, Mode: 8 chars, Std Dev: 2.1 chars, IQR: 1 char (Q₁=8, Q₃=9)<br><br>
+              <strong>Interpretation:</strong><br>
+              • Mode (8) shows minimum compliance (policy minimum)<br>
+              • IQR (1) shows most passwords are 8-9 chars (too short)<br>
+              • Std Dev (2.1) dominated by few users with 16+ char passwords<br><br>
+              <strong>Policy Insight:</strong> Mean (9.2) is misleading; 75% of users choose minimum (9 chars). High CV = 23% suggests policy not enforced uniformly. Recommendation: Implement minimum 12-char policy; add complexity rules; retrain users choosing near-minimum lengths.
+            </div>
+          </div>
+        </div>
+
+        <div class="step-container">
+          <div class="step-title">
+            <span class="step-number">3</span>
+            Limitations and Considerations
+          </div>
+          <div class="explanation">
+            <p><strong>Important Caveats:</strong></p>
+            <ul style="margin-left: 1.5rem; margin-top: 1rem; line-height: 1.8;">
+              <li><strong>Data quality:</strong> Garbage in, garbage out. Errors in measurement amplify through calculations</li>
+              <li><strong>Sample size dependency:</strong> Small samples (<30) produce unreliable statistics, especially for extreme measures</li>
+              <li><strong>Distribution assumptions:</strong> Many statistical tests assume normality; use Q-Q plots to verify</li>
+              <li><strong>Temporal dynamics:</strong> Cybersecurity metrics often change over time; consider time-series analysis</li>
+              <li><strong>Context sensitivity:</strong> Same metric value may indicate success or failure depending on context</li>
+              <li><strong>Causation vs correlation:</strong> Descriptive statistics reveal relationships, not causation</li>
+              <li><strong>Multiple comparisons:</strong> Computing many statistics increases risk of spurious findings</li>
+              <li><strong>Robustness:</strong> Always validate findings across multiple measures; no single measure is universally best</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+
+      <div class="centered">
+        <a href="homework.html" class="btn">← Back to Homework List</a>
+      </div>
+    </section>
+  </main>
+
+  <footer>
+    <span>&copy; 2025 Lorenzo Ciafrelli | MS Cybersecurity, Sapienza University of Rome</span>
+  </footer>
+
+  <script src="script.js"></script>
+</body>
+</html>
