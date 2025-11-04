@@ -938,9 +938,9 @@
               
               Interpretation guidelines:
               <ul>
-                <li>$$CV < 15\%$$: Low variability (consistent)</li>
-                <li>$$CV \in [15\%, 30\%]$$: Moderate variability</li>
-                <li>$$CV > 30\%$$: High variability (inconsistent)</li>
+                <li>\(CV < 15\%\): Low variability (consistent)</li>
+                <li>\(CV \in [15\%, 30\%]\): Moderate variability</li>
+                <li>\(CV > 30\%\): High variability (inconsistent)</li>
               </ul>
             </div>
           </div>
@@ -966,7 +966,7 @@
           <div class="use-case">
             <div class="use-case-title">🔒 Cybersecurity Application: Comparing Security Metrics</div>
             <div class="use-case-content">
-              Compare firewall effectiveness ($\bar{x} = 94.2\%$, $s = 2.1\%$, $CV \approx 2.2\%$) vs IDS detection ($\bar{x} = 78.5\%$, $s = 6.2\%$, $CV \approx 7.9\%$). The CV reveals IDS has higher relative inconsistency, enabling meaningful cross-metric comparison.
+              Compare firewall effectiveness (\(\bar{x} = 94.2\%\), \(s = 2.1\%\), \(CV \approx 2.2\%\)) vs IDS detection (\(\bar{x} = 78.5\%\), \(s = 6.2\%\), \(CV \approx 7.9\%\)). The CV reveals IDS has higher relative inconsistency, enabling meaningful cross-metric comparison.
             </div>
           </div>
         </div>
@@ -990,7 +990,7 @@
               Mean Absolute Deviation (around median):
               $$\text{MAD}_{\text{median}} = \frac{1}{n} \sum_{i=1}^{n} |x_i - \text{median}|$$
               
-              Note: We use absolute values $|\cdot|$ rather than squaring to avoid over-amplifying extremes.
+              Note: We use absolute values \(|\cdot|\) rather than squaring to avoid over-amplifying extremes.
             </div>
           </div>
 
@@ -1015,7 +1015,7 @@
           <div class="use-case">
             <div class="use-case-title">🔒 Cybersecurity Application: Alert System Robustness</div>
             <div class="use-case-content">
-              Use MAD for alert latency to account for occasional extreme delays. If $\text{MAD} = 15$ms, alerts are consistent (±15ms typical). This outlier-resistant metric better guides threshold tuning than variance.
+              Use MAD for alert latency to account for occasional extreme delays. If \(\text{MAD} = 15\)ms, alerts are consistent (±15ms typical). This outlier-resistant metric better guides threshold tuning than variance.
             </div>
           </div>
         </div>
