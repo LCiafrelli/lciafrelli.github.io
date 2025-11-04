@@ -403,6 +403,7 @@
       text-align: left;
       border-bottom: 1px solid #2d4a7a;
       color: #b8d4ff;
+      font-size: 0.85rem;
     }
 
     .stats-table th {
@@ -460,6 +461,14 @@
       font-family: 'Courier New', monospace;
       font-size: 0.85rem;
     }
+
+    ul, ol {
+      line-height: 1.9;
+    }
+
+    li {
+      margin-bottom: 0.5rem;
+    }
   </style>
 </head>
 <body>
@@ -480,7 +489,7 @@
       <h1>Homework 6: Online Algorithms for Incremental Statistics</h1>
       <p class="subtle">Derive recurrence relationships and implement online algorithms for computing statistics incrementally. Analyze numerical stability advantages over batch algorithms.</p>
 
-      <!-- PART A: Mathematical Theory (Truncated for space - include full version from previous response) -->
+      <!-- PART A: Mathematical Theory -->
       <div class="hw-section">
         <h2 style="color: #18e0e6; margin-bottom: 1.5rem;">Part A — Mathematical Theory: Recurrence Relations</h2>
         
@@ -515,6 +524,36 @@
           </div>
 
           <div class="math-formula">
+            <div class="formula-title">Problem Setup:</div>
+            <div class="formula-content">
+              Given \(n-1\) observations with computed mean \(\bar{x}_{n-1}\), find the new mean \(\bar{x}_n\) when the \(n\)-th observation \(x_n\) arrives.
+            </div>
+          </div>
+
+          <div class="math-formula">
+            <div class="formula-title">Derivation:</div>
+            <div class="formula-content">
+              By definition of arithmetic mean:
+              $$\bar{x}_{n-1} = \frac{1}{n-1} \sum_{i=1}^{n-1} x_i$$
+              
+              Thus:
+              $$\sum_{i=1}^{n-1} x_i = (n-1) \bar{x}_{n-1}$$
+              
+              After observing \(x_n\):
+              $$\bar{x}_n = \frac{1}{n} \sum_{i=1}^{n} x_i = \frac{1}{n} \left( \sum_{i=1}^{n-1} x_i + x_n \right)$$
+              
+              Substitute previous sum:
+              $$\bar{x}_n = \frac{1}{n} \left( (n-1) \bar{x}_{n-1} + x_n \right)$$
+              
+              Expand:
+              $$\bar{x}_n = \frac{n-1}{n} \bar{x}_{n-1} + \frac{1}{n} x_n$$
+              
+              <strong>Alternative form (incremental update):</strong>
+              $$\bar{x}_n = \bar{x}_{n-1} + \frac{1}{n} (x_n - \bar{x}_{n-1})$$
+            </div>
+          </div>
+
+          <div class="math-formula">
             <div class="formula-title">Recurrence Relation:</div>
             <div class="formula-content">
               $$\boxed{\bar{x}_n = \bar{x}_{n-1} + \frac{x_n - \bar{x}_{n-1}}{n}}$$
@@ -523,16 +562,81 @@
               Interpretation: The new mean is the old mean plus a fraction \(\frac{1}{n}\) of the prediction error \((x_n - \bar{x}_{n-1})\).
             </div>
           </div>
+
+          <div class="comparison-box">
+            <strong style="color: #81c784;">✓ Computational Properties:</strong>
+            <div class="pros">
+              <ul style="margin-left: 1.5rem; line-height: 1.8;">
+                <li><strong>Time Complexity:</strong> \(\mathcal{O}(1)\) per update</li>
+                <li><strong>Space Complexity:</strong> \(\mathcal{O}(1)\) (only store current mean)</li>
+                <li><strong>Numerical Stability:</strong> No accumulation of large numbers; subtraction is numerically stable</li>
+                <li><strong>Precision:</strong> Maintains good precision for large \(n\)</li>
+              </ul>
+            </div>
+          </div>
         </div>
 
         <div class="step-container">
           <div class="step-title">
             <span class="step-number">3</span>
-            Welford's Recurrence for Variance
+            Recurrence Relation for Variance
           </div>
           
           <div class="explanation">
-            Welford's algorithm is the numerically superior method for computing variance incrementally.
+            Derive Welford's algorithm: the recurrence relationship for computing variance incrementally. This is more complex than the mean and requires careful numerical handling.
+          </div>
+
+          <div class="math-formula">
+            <div class="formula-title">Problem Setup:</div>
+            <div class="formula-content">
+              Given \(n-1\) observations with computed mean \(\bar{x}_{n-1}\) and sum of squared deviations \(M_{n-1} = \sum_{i=1}^{n-1} (x_i - \bar{x}_{n-1})^2\), find the new variance after observation \(x_n\) arrives.
+            </div>
+          </div>
+
+          <div class="math-formula">
+            <div class="formula-title">Definition of Variance:</div>
+            <div class="formula-content">
+              Sample variance:
+              $$s_n^2 = \frac{1}{n-1} \sum_{i=1}^{n} (x_i - \bar{x}_n)^2 = \frac{M_n}{n-1}$$
+              
+              Where \(M_n\) is the sum of squared deviations from the current mean.
+            </div>
+          </div>
+
+          <div class="math-formula">
+            <div class="formula-title">Welford's Recurrence Derivation:</div>
+            <div class="formula-content">
+              When we compute the new mean \(\bar{x}_n\), the sum of squared deviations changes. We need to relate \(M_n\) to \(M_{n-1}\).
+              <br><br>
+              <strong>Key insight:</strong> Use delta method to update deviations:
+              $$\Delta = x_n - \bar{x}_{n-1}$$
+              $$\Delta' = x_n - \bar{x}_n$$
+              
+              From the mean recurrence:
+              $$x_n - \bar{x}_n = x_n - \left(\bar{x}_{n-1} + \frac{x_n - \bar{x}_{n-1}}{n}\right)$$
+              $$= x_n - \bar{x}_{n-1} - \frac{x_n - \bar{x}_{n-1}}{n}$$
+              $$= \frac{n-1}{n}(x_n - \bar{x}_{n-1}) = \frac{n-1}{n}\Delta$$
+              
+              <strong>Crucially:</strong>
+              $$\bar{x}_n - \bar{x}_{n-1} = \frac{x_n - \bar{x}_{n-1}}{n} = \frac{\Delta}{n}$$
+            </div>
+          </div>
+
+          <div class="math-formula">
+            <div class="formula-title">Computing M_n:</div>
+            <div class="formula-content">
+              The new sum of squared deviations:
+              $$M_n = \sum_{i=1}^{n} (x_i - \bar{x}_n)^2$$
+              
+              We can rewrite this using the relation:
+              $$(x_i - \bar{x}_n) = (x_i - \bar{x}_{n-1}) - (\bar{x}_n - \bar{x}_{n-1})$$
+              
+              After algebraic manipulation:
+              $$M_n = M_{n-1} + \Delta^2 \left(1 - \frac{1}{n}\right) = M_{n-1} + \frac{n-1}{n}\Delta^2$$
+              
+              <strong>Equivalent form:</strong>
+              $$M_n = M_{n-1} + (x_n - \bar{x}_{n-1})(x_n - \bar{x}_n)$$
+            </div>
           </div>
 
           <div class="math-formula">
@@ -547,6 +651,55 @@
               \end{align}}$$
               
               Starting conditions: \(\bar{x}_1 = x_1\), \(M_1 = 0\)
+              <br><br>
+              This is numerically superior because it never computes \(\sum x_i^2 - \frac{(\sum x_i)^2}{n}\), which causes catastrophic cancellation.
+            </div>
+          </div>
+
+          <div class="comparison-box">
+            <strong style="color: #81c784;">✓ Why Welford's is Superior:</strong>
+            <div class="pros">
+              <ul style="margin-left: 1.5rem; line-height: 1.8;">
+                <li><strong>Avoids subtraction of large numbers:</strong> Never computes \(\sum x_i^2 - \frac{(\sum x_i)^2}{n}\)</li>
+                <li><strong>Numerical stability:</strong> Maintains accuracy even for large \(n\) and large values</li>
+                <li><strong>Single pass:</strong> Requires only one pass through data</li>
+                <li><strong>Constant memory:</strong> Only stores \(\bar{x}_{n-1}\), \(M_{n-1}\), and \(n\)</li>
+                <li><strong>Handles outliers well:</strong> Incremental corrections prevent error accumulation</li>
+              </ul>
+            </div>
+          </div>
+        </div>
+
+        <div class="step-container">
+          <div class="step-title">
+            <span class="step-number">4</span>
+            Higher Moments: Skewness and Kurtosis
+          </div>
+          
+          <div class="explanation">
+            Extend Welford's algorithm to compute higher moments incrementally. This is useful for advanced statistical analysis.
+          </div>
+
+          <div class="math-formula">
+            <div class="formula-title">Third Moment (for Skewness):</div>
+            <div class="formula-content">
+              Let \(M_3^{(n)} = \sum_{i=1}^{n} (x_i - \bar{x}_n)^3\)
+              <br><br>
+              Recurrence:
+              $$M_3^{(n)} = M_3^{(n-1)} + \Delta^3 \left(1 - \frac{3}{n} + \frac{2}{n^2}\right) + 3\Delta M_2^{(n-1)} \left(\frac{1}{n} - \frac{1}{n^2}\right)$$
+              
+              Skewness coefficient:
+              $$\gamma_1 = \frac{M_3^{(n)}}{(M_2^{(n)})^{3/2}}$$
+            </div>
+          </div>
+
+          <div class="math-formula">
+            <div class="formula-title">Fourth Moment (for Kurtosis):</div>
+            <div class="formula-content">
+              Let \(M_4^{(n)} = \sum_{i=1}^{n} (x_i - \bar{x}_n)^4\)
+              <br><br>
+              Excess Kurtosis:
+              $$\gamma_2 = \frac{M_4^{(n)}}{(M_2^{(n)})^2} - 3$$
             </div>
           </div>
         </div>
@@ -559,7 +712,7 @@
         <div class="step-container">
           <div class="step-title">
             <span class="step-number">1</span>
-            Welford's Algorithm (Time: O(n), Space: O(1))
+            Welford's Algorithm for Mean & Variance
           </div>
 
           <div class="pseudocode">
@@ -583,10 +736,180 @@
 <span style="color: #4caf50;">// Complexity: O(1) per update; Total: O(n)</span>
 <span style="color: #4caf50;">// Space: O(1) for two accumulators</span>
           </div>
+
+          <div class="comparison-box">
+            <strong>Complexity Analysis:</strong>
+            <ul style="margin-left: 1.5rem; line-height: 1.8;">
+              <li><strong>Time Complexity:</strong> \(\mathcal{O}(n)\) for \(n\) observations (constant \(\mathcal{O}(1)\) per update)</li>
+              <li><strong>Space Complexity:</strong> \(\mathcal{O}(1)\) - only stores mean, M2, and count</li>
+              <li><strong>Operations per update:</strong> 5 arithmetic operations</li>
+              <li><strong>Memory Usage:</strong> 3 floating-point numbers</li>
+            </ul>
+          </div>
+        </div>
+
+        <div class="step-container">
+          <div class="step-title">
+            <span class="step-number">2</span>
+            Comparison: Batch vs Online Algorithm
+          </div>
+
+          <table>
+            <thead>
+              <tr>
+                <th>Property</th>
+                <th>Batch Algorithm</th>
+                <th>Online (Welford)</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td><strong>Time Complexity</strong></td>
+                <td>\(\mathcal{O}(n)\)</td>
+                <td>\(\mathcal{O}(n)\) (constant factor 2-3× better)</td>
+              </tr>
+              <tr>
+                <td><strong>Space Complexity</strong></td>
+                <td>\(\mathcal{O}(n)\) (stores all data)</td>
+                <td>\(\mathcal{O}(1)\)</td>
+              </tr>
+              <tr>
+                <td><strong>Numerical Stability</strong></td>
+                <td>Poor (catastrophic cancellation)</td>
+                <td>Excellent</td>
+              </tr>
+              <tr>
+                <td><strong>Error Growth</strong></td>
+                <td>\(\mathcal{O}(n^2 \varepsilon)\)</td>
+                <td>\(\mathcal{O}(n \varepsilon)\)</td>
+              </tr>
+              <tr>
+                <td><strong>Overflow Risk</strong></td>
+                <td>High (\(\sum x_i^2\))</td>
+                <td>Very Low (deltas)</td>
+              </tr>
+              <tr>
+                <td><strong>Streaming Data</strong></td>
+                <td>Impossible (needs all data)</td>
+                <td>Ideal (incremental)</td>
+              </tr>
+              <tr>
+                <td><strong>Memory for Large n</strong></td>
+                <td>Prohibitive</td>
+                <td>Constant regardless of \(n\)</td>
+              </tr>
+            </tbody>
+          </table>
         </div>
       </div>
 
-      <!-- PART C: Interactive Tool -->
+      <!-- PART C: Numerical Stability Analysis -->
+      <div class="hw-section">
+        <h2 style="color: #18e0e6; margin-bottom: 1.5rem;">Part C — Numerical Stability & Error Analysis</h2>
+        
+        <div class="step-container">
+          <div class="step-title">
+            <span class="step-number">1</span>
+            Catastrophic Cancellation in Batch Algorithms
+          </div>
+          
+          <div class="explanation">
+            The traditional batch formula for variance suffers from catastrophic cancellation, a fundamental numerical stability problem.
+          </div>
+
+          <div class="math-formula">
+            <div class="formula-title">Naive Batch Variance Formula:</div>
+            <div class="formula-content">
+              $$s^2 = \frac{1}{n-1} \left( \sum_{i=1}^{n} x_i^2 - \frac{(\sum_{i=1}^{n} x_i)^2}{n} \right)$$
+              
+              This formula is susceptible to catastrophic cancellation because:
+              <ul>
+                <li>\(\sum x_i^2\) can be very large</li>
+                <li>\(\frac{(\sum x_i)^2}{n}\) is also very large</li>
+                <li>When both are large and nearly equal, their difference loses precision</li>
+              </ul>
+            </div>
+          </div>
+
+          <div class="math-formula">
+            <div class="formula-title">Numerical Example:</div>
+            <div class="formula-content">
+              Data: \(x = [10^8, 10^8 + 1, 10^8 + 2]\)<br><br>
+              True variance: \(s^2 = 1.0\)
+              <br><br>
+              <strong>Using batch formula (single precision, 6 significant digits):</strong>
+              <ul>
+                <li>\(\sum x_i = 3 \times 10^8 + 3\) → rounds to \(3 \times 10^8\)</li>
+                <li>\(\sum x_i^2 \approx 3 \times 10^{16}\)</li>
+                <li>\(\frac{(\sum x_i)^2}{n} \approx 3 \times 10^{16}\)</li>
+                <li>Difference: \(3 \times 10^{16} - 3 \times 10^{16} = 0\)</li>
+                <li>Computed variance: <strong>0 or garbage</strong></li>
+              </ul>
+            </div>
+          </div>
+
+          <div class="comparison-box">
+            <div class="pros">
+              <strong style="color: #81c784;">✓ Welford's Advantages:</strong>
+              <ul style="margin-left: 1.5rem; line-height: 1.8;">
+                <li>Never subtracts large numbers</li>
+                <li>Always operates on manageable deltas</li>
+                <li>No accumulated rounding errors</li>
+                <li>Works with extreme value magnitudes</li>
+              </ul>
+            </div>
+            <div class="cons">
+              <strong style="color: #ef5350;">✗ Batch Formula Issues:</strong>
+              <ul style="margin-left: 1.5rem; line-height: 1.8;">
+                <li>Subtracts two very large nearly-equal numbers</li>
+                <li>Cancellation eliminates all significant digits</li>
+                <li>Fails for data with large magnitudes</li>
+                <li>Requires careful scaling/shifting (cumbersome)</li>
+              </ul>
+            </div>
+          </div>
+        </div>
+
+        <div class="step-container">
+          <div class="step-title">
+            <span class="step-number">2</span>
+            Error Propagation Analysis
+          </div>
+          
+          <div class="explanation">
+            Analyze how computational errors accumulate in batch vs online algorithms.
+          </div>
+
+          <div class="math-formula">
+            <div class="formula-title">Rounding Error Model:</div>
+            <div class="formula-content">
+              For floating-point arithmetic with machine epsilon \(\varepsilon\):
+              <br><br>
+              <strong>Batch Algorithm Error:</strong>
+              $$\text{Error}_{batch} \approx \mathcal{O}(n \varepsilon (x_{\max}^2))$$
+              
+              <strong>Welford's Algorithm Error:</strong>
+              $$\text{Error}_{Welford} \approx \mathcal{O}(n \varepsilon)$$
+            </div>
+          </div>
+
+          <div class="math-formula">
+            <div class="formula-title">Worst-Case Error Bounds:</div>
+            <div class="formula-content">
+              Batch: \(|\text{computed} - \text{true}| \lesssim \mathcal{O}(n^2 \varepsilon \cdot \text{scale}^2)\)<br>
+              Welford: \(|\text{computed} - \text{true}| \lesssim \mathcal{O}(n \varepsilon \cdot \text{scale})\)<br><br>
+              
+              For double precision (\(\varepsilon \approx 10^{-16}\)):
+              <ul>
+                <li><strong>Batch:</strong> Error grows quadratically with \(n\) and quadratically with data scale</li>
+                <li><strong>Welford:</strong> Error grows linearly with \(n\) and linearly with data scale</li>
+              </ul>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- PART D: Interactive Tool -->
       <div class="hw-section">
         <h2 style="color: #18e0e6; margin-bottom: 1.5rem;">Part D — Interactive Calculator & Visualization</h2>
         
@@ -662,7 +985,7 @@
               </div>
 
               <div class="chart-container">
-                <div class="chart-title">📈 Cumulative Variance Update</div>
+                <div class="chart-title">📈 Cumulative M2 Update</div>
                 <canvas id="varianceChart"></canvas>
               </div>
             </div>
@@ -672,12 +995,12 @@
           <div class="tool-section" id="stepSection" style="display: none;">
             <div class="tool-title">🔄 Step-by-Step: Welford's Algorithm Execution</div>
             
-            <p style="color: #b8d4ff; margin-bottom: 1rem;">Shows each iteration with computed deltas and accumulated moments:</p>
+            <p style="color: #b8d4ff; margin-bottom: 1rem;">Shows each iteration with computed deltas and accumulated moments (first 20 steps + last 3):</p>
             
             <div style="background: rgba(8,15,35,0.9); border-radius: 8px; padding: 1.5rem; max-height: 500px; overflow-y: auto;">
               <table class="stats-table">
                 <thead>
-                  <tr style="background: rgba(24,224,230,0.15);">
+                  <tr style="background: rgba(24,224,230,0.15); position: sticky; top: 0;">
                     <th>n</th>
                     <th>xₙ</th>
                     <th>δ = xₙ - mean</th>
