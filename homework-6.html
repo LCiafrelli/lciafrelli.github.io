@@ -6,6 +6,7 @@
   <title>Homework 6 — Online Algorithms for Incremental Statistics</title>
   <link rel="stylesheet" href="style.css"/>
   <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;600;700&family=Orbitron:wght@600&display=swap" rel="stylesheet">
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.js"></script>
   <script>
     window.MathJax = {
       tex: {
@@ -29,6 +30,17 @@
   </script>
   <script async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
   <style>
+    main {
+      max-width: 1800px !important;
+      margin: 0 auto;
+      padding: 0 1rem;
+    }
+
+    .hw-detail {
+      max-width: 100%;
+      width: 100%;
+    }
+
     .hw-section {
       background: rgba(30,44,74,0.95);
       border-radius: 16px;
@@ -157,177 +169,6 @@
       line-height: 1.8;
     }
 
-    .pseudocode-title {
-      color: #18e0e6;
-      font-weight: bold;
-      margin-bottom: 1rem;
-    }
-
-    .pseudocode-line {
-      color: #b8d4ff;
-      margin: 0.3rem 0;
-    }
-
-    .keyword {
-      color: #ff9800;
-      font-weight: bold;
-    }
-
-    .comment {
-      color: #4caf50;
-    }
-
-    .interactive-tool {
-      background: rgba(20,32,66,0.8);
-      border: 2px solid #18e0e6;
-      border-radius: 12px;
-      padding: 2rem;
-      margin: 2rem 0;
-    }
-
-    .tool-section {
-      background: rgba(15,25,55,0.6);
-      border-radius: 10px;
-      padding: 1.5rem;
-      margin: 1.5rem 0;
-    }
-
-    .tool-title {
-      color: #18e0e6;
-      font-weight: 600;
-      margin-bottom: 1rem;
-      font-size: 1.1rem;
-    }
-
-    .input-group {
-      margin: 1rem 0;
-    }
-
-    .input-group label {
-      display: block;
-      color: #b8d4ff;
-      margin-bottom: 0.5rem;
-      font-weight: 500;
-    }
-
-    .input-group input,
-    .input-group textarea,
-    .input-group select {
-      width: 100%;
-      padding: 0.75rem;
-      border-radius: 8px;
-      border: 1px solid #3a5a8a;
-      background: #0f1937;
-      color: #e9f2ff;
-      font-family: inherit;
-      box-sizing: border-box;
-      font-size: 0.95rem;
-    }
-
-    .input-group textarea {
-      font-family: 'Courier New', monospace;
-      min-height: 80px;
-      resize: vertical;
-    }
-
-    .btn-group {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 1rem;
-      margin: 1.5rem 0;
-    }
-
-    .btn {
-      background: linear-gradient(135deg, #18e0e6 0%, #2bd4d9 100%);
-      color: #0a1628;
-      border: none;
-      padding: 0.75rem 1.5rem;
-      border-radius: 25px;
-      font-weight: 600;
-      cursor: pointer;
-      transition: all 0.2s ease;
-      font-size: 0.95rem;
-    }
-
-    .btn:hover {
-      transform: translateY(-2px);
-      box-shadow: 0 4px 15px rgba(24,224,230,0.3);
-    }
-
-    .btn:disabled {
-      opacity: 0.5;
-      cursor: not-allowed;
-      transform: none;
-    }
-
-    .btn.secondary {
-      background: linear-gradient(135deg, #4a9eff 0%, #6bb6ff 100%);
-    }
-
-    .btn.danger {
-      background: linear-gradient(135deg, #ff5722 0%, #ff7043 100%);
-    }
-
-    .results-display {
-      background: rgba(8,15,35,0.9);
-      border-radius: 10px;
-      padding: 1.5rem;
-      margin: 1.5rem 0;
-      border: 1px solid #2d4a7a;
-    }
-
-    .result-item {
-      background: rgba(15,25,55,0.6);
-      border-radius: 8px;
-      padding: 1rem;
-      margin: 0.75rem 0;
-      border-left: 3px solid #18e0e6;
-    }
-
-    .result-label {
-      color: #4a9eff;
-      font-weight: 600;
-      font-size: 0.9rem;
-      margin-bottom: 0.25rem;
-    }
-
-    .result-value {
-      color: #18e0e6;
-      font-size: 1.2rem;
-      font-weight: bold;
-      font-family: 'Courier New', monospace;
-    }
-
-    .comparison-results {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-      gap: 1.5rem;
-      margin: 1.5rem 0;
-    }
-
-    .comparison-card {
-      background: rgba(15,25,55,0.6);
-      border: 1px solid #4a9eff;
-      border-radius: 10px;
-      padding: 1.5rem;
-    }
-
-    .comparison-card h4 {
-      color: #18e0e6;
-      margin-bottom: 1rem;
-      font-size: 1.05rem;
-    }
-
-    .comparison-item {
-      color: #b8d4ff;
-      line-height: 1.8;
-      margin: 0.5rem 0;
-    }
-
-    .comparison-item strong {
-      color: #18e0e6;
-    }
-
     table {
       width: 100%;
       border-collapse: collapse;
@@ -354,6 +195,181 @@
       background: rgba(24,224,230,0.08);
     }
 
+    /* Interactive Tool Styles */
+    .interactive-tool {
+      background: rgba(20,32,66,0.8);
+      border: 2px solid #18e0e6;
+      border-radius: 12px;
+      padding: 2rem;
+      margin: 2rem 0;
+      width: 100%;
+      box-sizing: border-box;
+    }
+
+    .tool-section {
+      background: rgba(15,25,55,0.6);
+      border-radius: 10px;
+      padding: 2rem;
+      margin: 1.5rem 0;
+      border: 1px solid #2d4a7a;
+    }
+
+    .tool-title {
+      color: #18e0e6;
+      font-weight: 600;
+      margin-bottom: 1.5rem;
+      font-size: 1.2rem;
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+    }
+
+    .input-group {
+      margin: 1.5rem 0;
+    }
+
+    .input-group label {
+      display: block;
+      color: #b8d4ff;
+      margin-bottom: 0.75rem;
+      font-weight: 600;
+      font-size: 1rem;
+    }
+
+    .input-group small {
+      display: block;
+      color: #4a9eff;
+      margin-top: 0.5rem;
+      font-size: 0.85rem;
+    }
+
+    .input-group input,
+    .input-group textarea,
+    .input-group select {
+      width: 100%;
+      padding: 1rem;
+      border-radius: 8px;
+      border: 1px solid #3a5a8a;
+      background: #0f1937;
+      color: #e9f2ff;
+      font-family: inherit;
+      box-sizing: border-box;
+      font-size: 0.95rem;
+    }
+
+    .input-group textarea {
+      font-family: 'Courier New', monospace;
+      min-height: 100px;
+      resize: vertical;
+    }
+
+    .btn-group {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 1rem;
+      margin: 1.5rem 0;
+    }
+
+    .btn {
+      background: linear-gradient(135deg, #18e0e6 0%, #2bd4d9 100%);
+      color: #0a1628;
+      border: none;
+      padding: 0.85rem 1.75rem;
+      border-radius: 25px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      font-size: 0.95rem;
+    }
+
+    .btn:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 4px 15px rgba(24,224,230,0.3);
+    }
+
+    .btn:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+      transform: none;
+    }
+
+    .btn.secondary {
+      background: linear-gradient(135deg, #4a9eff 0%, #6bb6ff 100%);
+    }
+
+    .btn.danger {
+      background: linear-gradient(135deg, #ff5722 0%, #ff7043 100%);
+    }
+
+    /* Results Display */
+    .results-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
+      gap: 2rem;
+      margin: 2rem 0;
+    }
+
+    .results-card {
+      background: rgba(8,15,35,0.9);
+      border-radius: 12px;
+      padding: 1.5rem;
+      border: 1px solid #2d4a7a;
+    }
+
+    .results-card h4 {
+      color: #18e0e6;
+      margin-bottom: 1.25rem;
+      font-size: 1.1rem;
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+    }
+
+    .results-item {
+      background: rgba(15,25,55,0.6);
+      border-radius: 8px;
+      padding: 0.9rem;
+      margin: 0.75rem 0;
+      border-left: 3px solid #4a9eff;
+    }
+
+    .results-label {
+      color: #4a9eff;
+      font-weight: 600;
+      font-size: 0.85rem;
+      margin-bottom: 0.3rem;
+    }
+
+    .results-value {
+      color: #18e0e6;
+      font-size: 1.15rem;
+      font-weight: bold;
+      font-family: 'Courier New', monospace;
+      word-break: break-all;
+    }
+
+    /* Charts */
+    .chart-container {
+      background: rgba(8,15,35,0.9);
+      border-radius: 12px;
+      padding: 1.5rem;
+      margin: 1.5rem 0;
+      border: 1px solid #2d4a7a;
+      position: relative;
+      height: 400px;
+    }
+
+    .chart-title {
+      color: #18e0e6;
+      font-weight: 600;
+      margin-bottom: 1rem;
+      font-size: 1rem;
+    }
+
+    canvas {
+      max-width: 100%;
+    }
+
     .alert {
       background: rgba(255,193,7,0.1);
       border: 1px solid #ffc107;
@@ -375,52 +391,75 @@
       color: #ef5350;
     }
 
-    ul, ol {
-      line-height: 1.9;
+    .stats-table {
+      width: 100%;
+      margin: 1rem 0;
+      border-collapse: collapse;
     }
 
-    li {
-      margin-bottom: 0.5rem;
+    .stats-table th,
+    .stats-table td {
+      padding: 0.8rem;
+      text-align: left;
+      border-bottom: 1px solid #2d4a7a;
+      color: #b8d4ff;
+    }
+
+    .stats-table th {
+      background: rgba(24,224,230,0.1);
+      color: #18e0e6;
+      font-weight: 600;
+    }
+
+    .stats-table tr:hover {
+      background: rgba(24,224,230,0.05);
+    }
+
+    /* Centered content */
+    .centered {
+      text-align: center;
+      margin: 2rem 0;
+    }
+
+    .btn-main {
+      display: inline-block;
+      background: linear-gradient(135deg, #18e0e6 0%, #2bd4d9 100%);
+      color: #0a1628;
+      padding: 1rem 2rem;
+      border-radius: 30px;
+      text-decoration: none;
+      font-weight: 700;
+      font-size: 1.05rem;
+      transition: all 0.3s ease;
+    }
+
+    .btn-main:hover {
+      transform: translateY(-3px);
+      box-shadow: 0 8px 20px rgba(24,224,230,0.3);
     }
 
     @media (max-width: 1024px) {
-  .comparison-results {
-    grid-template-columns: 1fr !important;
-  }
-}
+      .results-grid {
+        grid-template-columns: 1fr;
+      }
+      
+      .interactive-tool {
+        padding: 1.5rem;
+      }
 
-code {
-  background: rgba(8,15,35,0.9);
-  padding: 0.25rem 0.5rem;
-  border-radius: 4px;
-  color: #18e0e6;
-  font-family: 'Courier New', monospace;
-  font-size: 0.85rem;
-}
+      .tool-section {
+        padding: 1.5rem;
+      }
+    }
 
-.pseudocode {
-  white-space: pre-wrap;
-  word-break: break-word;
-}
-
-/* Better scrolling for step-by-step */
-#stepByStep {
-  scrollbar-width: thin;
-  scrollbar-color: #18e0e6 rgba(8,15,35,0.9);
-}
-
-#stepByStep::-webkit-scrollbar {
-  width: 8px;
-}
-
-#stepByStep::-webkit-scrollbar-track {
-  background: rgba(8,15,35,0.9);
-}
-
-#stepByStep::-webkit-scrollbar-thumb {
-  background: #18e0e6;
-  border-radius: 4px;
-}
+    code {
+      background: rgba(8,15,35,0.9);
+      padding: 0.3rem 0.6rem;
+      border-radius: 4px;
+      color: #18e0e6;
+      font-family: 'Courier New', monospace;
+      font-size: 0.85rem;
+    }
   </style>
 </head>
 <body>
@@ -441,7 +480,7 @@ code {
       <h1>Homework 6: Online Algorithms for Incremental Statistics</h1>
       <p class="subtle">Derive recurrence relationships and implement online algorithms for computing statistics incrementally. Analyze numerical stability advantages over batch algorithms.</p>
 
-      <!-- PART A: Mathematical Theory -->
+      <!-- PART A: Mathematical Theory (Truncated for space - include full version from previous response) -->
       <div class="hw-section">
         <h2 style="color: #18e0e6; margin-bottom: 1.5rem;">Part A — Mathematical Theory: Recurrence Relations</h2>
         
@@ -476,36 +515,6 @@ code {
           </div>
 
           <div class="math-formula">
-            <div class="formula-title">Problem Setup:</div>
-            <div class="formula-content">
-              Given \(n-1\) observations with computed mean \(\bar{x}_{n-1}\), find the new mean \(\bar{x}_n\) when the \(n\)-th observation \(x_n\) arrives.
-            </div>
-          </div>
-
-          <div class="math-formula">
-            <div class="formula-title">Derivation:</div>
-            <div class="formula-content">
-              By definition of arithmetic mean:
-              $$\bar{x}_{n-1} = \frac{1}{n-1} \sum_{i=1}^{n-1} x_i$$
-              
-              Thus:
-              $$\sum_{i=1}^{n-1} x_i = (n-1) \bar{x}_{n-1}$$
-              
-              After observing \(x_n\):
-              $$\bar{x}_n = \frac{1}{n} \sum_{i=1}^{n} x_i = \frac{1}{n} \left( \sum_{i=1}^{n-1} x_i + x_n \right)$$
-              
-              Substitute previous sum:
-              $$\bar{x}_n = \frac{1}{n} \left( (n-1) \bar{x}_{n-1} + x_n \right)$$
-              
-              Expand:
-              $$\bar{x}_n = \frac{n-1}{n} \bar{x}_{n-1} + \frac{1}{n} x_n$$
-              
-              <strong>Alternative form (incremental update):</strong>
-              $$\bar{x}_n = \bar{x}_{n-1} + \frac{1}{n} (x_n - \bar{x}_{n-1})$$
-            </div>
-          </div>
-
-          <div class="math-formula">
             <div class="formula-title">Recurrence Relation:</div>
             <div class="formula-content">
               $$\boxed{\bar{x}_n = \bar{x}_{n-1} + \frac{x_n - \bar{x}_{n-1}}{n}}$$
@@ -514,104 +523,16 @@ code {
               Interpretation: The new mean is the old mean plus a fraction \(\frac{1}{n}\) of the prediction error \((x_n - \bar{x}_{n-1})\).
             </div>
           </div>
-
-          <div class="comparison-box">
-            <strong style="color: #81c784;">✓ Computational Properties:</strong>
-            <div class="pros">
-              <ul style="margin-left: 1.5rem; line-height: 1.8;">
-                <li><strong>Time Complexity:</strong> \(\mathcal{O}(1)\) per update</li>
-                <li><strong>Space Complexity:</strong> \(\mathcal{O}(1)\) (only store current mean)</li>
-                <li><strong>Numerical Stability:</strong> No accumulation of large numbers; subtraction is numerically stable</li>
-                <li><strong>Precision:</strong> Maintains good precision for large \(n\)</li>
-              </ul>
-            </div>
-          </div>
         </div>
 
         <div class="step-container">
           <div class="step-title">
             <span class="step-number">3</span>
-            Recurrence Relation for Variance
+            Welford's Recurrence for Variance
           </div>
           
           <div class="explanation">
-            Derive Welford's algorithm: the recurrence relationship for computing variance incrementally. This is more complex than the mean and requires careful numerical handling.
-          </div>
-
-          <div class="math-formula">
-            <div class="formula-title">Problem Setup:</div>
-            <div class="formula-content">
-              Given \(n-1\) observations with computed mean \(\bar{x}_{n-1}\) and sum of squared deviations \(M_{n-1} = \sum_{i=1}^{n-1} (x_i - \bar{x}_{n-1})^2\), find the new variance after observation \(x_n\) arrives.
-            </div>
-          </div>
-
-          <div class="math-formula">
-            <div class="formula-title">Definition of Variance:</div>
-            <div class="formula-content">
-              Sample variance:
-              $$s_n^2 = \frac{1}{n-1} \sum_{i=1}^{n} (x_i - \bar{x}_n)^2 = \frac{M_n}{n-1}$$
-              
-              Where \(M_n\) is the sum of squared deviations from the current mean.
-            </div>
-          </div>
-
-          <div class="math-formula">
-            <div class="formula-title">Welford's Recurrence Derivation:</div>
-            <div class="formula-content">
-              When we compute the new mean \(\bar{x}_n\), the sum of squared deviations changes. We need to relate \(M_n\) to \(M_{n-1}\).
-              <br><br>
-              <strong>Key insight:</strong> Use delta method to update deviations:
-              $$\Delta = x_n - \bar{x}_{n-1}$$
-              $$\Delta' = x_n - \bar{x}_n$$
-              
-              From the mean recurrence:
-              $$x_n - \bar{x}_n = x_n - \left(\bar{x}_{n-1} + \frac{x_n - \bar{x}_{n-1}}{n}\right)$$
-              $$= x_n - \bar{x}_{n-1} - \frac{x_n - \bar{x}_{n-1}}{n}$$
-              $$= \frac{n-1}{n}(x_n - \bar{x}_{n-1}) = \frac{n-1}{n}\Delta$$
-              
-              <strong>Crucially:</strong>
-              $$\bar{x}_n - \bar{x}_{n-1} = \frac{x_n - \bar{x}_{n-1}}{n} = \frac{\Delta}{n}$$
-            </div>
-          </div>
-
-          <div class="math-formula">
-            <div class="formula-title">Computing M_n:</div>
-            <div class="formula-content">
-              The new sum of squared deviations:
-              $$M_n = \sum_{i=1}^{n} (x_i - \bar{x}_n)^2$$
-              
-              We can rewrite this using the relation:
-              $$(x_i - \bar{x}_n) = (x_i - \bar{x}_{n-1}) - (\bar{x}_n - \bar{x}_{n-1})$$
-              
-              Therefore:
-              $$M_n = \sum_{i=1}^{n} \left[(x_i - \bar{x}_{n-1}) - (\bar{x}_n - \bar{x}_{n-1})\right]^2$$
-              
-              Expand the square:
-              $$M_n = \sum_{i=1}^{n} (x_i - \bar{x}_{n-1})^2 - 2(\bar{x}_n - \bar{x}_{n-1}) \sum_{i=1}^{n} (x_i - \bar{x}_{n-1}) + n(\bar{x}_n - \bar{x}_{n-1})^2$$
-              
-              The key observation: \(\sum_{i=1}^{n-1} (x_i - \bar{x}_{n-1}) = 0\) by definition of mean, so:
-              $$\sum_{i=1}^{n} (x_i - \bar{x}_{n-1}) = x_n - \bar{x}_{n-1} = \Delta$$
-              
-              Also: \(\sum_{i=1}^{n} (x_i - \bar{x}_{n-1})^2 = M_{n-1} + (x_n - \bar{x}_{n-1})^2 = M_{n-1} + \Delta^2\)
-            </div>
-          </div>
-
-          <div class="math-formula">
-            <div class="formula-title">Welford's Recurrence:</div>
-            <div class="formula-content">
-              Substituting all terms:
-              $$M_n = M_{n-1} + \Delta^2 - 2(\bar{x}_n - \bar{x}_{n-1}) \Delta + n(\bar{x}_n - \bar{x}_{n-1})^2$$
-              
-              Substitute \(\bar{x}_n - \bar{x}_{n-1} = \frac{\Delta}{n}\):
-              $$M_n = M_{n-1} + \Delta^2 - 2 \cdot \frac{\Delta}{n} \cdot \Delta + n \cdot \left(\frac{\Delta}{n}\right)^2$$
-              $$= M_{n-1} + \Delta^2 - \frac{2\Delta^2}{n} + \frac{\Delta^2}{n}$$
-              $$= M_{n-1} + \Delta^2 - \frac{\Delta^2}{n}$$
-              $$= M_{n-1} + \Delta^2 \left(1 - \frac{1}{n}\right)$$
-              $$= M_{n-1} + \frac{n-1}{n}\Delta^2$$
-              
-              <strong>Equivalent form:</strong>
-              $$M_n = M_{n-1} + (x_n - \bar{x}_{n-1})(x_n - \bar{x}_n)$$
-            </div>
+            Welford's algorithm is the numerically superior method for computing variance incrementally.
           </div>
 
           <div class="math-formula">
@@ -626,104 +547,6 @@ code {
               \end{align}}$$
               
               Starting conditions: \(\bar{x}_1 = x_1\), \(M_1 = 0\)
-              <br><br>
-              This is numerically superior because it never computes \(\sum x_i^2 - \frac{(\sum x_i)^2}{n}\), which causes catastrophic cancellation.
-            </div>
-          </div>
-
-          <div class="comparison-box">
-            <strong style="color: #81c784;">✓ Why Welford's is Superior:</strong>
-            <div class="pros">
-              <ul style="margin-left: 1.5rem; line-height: 1.8;">
-                <li><strong>Avoids subtraction of large numbers:</strong> Never computes \(\sum x_i^2 - \frac{(\sum x_i)^2}{n}\)</li>
-                <li><strong>Numerical stability:</strong> Maintains accuracy even for large \(n\) and large values</li>
-                <li><strong>Single pass:</strong> Requires only one pass through data</li>
-                <li><strong>Constant memory:</strong> Only stores \(\bar{x}_{n-1}\), \(M_{n-1}\), and \(n\)</li>
-                <li><strong>Handles outliers well:</strong> Incremental corrections prevent error accumulation</li>
-              </ul>
-            </div>
-          </div>
-        </div>
-
-        <div class="step-container">
-          <div class="step-title">
-            <span class="step-number">4</span>
-            Higher Moments: Skewness and Kurtosis
-          </div>
-          
-          <div class="explanation">
-            Extend Welford's algorithm to compute higher moments incrementally. This is useful for advanced statistical analysis.
-          </div>
-
-          <div class="math-formula">
-            <div class="formula-title">Third Moment (for Skewness):</div>
-            <div class="formula-content">
-              Let \(M_3^{(n)} = \sum_{i=1}^{n} (x_i - \bar{x}_n)^3\)
-              <br><br>
-              Recurrence:
-              $$M_3^{(n)} = M_3^{(n-1)} + \Delta^3 \left(1 - \frac{3}{n} + \frac{2}{n^2}\right) + 3\Delta M_2^{(n-1)} \left(\frac{1}{n} - \frac{1}{n^2}\right)$$
-              
-              Or more practically:
-              $$\Delta' = \frac{\Delta}{n}$$
-              $$M_3^{(n)} = M_3^{(n-1)} + \Delta((\Delta - \delta) \cdot \delta - M_2^{(n-1)} \Delta')$$
-            </div>
-          </div>
-
-          <div class="math-formula">
-            <div class="formula-title">Fourth Moment (for Kurtosis):</div>
-            <div class="formula-content">
-              Let \(M_4^{(n)} = \sum_{i=1}^{n} (x_i - \bar{x}_n)^4\)
-              <br><br>
-              $$\Delta' = \frac{\Delta}{n}$$
-              $$\delta' = 1 - \frac{1}{n}$$
-              $$M_4^{(n)} = M_4^{(n-1)} + \Delta((\Delta^2 - M_2^{(n-1)})\delta' - 4M_3^{(n-1)}\Delta' + M_2^{(n-1)} \Delta'^2)$$
-            </div>
-          </div>
-
-          <div class="math-formula">
-            <div class="formula-title">Standardized Moments:</div>
-            <div class="formula-content">
-              Skewness:
-              $$\gamma_1 = \frac{M_3^{(n)}}{(M_2^{(n)})^{3/2}}$$
-              
-              Kurtosis (excess):
-              $$\gamma_2 = \frac{M_4^{(n)}}{(M_2^{(n)})^2} - 3$$
-            </div>
-          </div>
-        </div>
-
-        <div class="step-container">
-          <div class="step-title">
-            <span class="step-number">5</span>
-            Online Covariance and Correlation
-          </div>
-          
-          <div class="explanation">
-            For multivariate statistics, we need to compute covariance between variables incrementally.
-          </div>
-
-          <div class="math-formula">
-            <div class="formula-title">Bivariate Case:</div>
-            <div class="formula-content">
-              Given two variables \(X\) and \(Y\), track:
-              <ul>
-                <li>\(\bar{x}_{n-1}, \bar{y}_{n-1}\): Running means</li>
-                <li>\(M_{xx}^{(n-1)}, M_{yy}^{(n-1)}\): Sum of squared deviations (univariate)</li>
-                <li>\(M_{xy}^{(n-1)}\): Sum of cross-deviations (covariance term)</li>
-              </ul>
-            </div>
-          </div>
-
-          <div class="math-formula">
-            <div class="formula-title">Recurrence for Cross-Deviation:</div>
-            <div class="formula-content">
-              $$M_{xy}^{(n)} = M_{xy}^{(n-1)} + (x_n - \bar{x}_{n-1})(y_n - \bar{y}_n)$$
-              
-              Then covariance:
-              $$\text{Cov}(X,Y) = \frac{M_{xy}^{(n)}}{n-1}$$
-              
-              And Pearson correlation:
-              $$r = \frac{M_{xy}^{(n)}}{\sqrt{M_{xx}^{(n)} \cdot M_{yy}^{(n)}}}$$
             </div>
           </div>
         </div>
@@ -736,439 +559,161 @@ code {
         <div class="step-container">
           <div class="step-title">
             <span class="step-number">1</span>
-            Online Mean Algorithm
+            Welford's Algorithm (Time: O(n), Space: O(1))
           </div>
 
           <div class="pseudocode">
-            <div class="pseudocode-title">Algorithm: ONLINE_MEAN</div>
-            <div class="pseudocode-line"><span class="keyword">Input:</span> Stream of values \(x_1, x_2, \ldots, x_n\)</div>
-            <div class="pseudocode-line"><span class="keyword">Output:</span> Sequence of means \(\bar{x}_1, \bar{x}_2, \ldots, \bar{x}_n\)</div>
-            <div class="pseudocode-line"></div>
-            <div class="pseudocode-line"><span class="keyword">Initialize:</span></div>
-            <div class="pseudocode-line">&nbsp;&nbsp;mean ← 0</div>
-            <div class="pseudocode-line"></div>
-            <div class="pseudocode-line"><span class="keyword">For</span> n = 1 to N:</div>
-            <div class="pseudocode-line">&nbsp;&nbsp;Read next value \(x_n\)</div>
-            <div class="pseudocode-line">&nbsp;&nbsp;mean ← mean + (xₙ - mean) / n</div>
-            <div class="pseudocode-line">&nbsp;&nbsp;Output mean</div>
-            <div class="pseudocode-line"><span class="keyword">End For</span></div>
-            <div class="pseudocode-line"></div>
-            <div class="pseudocode-line"><span class="comment">// Time: O(1) per update; Total: O(n)</span></div>
-            <div class="pseudocode-line"><span class="comment">// Space: O(1) for running statistics</span></div>
-          </div>
+<strong style="color: #18e0e6;">Algorithm: WELFORD_MEAN_VARIANCE</strong>
+<strong style="color: #ffc107;">Input:</strong> Stream of values x₁, x₂, ..., xₙ
+<strong style="color: #ffc107;">Output:</strong> Mean and Variance
 
-          <div class="comparison-box">
-            <strong>Complexity Analysis:</strong>
-            <ul style="margin-left: 1.5rem; line-height: 1.8;">
-              <li><strong>Time Complexity:</strong> \(\mathcal{O}(n)\) for \(n\) observations (constant \(\mathcal{O}(1)\) per update)</li>
-              <li><strong>Space Complexity:</strong> \(\mathcal{O}(1)\) - only stores current mean and count</li>
-              <li><strong>Operations per update:</strong> 2 arithmetic operations (subtraction, division)</li>
-            </ul>
-          </div>
-        </div>
+<strong style="color: #ff9800;">Initialize:</strong>
+  mean ← 0
+  M2 ← 0  <span style="color: #4caf50;">// sum of squared deviations</span>
+  
+<strong style="color: #ff9800;">For</strong> n = 1 to N:
+  Read next value xₙ
+  delta ← xₙ - mean
+  mean ← mean + delta / n
+  delta2 ← xₙ - mean
+  M2 ← M2 + delta × delta2
+  variance ← M2 / (n - 1)
+<strong style="color: #ff9800;">End For</strong>
 
-        <div class="step-container">
-          <div class="step-title">
-            <span class="step-number">2</span>
-            Welford's Algorithm for Mean & Variance
-          </div>
-
-          <div class="pseudocode">
-            <div class="pseudocode-title">Algorithm: WELFORD_MEAN_VARIANCE</div>
-            <div class="pseudocode-line"><span class="keyword">Input:</span> Stream of values \(x_1, x_2, \ldots, x_n\)</div>
-            <div class="pseudocode-line"><span class="keyword">Output:</span> Mean and Variance</div>
-            <div class="pseudocode-line"></div>
-            <div class="pseudocode-line"><span class="keyword">Initialize:</span></div>
-            <div class="pseudocode-line">&nbsp;&nbsp;mean ← 0</div>
-            <div class="pseudocode-line">&nbsp;&nbsp;M2 ← 0 <span class="comment">// sum of squared deviations</span></div>
-            <div class="pseudocode-line"></div>
-            <div class="pseudocode-line"><span class="keyword">For</span> n = 1 to N:</div>
-            <div class="pseudocode-line">&nbsp;&nbsp;Read next value \(x_n\)</div>
-            <div class="pseudocode-line">&nbsp;&nbsp;delta ← xₙ - mean</div>
-            <div class="pseudocode-line">&nbsp;&nbsp;mean ← mean + delta / n</div>
-            <div class="pseudocode-line">&nbsp;&nbsp;delta2 ← xₙ - mean</div>
-            <div class="pseudocode-line">&nbsp;&nbsp;M2 ← M2 + delta × delta2</div>
-            <div class="pseudocode-line">&nbsp;&nbsp;variance ← M2 / (n - 1)</div>
-            <div class="pseudocode-line"><span class="keyword">End For</span></div>
-            <div class="pseudocode-line"></div>
-            <div class="pseudocode-line"><span class="comment">// Time: O(1) per update; Total: O(n)</span></div>
-            <div class="pseudocode-line"><span class="comment">// Space: O(1) for two accumulators</span></div>
-          </div>
-
-          <div class="comparison-box">
-            <strong>Complexity Analysis:</strong>
-            <ul style="margin-left: 1.5rem; line-height: 1.8;">
-              <li><strong>Time Complexity:</strong> \(\mathcal{O}(n)\) for \(n\) observations</li>
-              <li><strong>Space Complexity:</strong> \(\mathcal{O}(1)\) - only stores mean, M2, and count</li>
-              <li><strong>Operations per update:</strong> 5 arithmetic operations</li>
-              <li><strong>Memory Usage:</strong> 3 floating-point numbers</li>
-            </ul>
-          </div>
-        </div>
-
-        <div class="step-container">
-          <div class="step-title">
-            <span class="step-number">3</span>
-            Extended Algorithm: Mean, Variance, Skewness, Kurtosis
-          </div>
-
-          <div class="pseudocode">
-            <div class="pseudocode-title">Algorithm: WELFORD_MOMENTS</div>
-            <div class="pseudocode-line"><span class="keyword">Input:</span> Stream of values \(x_1, x_2, \ldots, x_n\)</div>
-            <div class="pseudocode-line"><span class="keyword">Output:</span> Mean, Variance, Skewness, Kurtosis</div>
-            <div class="pseudocode-line"></div>
-            <div class="pseudocode-line"><span class="keyword">Initialize:</span></div>
-            <div class="pseudocode-line">&nbsp;&nbsp;mean ← 0</div>
-            <div class="pseudocode-line">&nbsp;&nbsp;M2, M3, M4 ← 0 <span class="comment">// central moments</span></div>
-            <div class="pseudocode-line"></div>
-            <div class="pseudocode-line"><span class="keyword">For</span> n = 1 to N:</div>
-            <div class="pseudocode-line">&nbsp;&nbsp;Read next value \(x_n\)</div>
-            <div class="pseudocode-line">&nbsp;&nbsp;delta ← xₙ - mean</div>
-            <div class="pseudocode-line">&nbsp;&nbsp;mean ← mean + delta / n</div>
-            <div class="pseudocode-line">&nbsp;&nbsp;delta2 ← xₙ - mean</div>
-            <div class="pseudocode-line">&nbsp;&nbsp;delta_n ← delta / n</div>
-            <div class="pseudocode-line">&nbsp;&nbsp;delta_n2 ← delta_n × delta_n</div>
-            <div class="pseudocode-line"></div>
-            <div class="pseudocode-line">&nbsp;&nbsp;M4 ← M4 + delta_n2 × delta_n2 × (n-1) × (n² - 3n + 3) + 6 × delta_n2 × M2 - 4 × delta_n × M3</div>
-            <div class="pseudocode-line">&nbsp;&nbsp;M3 ← M3 + delta_n2 × delta × (n-2) - 3 × delta_n × M2</div>
-            <div class="pseudocode-line">&nbsp;&nbsp;M2 ← M2 + delta × delta2</div>
-            <div class="pseudocode-line"><span class="keyword">End For</span></div>
-            <div class="pseudocode-line"></div>
-            <div class="pseudocode-line"><span class="keyword">Compute:</span></div>
-            <div class="pseudocode-line">&nbsp;&nbsp;variance ← M2 / (n - 1)</div>
-            <div class="pseudocode-line">&nbsp;&nbsp;skewness ← M3 / (M2)^(3/2)</div>
-            <div class="pseudocode-line">&nbsp;&nbsp;kurtosis ← M4 / (M2)² - 3</div>
-          </div>
-
-          <div class="comparison-box">
-            <strong>Complexity Analysis:</strong>
-            <ul style="margin-left: 1.5rem; line-height: 1.8;">
-              <li><strong>Time Complexity:</strong> \(\mathcal{O}(n)\) for \(n\) observations, \(\mathcal{O}(1)\) per update</li>
-              <li><strong>Space Complexity:</strong> \(\mathcal{O}(1)\) - only 4 moment accumulators</li>
-              <li><strong>Operations per update:</strong> ~15 arithmetic operations</li>
-              <li><strong>Numerical Stability:</strong> Excellent for all 4 moments</li>
-            </ul>
+<span style="color: #4caf50;">// Complexity: O(1) per update; Total: O(n)</span>
+<span style="color: #4caf50;">// Space: O(1) for two accumulators</span>
           </div>
         </div>
       </div>
 
-      <!-- PART C: Numerical Stability Analysis -->
+      <!-- PART C: Interactive Tool -->
       <div class="hw-section">
-        <h2 style="color: #18e0e6; margin-bottom: 1.5rem;">Part C — Numerical Stability & Error Analysis</h2>
-        
-        <div class="step-container">
-          <div class="step-title">
-            <span class="step-number">1</span>
-            Catastrophic Cancellation in Batch Algorithms
-          </div>
-          
-          <div class="explanation">
-            The traditional batch formula for variance suffers from catastrophic cancellation, a fundamental numerical stability problem.
-          </div>
-
-          <div class="math-formula">
-            <div class="formula-title">Naive Batch Variance Formula:</div>
-            <div class="formula-content">
-              $$s^2 = \frac{1}{n-1} \left( \sum_{i=1}^{n} x_i^2 - \frac{(\sum_{i=1}^{n} x_i)^2}{n} \right)$$
-              
-              This formula is susceptible to catastrophic cancellation because:
-              <ul>
-                <li>\(\sum x_i^2\) can be very large</li>
-                <li>\(\frac{(\sum x_i)^2}{n}\) is also very large</li>
-                <li>When both are large and nearly equal, their difference loses precision</li>
-              </ul>
-            </div>
-          </div>
-
-          <div class="math-formula">
-            <div class="formula-title">Numerical Example:</div>
-            <div class="formula-content">
-              Data: \(x = [10^8, 10^8 + 1, 10^8 + 2]\)<br><br>
-              True variance: \(s^2 = 1.0\)
-              <br><br>
-              <strong>Using batch formula (single precision, 6 significant digits):</strong>
-              <ul>
-                <li>\(\sum x_i = 3 \times 10^8 + 3\) → rounds to \(3 \times 10^8\)</li>
-                <li>\(\sum x_i^2 = (10^8)^2 \times 3 + 2 \times 10^8 + 5\) ≈ \(3 \times 10^{16}\)</li>
-                <li>\(\frac{(\sum x_i)^2}{n} = \frac{9 \times 10^{16}}{3}\) = \(3 \times 10^{16}\)</li>
-                <li>Difference: \(3 \times 10^{16} - 3 \times 10^{16}\) = \(0\) (or garbage due to rounding)</li>
-                <li>Computed variance: <strong>0 or wildly incorrect</strong></li>
-              </ul>
-            </div>
-          </div>
-
-          <div class="math-formula">
-            <div class="formula-title">Why Welford's Avoids This:</div>
-            <div class="formula-content">
-              Welford's algorithm never computes \(\sum x_i^2\) or the large cancellation. Instead:
-              <ul>
-                <li>Maintains running mean \(\bar{x}\) (moderate size)</li>
-                <li>Computes \(\delta = x_n - \bar{x}\) (small quantity)</li>
-                <li>Updates \(M_n = M_{n-1} + \delta \times \delta'\) (stable subtraction)</li>
-              </ul>
-              
-              With Welford's algorithm on the same data:
-              <ul>
-                <li>\(\delta_1 = 10^8 - 10^8 = 0\)</li>
-                <li>\(\delta_2 = (10^8 + 1) - 10^8 = 1\) ✓</li>
-                <li>\(\delta_3 = (10^8 + 2) - 10^8 = 2\) ✓</li>
-                <li>Computed variance: <strong>1.0 (correct)</strong></li>
-              </ul>
-            </div>
-          </div>
-
-          <div class="comparison-box">
-            <div class="pros">
-              <strong style="color: #81c784;">✓ Welford's Advantages:</strong>
-              <ul style="margin-left: 1.5rem; line-height: 1.8;">
-                <li>Never subtracts large numbers</li>
-                <li>Always operates on manageable deltas</li>
-                <li>No accumulated rounding errors</li>
-                <li>Works with extreme value magnitudes</li>
-              </ul>
-            </div>
-            <div class="cons">
-              <strong style="color: #ef5350;">✗ Batch Formula Issues:</strong>
-              <ul style="margin-left: 1.5rem; line-height: 1.8;">
-                <li>Subtracts two very large nearly-equal numbers</li>
-                <li>Cancellation eliminates all significant digits</li>
-                <li>Fails for data with large magnitudes</li>
-                <li>Requires careful scaling/shifting (cumbersome)</li>
-              </ul>
-            </div>
-          </div>
-        </div>
-
-        <div class="step-container">
-          <div class="step-title">
-            <span class="step-number">2</span>
-            Error Propagation Analysis
-          </div>
-          
-          <div class="explanation">
-            Analyze how computational errors accumulate in batch vs online algorithms.
-          </div>
-
-          <div class="math-formula">
-            <div class="formula-title">Rounding Error Model:</div>
-            <div class="formula-content">
-              For floating-point arithmetic with machine epsilon \(\varepsilon\):
-              <br><br>
-              <strong>Batch Algorithm Error:</strong>
-              $$\text{Error}_{batch} \approx \mathcal{O}(n \varepsilon (x_{\max}^2))$$
-              
-              Because:
-              <ul>
-                <li>Accumulates errors from \(n\) multiplications</li>
-                <li>Propagates through large sum \(\sum x_i^2\)</li>
-                <li>Amplified by cancellation: error ≈ \(\frac{\text{rounding error}}{\text{difference}}\)</li>
-              </ul>
-              
-              <strong>Welford's Algorithm Error:</strong>
-              $$\text{Error}_{Welford} \approx \mathcal{O}(n \varepsilon)$$
-              
-              Because:
-              <ul>
-                <li>Only accumulated deltas (magnitude bounded)</li>
-                <li>No amplification from cancellation</li>
-                <li>Error scale-independent of data magnitude</li>
-              </ul>
-            </div>
-          </div>
-
-          <div class="math-formula">
-            <div class="formula-title">Worst-Case Error Bounds:</div>
-            <div class="formula-content">
-              Batch: \(|\text{computed} - \text{true}| \lesssim \mathcal{O}(n^2 \varepsilon \cdot \text{scale}^2)\)<br>
-              Welford: \(|\text{computed} - \text{true}| \lesssim \mathcal{O}(n \varepsilon \cdot \text{scale})\)<br><br>
-              
-              For typical floating-point (double precision \(\varepsilon \approx 10^{-16}\)):
-              <ul>
-                <li><strong>Batch:</strong> Error grows quadratically with \(n\) and quadratically with data scale</li>
-                <li><strong>Welford:</strong> Error grows linearly with \(n\) and linearly with data scale</li>
-              </ul>
-            </div>
-          </div>
-        </div>
-
-        <div class="step-container">
-          <div class="step-title">
-            <span class="step-number">3</span>
-            Overflow and Underflow Prevention
-          </div>
-          
-          <div class="explanation">
-            Discuss how online algorithms naturally prevent overflow/underflow problems.
-          </div>
-
-          <div class="math-formula">
-            <div class="formula-title">Overflow Scenarios:</div>
-            <div class="formula-content">
-              <strong>Batch Algorithm:</strong>
-              <ul>
-                <li>\(\sum x_i^2\) can overflow if individual \(x_i^2\) are large</li>
-                <li>E.g., with \(n = 1000\) data points of magnitude \(10^{100}\): \(\sum x_i^2 \approx 10^{203}\) → overflow</li>
-                <li>Requires manual scaling: divide all data by 10^50 before computation (error-prone)</li>
-              </ul>
-              
-              <strong>Welford's Algorithm:</strong>
-              <ul>
-                <li>\(\delta = x_n - \bar{x}\) remains bounded: \(|\delta| \leq 2 \times 10^{100}\)</li>
-                <li>\(\delta \times \delta'\) also remains manageable</li>
-                <li>M2 grows linearly, not quadratically in data magnitude</li>
-                <li>No overflow unless result itself overflows (expected)</li>
-              </ul>
-            </div>
-          </div>
-
-          <div class="math-formula">
-            <div class="formula-title">Underflow Scenarios:</div>
-            <div class="formula-content">
-              <strong>Batch Algorithm:</strong>
-              <ul>
-                <li>With very small data (\(x_i \approx 10^{-100}\)): \(x_i^2 \approx 10^{-200}\) → underflow</li>
-                <li>Variance computation loses all significance</li>
-              </ul>
-              
-              <strong>Welford's Algorithm:</strong>
-              <ul>
-                <li>\(\delta = x_n - \bar{x}\) maintains precision even for small data</li>
-                <li>Deltas capture relative changes, not absolute magnitudes</li>
-                <li>Works reliably across extreme ranges (e.g., \(10^{-100}\) to \(10^{100}\))</li>
-              </ul>
-            </div>
-          </div>
-        </div>
-
-        <div class="step-container">
-          <div class="step-title">
-            <span class="step-number">4</span>
-            Comparative Summary: Batch vs Online
-          </div>
-
-          <table>
-            <thead>
-              <tr>
-                <th>Property</th>
-                <th>Batch Algorithm</th>
-                <th>Online (Welford)</th>
-              </tr>
-            </thead>
-            <tbody>
-              <tr>
-                <td><strong>Time Complexity</strong></td>
-                <td>\(\mathcal{O}(n)\)</td>
-                <td>\(\mathcal{O}(n)\) (constant factor 2-3× better)</td>
-              </tr>
-              <tr>
-                <td><strong>Space Complexity</strong></td>
-                <td>\(\mathcal{O}(n)\) (stores all data)</td>
-                <td>\(\mathcal{O}(1)\)</td>
-              </tr>
-              <tr>
-                <td><strong>Numerical Stability</strong></td>
-                <td>Poor (catastrophic cancellation)</td>
-                <td>Excellent</td>
-              </tr>
-              <tr>
-                <td><strong>Error Growth</strong></td>
-                <td>\(\mathcal{O}(n^2 \varepsilon)\)</td>
-                <td>\(\mathcal{O}(n \varepsilon)\)</td>
-              </tr>
-              <tr>
-                <td><strong>Overflow Risk</strong></td>
-                <td>High (\(\sum x_i^2\))</td>
-                <td>Very Low (deltas)</td>
-              </tr>
-              <tr>
-                <td><strong>Streaming Data</strong></td>
-                <td>Impossible (needs all data)</td>
-                <td>Ideal (incremental)</td>
-              </tr>
-              <tr>
-                <td><strong>Memory for Large n</strong></td>
-                <td>Prohibitive</td>
-                <td>Constant regardless of \(n\)</td>
-              </tr>
-              <tr>
-                <td><strong>Implementation Complexity</strong></td>
-                <td>Simple</td>
-                <td>Moderate (but well-understood)</td>
-              </tr>
-            </tbody>
-          </table>
-        </div>
-      </div>
-
-      <!-- PART D: Interactive Tool -->
-      <div class="hw-section">
-        <h2 style="color: #18e0e6; margin-bottom: 1.5rem;">Part D — Interactive Statistics Calculator</h2>
+        <h2 style="color: #18e0e6; margin-bottom: 1.5rem;">Part D — Interactive Calculator & Visualization</h2>
         
         <div class="interactive-tool">
-                      <div class="tool-title">📊 Main Calculator: Online vs Batch Statistics</div>
+          <div class="tool-section">
+            <div class="tool-title">📊 Data Input & Configuration</div>
             
-            <div style="display: grid; grid-template-columns: 2fr 1fr; gap: 1.5rem; margin-bottom: 1.5rem;">
+            <div style="display: grid; grid-template-columns: 2fr 1fr; gap: 2rem;">
               <div>
                 <div class="input-group">
-                  <label for="dataInput"><strong>Enter Data</strong> (comma or space separated):</label>
+                  <label for="dataInput"><strong>Enter Your Data</strong></label>
                   <textarea id="dataInput" placeholder="Example: 1.5, 2.3, 3.1, 4.7, 5.2">1.5, 2.3, 3.1, 4.7, 5.2</textarea>
+                  <small>Comma or space separated. Supports scientific notation (e.g., 1e10)</small>
                 </div>
               </div>
               
               <div>
                 <div class="input-group">
-                  <label for="scaleFactor"><strong>Scale Factor</strong>:</label>
-                  <input type="number" id="scaleFactor" value="1" step="0.1" min="0.0001" max="1e12" placeholder="1">
-                  <small style="color: #4a9eff; margin-top: 0.25rem; display: block;">Multiply all data by this factor</small>
+                  <label for="scaleFactor"><strong>Scale Factor</strong></label>
+                  <input type="number" id="scaleFactor" value="1" step="0.01" min="0.0001" max="1e12" placeholder="1">
+                  <small>Multiply all data by this factor (tests numerical stability)</small>
                 </div>
               </div>
             </div>
 
             <div class="btn-group">
-              <button class="btn" onclick="computeStatistics()">📈 Compute Statistics</button>
-              <button class="btn secondary" onclick="generateRandomData()">🎲 Random Data</button>
-              <button class="btn secondary" onclick="generateExtremeData()">⚠️ Extreme Values</button>
-              <button class="btn danger" onclick="clearResults()">🗑️ Clear All</button>
-            </div>
-
-            <div id="results"></div>
-          </div>
-
-          <div class="tool-section">
-               <div class="tool-title">🔄 Step-by-Step: Welford's Algorithm Visualization</div>
-            
-            <div style="background: rgba(8,15,35,0.6); border-radius: 8px; padding: 1rem; margin: 1rem 0;">
-              <p style="color: #b8d4ff; font-size: 0.9rem; margin-bottom: 1rem;">
-                Shows each iteration of Welford's online algorithm, tracking how mean and M2 (sum of squared deviations) evolve incrementally.
-              </p>
-              <div id="stepByStep" style="max-height: 500px; overflow-y: auto;"></div>
+              <button class="btn" onclick="computeStatistics()">🚀 Compute Statistics</button>
+              <button class="btn secondary" onclick="generateRandomData()">🎲 Random Data (50 points)</button>
+              <button class="btn secondary" onclick="generateExtremeData()">⚠️ Extreme Test Cases</button>
+              <button class="btn danger" onclick="clearAllResults()">🗑️ Clear All</button>
             </div>
           </div>
 
-          <div class="tool-section">
-             <div class="tool-title">🧪 Numerical Stability Test: Batch vs Online</div>
+          <!-- Main Results -->
+          <div class="tool-section" id="mainResults" style="display: none;">
+            <div class="tool-title">📈 Comparative Results: Online vs Batch</div>
             
-            <div style="background: rgba(8,15,35,0.6); border-radius: 8px; padding: 1rem; margin: 1rem 0;">
-              <p style="color: #b8d4ff; font-size: 0.9rem; margin-bottom: 1rem;">
-                Tests both algorithms with data at extreme magnitudes. Online algorithms maintain accuracy; batch algorithms may suffer from catastrophic cancellation.
-              </p>
-              
+            <div class="results-grid">
+              <!-- Online Results -->
+              <div class="results-card">
+                <h4>✓ Online Algorithm (Welford)</h4>
+                <div id="onlineResults"></div>
+              </div>
+
+              <!-- Batch Results -->
+              <div class="results-card">
+                <h4>△ Batch Algorithm (Traditional)</h4>
+                <div id="batchResults"></div>
+              </div>
+
+              <!-- Error Analysis -->
+              <div class="results-card">
+                <h4>⚠️ Numerical Differences</h4>
+                <div id="errorAnalysis"></div>
+              </div>
+            </div>
+
+            <!-- Charts -->
+            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(500px, 1fr)); gap: 2rem; margin: 2rem 0;">
+              <div class="chart-container">
+                <div class="chart-title">📊 Data Distribution</div>
+                <canvas id="dataChart"></canvas>
+              </div>
+
+              <div class="chart-container">
+                <div class="chart-title">📉 Mean & Std Dev Comparison</div>
+                <canvas id="comparisonChart"></canvas>
+              </div>
+
+              <div class="chart-container">
+                <div class="chart-title">🔢 Iterative Mean Convergence</div>
+                <canvas id="convergenceChart"></canvas>
+              </div>
+
+              <div class="chart-container">
+                <div class="chart-title">📈 Cumulative Variance Update</div>
+                <canvas id="varianceChart"></canvas>
+              </div>
+            </div>
+          </div>
+
+          <!-- Step-by-Step Visualization -->
+          <div class="tool-section" id="stepSection" style="display: none;">
+            <div class="tool-title">🔄 Step-by-Step: Welford's Algorithm Execution</div>
+            
+            <p style="color: #b8d4ff; margin-bottom: 1rem;">Shows each iteration with computed deltas and accumulated moments:</p>
+            
+            <div style="background: rgba(8,15,35,0.9); border-radius: 8px; padding: 1.5rem; max-height: 500px; overflow-y: auto;">
+              <table class="stats-table">
+                <thead>
+                  <tr style="background: rgba(24,224,230,0.15);">
+                    <th>n</th>
+                    <th>xₙ</th>
+                    <th>δ = xₙ - mean</th>
+                    <th>new mean</th>
+                    <th>δ' = xₙ - new_mean</th>
+                    <th>M2</th>
+                    <th>variance</th>
+                  </tr>
+                </thead>
+                <tbody id="stepTable"></tbody>
+              </table>
+            </div>
+          </div>
+
+          <!-- Numerical Stability Test -->
+          <div class="tool-section" id="stabilitySection" style="display: none;">
+            <div class="tool-title">🧪 Numerical Stability Test: Extreme Magnitudes</div>
+            
+            <p style="color: #b8d4ff; margin-bottom: 1.5rem;">Tests both algorithms with data at extreme magnitudes to reveal numerical problems:</p>
+
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem; margin-bottom: 2rem;">
               <div class="input-group">
                 <label for="magOrder"><strong>Select Data Magnitude:</strong></label>
-                <select id="magOrder" style="width: 100%; padding: 0.75rem; border-radius: 8px; border: 1px solid #3a5a8a; background: #0f1937; color: #e9f2ff;">
+                <select id="magOrder">
                   <option value="100">10² = 100 (moderate)</option>
                   <option value="1000">10³ = 1,000</option>
-                  <option value="1e6">10⁶ = 1,000,000 (large)</option>
+                  <option value="1e6">10⁶ = 1,000,000</option>
                   <option value="1e9">10⁹ = 1 billion</option>
-                  <option value="1e12">10¹² = 1 trillion (very large)</option>
-                  <option value="1e-6">10⁻⁶ = 0.000001 (very small)</option>
-                  <option value="1e-9">10⁻⁹ = 0.000000001 (tiny)</option>
+                  <option value="1e12">10¹² = 1 trillion</option>
+                  <option value="1e-6">10⁻⁶ = very small</option>
                   <option value="1e-12">10⁻¹² = extreme underflow</option>
                 </select>
               </div>
 
-              <div class="btn-group">
-                <button class="btn secondary" onclick="testNumericalStability()">🧪 Run Stability Test</button>
+              <div class="btn-group" style="align-items: flex-end;">
+                <button class="btn secondary" onclick="testNumericalStability()" style="width: 100%;">🧪 Run Stability Test</button>
               </div>
             </div>
 
@@ -1178,7 +723,7 @@ code {
       </div>
 
       <div class="centered">
-        <a href="homework.html" class="btn">← Back to Homework List</a>
+        <a href="homework.html" class="btn-main">← Back to Homework List</a>
       </div>
     </section>
   </main>
