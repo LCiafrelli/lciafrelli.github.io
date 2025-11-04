@@ -10,8 +10,8 @@
 <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js">
  MathJax = {
     tex: {
-      inlineMath: [['$', '$'], ['\\(', '\\)']],
-      displayMath: [['$$', '$$'], ['\\[', '\\]']],
+      inlineMath: [['$$', '$$'], ['\\(', '\\)']],
+      displayMath: [['$$$', '$$$$'], ['\\[', '\\]']],
       processEscapes: true
     },
     svg: {
@@ -308,8 +308,8 @@
           <div class="math-formula">
             <div class="formula-title">Definition:</div>
             <div class="formula-content">
-              $$\mu = \frac{1}{n} \sum_{i=1}^{n} x_i \quad \text{(population)}$$
-              $$\bar{x} = \frac{1}{n} \sum_{i=1}^{n} x_i \quad \text{(sample)}$$
+              $$$$\mu = \frac{1}{n} \sum_{i=1}^{n} x_i \quad \text{(population)}$$$$
+              $$$$\bar{x} = \frac{1}{n} \sum_{i=1}^{n} x_i \quad \text{(sample)}$$$$
               
               Where:
 <ul>
@@ -362,13 +362,13 @@
           <div class="math-formula">
             <div class="formula-title">Definition:</div>
             <div class="formula-content">
-              $$\bar{x}_w = \frac{\sum_{i=1}^{n} w_i \cdot x_i}{\sum_{i=1}^{n} w_i}$$
+              $$$$\bar{x}_w = \frac{\sum_{i=1}^{n} w_i \cdot x_i}{\sum_{i=1}^{n} w_i}$$$$
               
               Where:
               <ul>
-                <li>$w_i$ = weight of observation $i$</li>
-                <li>$x_i$ = value of observation $i$</li>
-                <li>$\sum w_i$ = sum of all weights</li>
+                <li>$$w_i$$ = weight of observation $$i$$</li>
+                <li>$$x_i$$ = value of observation $$i$$</li>
+                <li>$$\sum w_i$$ = sum of all weights</li>
               </ul>
             </div>
           </div>
@@ -412,13 +412,13 @@
           <div class="math-formula">
             <div class="formula-title">Definition:</div>
             <div class="formula-content">
-              $$GM = \sqrt[n]{x_1 \cdot x_2 \cdot \ldots \cdot x_n} = \left(\prod_{i=1}^{n} x_i\right)^{1/n}$$
+              $$$$GM = \sqrt[n]{x_1 \cdot x_2 \cdot \ldots \cdot x_n} = \left(\prod_{i=1}^{n} x_i\right)^{1/n}$$$$
               
               Or equivalently (using logarithms):
-              $$\log(GM) = \frac{1}{n} \sum_{i=1}^{n} \log(x_i)$$
-              $$GM = 10^{\log(GM)}$$
+              $$$$\log(GM) = \frac{1}{n} \sum_{i=1}^{n} \log(x_i)$$$$
+              $$$$GM = 10^{\log(GM)}$$$$
               
-              Constraint: All values must be positive ($x_i > 0$)
+              Constraint: All values must be positive ($$x_i > 0$$)
             </div>
           </div>
 
@@ -462,9 +462,9 @@
           <div class="math-formula">
             <div class="formula-title">Definition:</div>
             <div class="formula-content">
-              $$HM = \frac{n}{\sum_{i=1}^{n} \frac{1}{x_i}} = \frac{n}{\frac{1}{x_1} + \frac{1}{x_2} + \cdots + \frac{1}{x_n}}$$
+              $$$$HM = \frac{n}{\sum_{i=1}^{n} \frac{1}{x_i}} = \frac{n}{\frac{1}{x_1} + \frac{1}{x_2} + \cdots + \frac{1}{x_n}}$$$$
               
-              Constraint: All values must be non-zero and positive ($x_i \neq 0, x_i > 0$)
+              Constraint: All values must be non-zero and positive ($$x_i \neq 0, x_i > 0$$)
             </div>
           </div>
 
@@ -507,12 +507,12 @@
           <div class="math-formula">
             <div class="formula-title">Definition:</div>
             <div class="formula-content">
-              $$QM = \sqrt{\frac{1}{n} \sum_{i=1}^{n} x_i^2} = \sqrt{\frac{x_1^2 + x_2^2 + \cdots + x_n^2}{n}}$$
+              $$$$QM = \sqrt{\frac{1}{n} \sum_{i=1}^{n} x_i^2} = \sqrt{\frac{x_1^2 + x_2^2 + \cdots + x_n^2}{n}}$$$$
               
               Relationship to standard deviation:
-              $$\text{RMS} = \sqrt{\sigma^2 + \mu^2}$$
+              $$$$\text{RMS} = \sqrt{\sigma^2 + \mu^2}$$$$
               
-              Where $\sigma$ is standard deviation and $\mu$ is mean
+              Where $$\sigma$$ is standard deviation and $$\mu$$ is mean
             </div>
           </div>
 
@@ -555,11 +555,11 @@
           <div class="math-formula">
             <div class="formula-title">Definition (k% Trimmed Mean):</div>
             <div class="formula-content">
-              1. Sort data in ascending order: $x_{(1)} \leq x_{(2)} \leq \cdots \leq x_{(n)}$<br><br>
-              2. Remove $k\%$ of values from each tail.<br>
-              Let $m = \lfloor 0.01k \cdot n \rfloor$ (number to remove from each side)<br><br>
+              1. Sort data in ascending order: $$x_{(1)} \leq x_{(2)} \leq \cdots \leq x_{(n)}$$<br><br>
+              2. Remove $$k\%$$ of values from each tail.<br>
+              Let $$m = \lfloor 0.01k \cdot n \rfloor$$ (number to remove from each side)<br><br>
               3. Calculate mean of remaining values:
-              $$\bar{x}_{tr} = \frac{1}{n-2m} \sum_{i=m+1}^{n-m} x_{(i)}$$
+              $$$$\bar{x}_{tr} = \frac{1}{n-2m} \sum_{i=m+1}^{n-m} x_{(i)}$$$$
               
               Common choices: 5% or 10% trimmed mean
             </div>
@@ -605,13 +605,13 @@
           <div class="math-formula">
             <div class="formula-title">Definition:</div>
             <div class="formula-content">
-              For odd $n$:
-              $$\text{Median} = x_{\left(\frac{n+1}{2}\right)}$$
+              For odd $$n$$:
+              $$$$\text{Median} = x_{\left(\frac{n+1}{2}\right)}$$$$
               
-              For even $n$:
-              $$\text{Median} = \frac{x_{(n/2)} + x_{(n/2+1)}}{2}$$
+              For even $$n$$:
+              $$$$\text{Median} = \frac{x_{(n/2)} + x_{(n/2+1)}}{2}$$$$
               
-              Where data is sorted in ascending order: $x_{(1)} \leq x_{(2)} \leq \cdots \leq x_{(n)}$
+              Where data is sorted in ascending order: $$x_{(1)} \leq x_{(2)} \leq \cdots \leq x_{(n)}$$
             </div>
           </div>
 
@@ -656,7 +656,7 @@
           <div class="math-formula">
             <div class="formula-title">Definition:</div>
             <div class="formula-content">
-              $$\text{Mode} = \arg\max_i (\text{frequency}(x_i))$$
+              $$$$\text{Mode} = \arg\max_i (\text{frequency}(x_i))$$$$
               
               Properties:
               <ul>
@@ -709,12 +709,12 @@
           <div class="math-formula">
             <div class="formula-title">The Mean Inequality (Power Mean Inequality):</div>
             <div class="formula-content">
-              $$HM \leq GM \leq AM \leq QM$$
+              $$$$HM \leq GM \leq AM \leq QM$$$$
               
               With equality if and only if all values are identical.
               <br><br>
               Explicitly:
-              $$\frac{n}{\sum 1/x_i} \leq \sqrt[n]{\prod x_i} \leq \frac{\sum x_i}{n} \leq \sqrt{\frac{\sum x_i^2}{n}}$$
+              $$$$\frac{n}{\sum 1/x_i} \leq \sqrt[n]{\prod x_i} \leq \frac{\sum x_i}{n} \leq \sqrt{\frac{\sum x_i^2}{n}}$$$$
               
               This inequality is fundamental in mathematics and statistics.
             </div>
@@ -830,12 +830,12 @@
             <div class="formula-title">Definition:</div>
             <div class="formula-content">
               Range:
-              $$R = \max(x_i) - \min(x_i)$$
+              $$$$R = \max(x_i) - \min(x_i)$$$$
               
               Interquartile Range:
-              $$\text{IQR} = Q_3 - Q_1$$
+              $$$$\text{IQR} = Q_3 - Q_1$$$$
               
-              Where $Q_1$ and $Q_3$ are the 25th and 75th percentiles respectively.
+              Where $$Q_1$$ and $$Q_3$$ are the 25th and 75th percentiles respectively.
             </div>
           </div>
 
@@ -879,16 +879,16 @@
             <div class="formula-title">Definition:</div>
             <div class="formula-content">
               Population Variance:
-              $$\sigma^2 = \frac{1}{N} \sum_{i=1}^{N} (x_i - \mu)^2$$
+              $$$$\sigma^2 = \frac{1}{N} \sum_{i=1}^{N} (x_i - \mu)^2$$$$
               
               Sample Variance (unbiased):
-              $$s^2 = \frac{1}{n-1} \sum_{i=1}^{n} (x_i - \bar{x})^2$$
+              $$$$s^2 = \frac{1}{n-1} \sum_{i=1}^{n} (x_i - \bar{x})^2$$$$
               
               Standard Deviation:
-              $$\sigma = \sqrt{\sigma^2} \quad \text{(population)}$$
-              $$s = \sqrt{s^2} \quad \text{(sample)}$$
+              $$$$\sigma = \sqrt{\sigma^2} \quad \text{(population)}$$$$
+              $$$$s = \sqrt{s^2} \quad \text{(sample)}$$$$
               
-              <strong>Why $(n-1)$?</strong> Bessel's correction: the sample variance using $n$ underestimates the population variance, so we divide by $(n-1)$ degrees of freedom for unbiased estimation.
+              <strong>Why $$(n-1)$$?</strong> Bessel's correction: the sample variance using $$n$$ underestimates the population variance, so we divide by $$(n-1)$$ degrees of freedom for unbiased estimation.
             </div>
           </div>
 
@@ -914,7 +914,7 @@
           <div class="use-case">
             <div class="use-case-title">🔒 Cybersecurity Application: Network Latency Monitoring</div>
             <div class="use-case-content">
-              Track standard deviation of network latency. High $\sigma$ (e.g., 50ms) indicates unstable connectivity despite acceptable mean latency. Alerts trigger when latency exceeds $\mu + 3\sigma$. Unlike range, std dev provides statistically robust baseline.
+              Track standard deviation of network latency. High $$\sigma$$ (e.g., 50ms) indicates unstable connectivity despite acceptable mean latency. Alerts trigger when latency exceeds $$\mu + 3\sigma$$. Unlike range, std dev provides statistically robust baseline.
             </div>
           </div>
         </div>
@@ -932,14 +932,14 @@
           <div class="math-formula">
             <div class="formula-title">Definition:</div>
             <div class="formula-content">
-              $$CV = \frac{\sigma}{\mu} \times 100\% \quad \text{(population)}$$
-              $$CV = \frac{s}{\bar{x}} \times 100\% \quad \text{(sample)}$$
+              $$$$CV = \frac{\sigma}{\mu} \times 100\% \quad \text{(population)}$$$$
+              $$$$CV = \frac{s}{\bar{x}} \times 100\% \quad \text{(sample)}$$$$
               
               Interpretation guidelines:
               <ul>
-                <li>$CV < 15\%$: Low variability (consistent)</li>
-                <li>$CV \in [15\%, 30\%]$: Moderate variability</li>
-                <li>$CV > 30\%$: High variability (inconsistent)</li>
+                <li>$$CV < 15\%$$: Low variability (consistent)</li>
+                <li>$$CV \in [15\%, 30\%]$$: Moderate variability</li>
+                <li>$$CV > 30\%$$: High variability (inconsistent)</li>
               </ul>
             </div>
           </div>
@@ -965,7 +965,7 @@
           <div class="use-case">
             <div class="use-case-title">🔒 Cybersecurity Application: Comparing Security Metrics</div>
             <div class="use-case-content">
-              Compare firewall effectiveness ($\bar{x} = 94.2\%$, $s = 2.1\%$, $CV \approx 2.2\%$) vs IDS detection ($\bar{x} = 78.5\%$, $s = 6.2\%$, $CV \approx 7.9\%$). The CV reveals IDS has higher relative inconsistency, enabling meaningful cross-metric comparison.
+              Compare firewall effectiveness ($$\bar{x} = 94.2\%$$, $$s = 2.1\%$$, $$CV \approx 2.2\%$$) vs IDS detection ($$\bar{x} = 78.5\%$$, $$s = 6.2\%$$, $$CV \approx 7.9\%$$). The CV reveals IDS has higher relative inconsistency, enabling meaningful cross-metric comparison.
             </div>
           </div>
         </div>
@@ -984,12 +984,12 @@
             <div class="formula-title">Definition:</div>
             <div class="formula-content">
               Mean Absolute Deviation (around mean):
-              $$\text{MAD} = \frac{1}{n} \sum_{i=1}^{n} |x_i - \bar{x}|$$
+              $$$$\text{MAD} = \frac{1}{n} \sum_{i=1}^{n} |x_i - \bar{x}|$$$$
               
               Mean Absolute Deviation (around median):
-              $$\text{MAD}_{\text{median}} = \frac{1}{n} \sum_{i=1}^{n} |x_i - \text{median}|$$
+              $$$$\text{MAD}_{\text{median}} = \frac{1}{n} \sum_{i=1}^{n} |x_i - \text{median}|$$$$
               
-              Note: We use absolute values $|\cdot|$ rather than squaring to avoid over-amplifying extremes.
+              Note: We use absolute values $$|\cdot|$$ rather than squaring to avoid over-amplifying extremes.
             </div>
           </div>
 
@@ -1014,7 +1014,7 @@
           <div class="use-case">
             <div class="use-case-title">🔒 Cybersecurity Application: Alert System Robustness</div>
             <div class="use-case-content">
-              Use MAD for alert latency to account for occasional extreme delays. If $\text{MAD} = 15$ms, alerts are consistent (±15ms typical). This outlier-resistant metric better guides threshold tuning than variance.
+              Use MAD for alert latency to account for occasional extreme delays. If $$\text{MAD} = 15$$ms, alerts are consistent (±15ms typical). This outlier-resistant metric better guides threshold tuning than variance.
             </div>
           </div>
         </div>
@@ -1047,7 +1047,7 @@
                 <td><strong>Variance/Std Dev</strong></td>
                 <td>Low</td>
                 <td>Excellent</td>
-                <td>Moderate ($\sigma$ in original units)</td>
+                <td>Moderate ($$\sigma$ in original units)</td>
                 <td>Parametric tests, normal data</td>
               </tr>
               <tr>
