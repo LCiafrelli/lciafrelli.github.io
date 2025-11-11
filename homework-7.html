@@ -1,0 +1,1033 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Homework 7 — Random Walk & Binomial Convergence</title>
+  <link rel="stylesheet" href="style.css"/>
+  <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;600;700&family=Orbitron:wght@600&display=swap" rel="stylesheet">
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.js"></script>
+  <script>
+    window.MathJax = {
+      tex: {
+        inlineMath: [['$', '$'], ['\\(', '\\)']],
+        displayMath: [['$$', '$$'], ['\\[', '\\]']],
+        processEscapes: true,
+        processEnvironments: true
+      },
+      svg: { fontCache: 'global' },
+      startup: {
+        delay: 500,
+        pageReady: () => MathJax.typesetPromise().catch(err => console.log(err))
+      }
+    };
+  </script>
+  <script async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+  <style>
+    main {
+      max-width: 1800px !important;
+      margin: 0 auto;
+      padding: 0 1rem;
+    }
+
+    .hw-detail {
+      max-width: 100%;
+      width: 100%;
+    }
+
+    .hw-section {
+      background: rgba(30,44,74,0.95);
+      border-radius: 16px;
+      margin: 2rem 0;
+      padding: 2rem;
+      box-shadow: 0 8px 32px rgba(24,224,230,0.15);
+    }
+    
+    .step-container {
+      background: rgba(20,32,66,0.6);
+      border-radius: 12px;
+      padding: 1.5rem;
+      margin: 1.5rem 0;
+      border-left: 4px solid #18e0e6;
+    }
+    
+    .step-title {
+      color: #18e0e6;
+      font-weight: 600;
+      font-size: 1.1rem;
+      margin-bottom: 1rem;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+    
+    .step-number {
+      background: #18e0e6;
+      color: #0a1628;
+      width: 28px;
+      height: 28px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 0.9rem;
+      font-weight: bold;
+    }
+    
+    .explanation {
+      background: rgba(15,25,55,0.7);
+      border-radius: 8px;
+      padding: 1.25rem;
+      margin: 1rem 0;
+      border-left: 3px solid #4a9eff;
+      font-size: 0.95rem;
+      line-height: 1.8;
+    }
+
+    .math-formula {
+      background: rgba(8,15,35,0.95);
+      border-radius: 10px;
+      padding: 1.5rem;
+      margin: 1rem 0;
+      border-left: 3px solid #18e0e6;
+      color: #e9f2ff;
+      overflow-x: auto;
+    }
+
+    .formula-title {
+      color: #18e0e6;
+      font-weight: bold;
+      margin-bottom: 1rem;
+      font-size: 1.05rem;
+    }
+
+    .formula-content {
+      color: #b8d4ff;
+      line-height: 2;
+      margin: 1rem 0;
+      font-size: 1.05rem;
+    }
+
+    .formula-content ul {
+      margin-left: 1.5rem;
+      margin-top: 0.75rem;
+      line-height: 1.9;
+    }
+
+    .cyber-box {
+      background: rgba(33,150,243,0.08);
+      border: 2px solid #2196f3;
+      border-radius: 10px;
+      padding: 1.5rem;
+      margin: 1.5rem 0;
+    }
+
+    .cyber-title {
+      color: #64b5f6;
+      font-weight: 600;
+      font-size: 1.1rem;
+      margin-bottom: 0.75rem;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+
+    .cyber-content {
+      color: #b3e5fc;
+      line-height: 1.8;
+    }
+
+    .cyber-point {
+      background: rgba(15,25,55,0.6);
+      border-left: 3px solid #64b5f6;
+      padding: 1rem;
+      margin: 0.75rem 0;
+      border-radius: 8px;
+    }
+
+    .comparison-box {
+      background: rgba(24,224,230,0.08);
+      border: 1px solid #18e0e6;
+      border-radius: 10px;
+      padding: 1.25rem;
+      margin: 1rem 0;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      background: rgba(8,15,35,0.9);
+      border-radius: 10px;
+      overflow: hidden;
+      margin: 1rem 0;
+    }
+
+    th, td {
+      padding: 1rem;
+      text-align: left;
+      border-bottom: 1px solid #2d4a7a;
+      color: #b8d4ff;
+    }
+
+    th {
+      background: rgba(24,224,230,0.15);
+      color: #18e0e6;
+      font-weight: 600;
+    }
+
+    tr:hover {
+      background: rgba(24,224,230,0.08);
+    }
+
+    /* Interactive Tool Styles */
+    .interactive-tool {
+      background: rgba(20,32,66,0.8);
+      border: 2px solid #18e0e6;
+      border-radius: 12px;
+      padding: 2rem;
+      margin: 2rem 0;
+      width: 100%;
+      box-sizing: border-box;
+    }
+
+    .tool-section {
+      background: rgba(15,25,55,0.6);
+      border-radius: 10px;
+      padding: 2rem;
+      margin: 1.5rem 0;
+      border: 1px solid #2d4a7a;
+    }
+
+    .tool-title {
+      color: #18e0e6;
+      font-weight: 600;
+      margin-bottom: 1.5rem;
+      font-size: 1.2rem;
+    }
+
+    .input-group {
+      margin: 1.5rem 0;
+    }
+
+    .input-group label {
+      display: block;
+      color: #b8d4ff;
+      margin-bottom: 0.75rem;
+      font-weight: 600;
+      font-size: 1rem;
+    }
+
+    .input-group small {
+      display: block;
+      color: #4a9eff;
+      margin-top: 0.5rem;
+      font-size: 0.85rem;
+    }
+
+    .input-group input,
+    .input-group select {
+      width: 100%;
+      padding: 1rem;
+      border-radius: 8px;
+      border: 1px solid #3a5a8a;
+      background: #0f1937;
+      color: #e9f2ff;
+      font-family: inherit;
+      box-sizing: border-box;
+      font-size: 0.95rem;
+    }
+
+    .btn-group {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 1rem;
+      margin: 1.5rem 0;
+    }
+
+    .btn {
+      background: linear-gradient(135deg, #18e0e6 0%, #2bd4d9 100%);
+      color: #0a1628;
+      border: none;
+      padding: 0.85rem 1.75rem;
+      border-radius: 25px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      font-size: 0.95rem;
+    }
+
+    .btn:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 4px 15px rgba(24,224,230,0.3);
+    }
+
+    .btn.secondary {
+      background: linear-gradient(135deg, #4a9eff 0%, #6bb6ff 100%);
+    }
+
+    .btn.danger {
+      background: linear-gradient(135deg, #ff5722 0%, #ff7043 100%);
+    }
+
+    .chart-container {
+      background: rgba(8,15,35,0.9);
+      border-radius: 12px;
+      padding: 1.5rem;
+      margin: 1.5rem 0;
+      border: 1px solid #2d4a7a;
+      position: relative;
+      height: 450px;
+    }
+
+    .chart-title {
+      color: #18e0e6;
+      font-weight: 600;
+      margin-bottom: 0.5rem;
+      font-size: 1.05rem;
+    }
+
+    .chart-description {
+      color: #4a9eff;
+      font-size: 0.85rem;
+      margin-bottom: 1rem;
+      line-height: 1.5;
+    }
+
+    .stats-summary {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 1.5rem;
+      margin: 2rem 0;
+    }
+
+    .stat-card {
+      background: rgba(8,15,35,0.9);
+      border-radius: 10px;
+      padding: 1.5rem;
+      border-left: 4px solid #18e0e6;
+    }
+
+    .stat-label {
+      color: #4a9eff;
+      font-size: 0.85rem;
+      margin-bottom: 0.5rem;
+      font-weight: 600;
+    }
+
+    .stat-value {
+      color: #18e0e6;
+      font-size: 1.8rem;
+      font-weight: bold;
+      font-family: 'Orbitron', monospace;
+    }
+
+    .stat-explanation {
+      color: #64b5f6;
+      font-size: 0.8rem;
+      margin-top: 0.75rem;
+      line-height: 1.5;
+      font-style: italic;
+    }
+
+    .alert {
+      position: fixed;
+      top: 20px;
+      right: 20px;
+      z-index: 1000;
+      max-width: 500px;
+      padding: 1rem 1.5rem;
+      border-radius: 8px;
+      font-weight: 600;
+      box-shadow: 0 4px 15px rgba(0,0,0,0.3);
+    }
+
+    .alert.success {
+      background: rgba(76,175,80,0.95);
+      border: 1px solid #4caf50;
+      color: #fff;
+    }
+
+    .alert.error {
+      background: rgba(244,67,54,0.95);
+      border: 1px solid #f44336;
+      color: #fff;
+    }
+
+    .alert.info {
+      background: rgba(33,150,243,0.95);
+      border: 1px solid #2196f3;
+      color: #fff;
+    }
+
+    .progress-bar {
+      background: rgba(15,25,55,0.9);
+      border-radius: 10px;
+      height: 30px;
+      margin: 1.5rem 0;
+      overflow: hidden;
+      border: 1px solid #2d4a7a;
+    }
+
+    .progress-fill {
+      background: linear-gradient(90deg, #18e0e6 0%, #2bd4d9 100%);
+      height: 100%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: #0a1628;
+      font-weight: bold;
+      transition: width 0.3s ease;
+    }
+
+    .centered {
+      text-align: center;
+      margin: 2rem 0;
+    }
+
+    .btn-main {
+      display: inline-block;
+      background: linear-gradient(135deg, #18e0e6, #2bd4d9);
+      color: #0a1628;
+      padding: 1rem 2rem;
+      border-radius: 30px;
+      text-decoration: none;
+      font-weight: 700;
+      transition: all 0.3s;
+    }
+
+    .btn-main:hover {
+      transform: translateY(-3px);
+      box-shadow: 0 8px 20px rgba(24,224,230,0.3);
+    }
+
+    @media (max-width: 1024px) {
+      .interactive-tool {
+        padding: 1.5rem;
+      }
+    }
+
+    ul, ol {
+      line-height: 1.9;
+    }
+
+    li {
+      margin-bottom: 0.5rem;
+    }
+
+    code {
+      background: rgba(8,15,35,0.9);
+      padding: 0.3rem 0.6rem;
+      border-radius: 4px;
+      color: #18e0e6;
+      font-family: 'Courier New', monospace;
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <nav class="navbar">
+      <div class="logo">Statistics<span class="cyber">Cyber</span></div>
+      <ul id="navLinks">
+        <li><a href="index.html">Home</a></li>
+        <li><a href="homework.html">Homework</a></li>
+        <li><a href="about.html">About</a></li>
+      </ul>
+      <button class="nav-toggle" id="navToggle">&#9776;</button>
+    </nav>
+  </header>
+
+  <main>
+    <section class="hw-detail">
+      <h1>Homework 7: Random Walk & Binomial Convergence in Cybersecurity</h1>
+      <p class="subtle">Simulate server security trajectories as random walks, analyze their convergence to the binomial distribution, and explore real-world cybersecurity implications of probabilistic threat modeling.</p>
+
+      <!-- PART A: Theory -->
+      <div class="hw-section">
+        <h2 style="color: #18e0e6; margin-bottom: 1.5rem;">Part A — Theoretical Framework & Cybersecurity Context</h2>
+        
+        <div class="step-container">
+          <div class="step-title">
+            <span class="step-number">1</span>
+            Problem Statement
+          </div>
+          <div class="explanation">
+            <p><strong>Security Scenario:</strong> A server receives weekly security updates for \(n\) weeks. There are \(m\) attackers (or \(m\) independent threat simulations) attempting to breach the system, each with independent probability \(p\) of success per week.</p>
+            
+            <p style="margin-top: 1rem;"><strong>Scoring System:</strong></p>
+            <ul style="margin-left: 1.5rem;">
+              <li><strong>+1</strong> if the server remains secure in a week (no successful breach)</li>
+              <li><strong>-1</strong> if the server is breached in a week (attack succeeds)</li>
+            </ul>
+
+            <p style="margin-top: 1rem;">The <strong>cumulative score</strong> after \(n\) weeks represents the net security posture: higher scores indicate fewer breaches, lower scores indicate more breaches.</p>
+          </div>
+
+          <div class="cyber-box">
+            <div class="cyber-title">🔒 Cybersecurity Interpretation</div>
+            <div class="cyber-content">
+              <div class="cyber-point">
+                <strong>What does this model represent?</strong> This simulates a realistic cybersecurity scenario where:
+                <ul style="margin-left: 1.5rem; margin-top: 0.5rem;">
+                  <li>Each week represents a critical period (monitoring cycle, update window)</li>
+                  <li>\(m\) represents either multiple independent attackers OR multiple simulation runs for risk assessment</li>
+                  <li>\(p\) is the organizational vulnerability index: how likely the system can be breached despite defenses</li>
+                </ul>
+              </div>
+              <div class="cyber-point">
+                <strong>Real-World Example:</strong> A financial institution runs weekly security audits on their web servers. With \(n=52\) weeks (1 year), \(m=1000\) independent threat actors (crawlers, automated scanners), and \(p=0.1\) (10% chance each actor breaches in a given week), the cumulative score models the institution's long-term security posture.
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="step-container">
+          <div class="step-title">
+            <span class="step-number">2</span>
+            Random Walk Interpretation
+          </div>
+          
+          <div class="explanation">
+            <p>The cumulative score process is a <strong>discrete-time random walk</strong> with specific security implications:</p>
+          </div>
+
+          <div class="math-formula">
+            <div class="formula-title">Random Walk Definition:</div>
+            <div class="formula-content">
+              Let \(S_k\) denote the cumulative score after week \(k\):
+              $$S_k = \sum_{i=1}^{k} X_i$$
+              
+              Where \(X_i\) is the outcome of week \(i\):
+              $$X_i = \begin{cases}
+              +1 & \text{with probability } (1-p) \text{ (week is secure)}\\
+              -1 & \text{with probability } p \text{ (breach occurs)}
+              \end{cases}$$
+              
+              Starting condition: \(S_0 = 0\) (neutral starting position)
+            </div>
+          </div>
+
+          <div class="cyber-box">
+            <div class="cyber-title">🔒 What Each Component Means in Cybersecurity</div>
+            <div class="cyber-content">
+              <div class="cyber-point">
+                <strong>\(S_k\) = Cumulative Security Score:</strong> 
+                <ul style="margin-left: 1.5rem; margin-top: 0.5rem;">
+                  <li>\(S_k > 0\): System has remained secure more weeks than breached</li>
+                  <li>\(S_k = 0\): Equal breaches and secure weeks (critical vulnerability)</li>
+                  <li>\(S_k < 0\): More breaches than secure weeks (system compromised)</li>
+                </ul>
+              </div>
+              <div class="cyber-point">
+                <strong>\(p\) = Breach Probability:</strong> Represents organizational risk
+                <ul style="margin-left: 1.5rem; margin-top: 0.5rem;">
+                  <li>p = 0.05: Strong defenses (95% weekly security rate)</li>
+                  <li>p = 0.30: Moderate risk (30% weekly breach rate)</li>
+                  <li>p = 0.50: Critical (equally likely to be breached or secure each week)</li>
+                  <li>p = 0.70: Severe (70% weekly breach rate - likely compromised)</li>
+                </ul>
+              </div>
+              <div class="cyber-point">
+                <strong>\(1-p\) = Security Success Rate:</strong> Probability the system survives the week unbreached
+                <ul style="margin-left: 1.5rem; margin-top: 0.5rem;">
+                  <li>Higher \((1-p)\) means more robust security infrastructure</li>
+                  <li>Lower \((1-p)\) indicates vulnerability to attacks</li>
+                </ul>
+              </div>
+            </div>
+          </div>
+
+          <div class="math-formula">
+            <div class="formula-title">Random Walk Properties & Security Implications:</div>
+            <div class="formula-content">
+              <ul>
+                <li><strong>State Space:</strong> \(S_n \in \{-n, -n+2, \ldots, n-2, n\}\) 
+                  <div style="color: #64b5f6; margin-left: 1rem; margin-top: 0.3rem;">
+                    ➜ Possible security outcomes range from total compromise (\(-n\)) to perfect security (\(+n\))
+                  </div>
+                </li>
+                
+                <li style="margin-top: 0.75rem;"><strong>Step Size:</strong> ±1 (unit steps)
+                  <div style="color: #64b5f6; margin-left: 1rem; margin-top: 0.3rem;">
+                    ➜ Each week contributes equally to security posture (no compounding)
+                  </div>
+                </li>
+                
+                <li style="margin-top: 0.75rem;"><strong>Bias:</strong> Biased if \(p \neq 0.5\); symmetric if \(p = 0.5\)
+                  <div style="color: #64b5f6; margin-left: 1rem; margin-top: 0.3rem;">
+                    ➜ Non-equal p/q creates systematic drift (upward if secure, downward if vulnerable)
+                  </div>
+                </li>
+                
+                <li style="margin-top: 0.75rem;"><strong>Expected Position:</strong> \(\mathbb{E}[S_n] = n(1-2p)\)
+                  <div style="color: #64b5f6; margin-left: 1rem; margin-top: 0.3rem;">
+                    ➜ Long-term expected security score reveals organizational risk trajectory
+                  </div>
+                </li>
+                
+                <li style="margin-top: 0.75rem;"><strong>Variance:</strong> \(\text{Var}(S_n) = 4np(1-p)\)
+                  <div style="color: #64b5f6; margin-left: 1rem; margin-top: 0.3rem;">
+                    ➜ Uncertainty in final outcome; higher variance = less predictable security
+                  </div>
+                </li>
+              </ul>
+            </div>
+          </div>
+
+          <div class="cyber-box">
+            <div class="cyber-title">🔒 Interpreting the Drift</div>
+            <div class="cyber-content">
+              <div class="cyber-point">
+                <strong>If p < 0.5 (Upward Drift):</strong> System is generally SECURE
+                <ul style="margin-left: 1.5rem; margin-top: 0.5rem;">
+                  <li>More weeks without breaches than with breaches</li>
+                  <li>Expected score \(\mathbb{E}[S_n] > 0\) grows with time</li>
+                  <li>Security posture improves; updates are effective</li>
+                  <li>Risk management is working</li>
+                </ul>
+              </div>
+              <div class="cyber-point">
+                <strong>If p = 0.5 (Symmetric Walk):</strong> System in EQUILIBRIUM
+                <ul style="margin-left: 1.5rem; margin-top: 0.5rem;">
+                  <li>50/50 chance of breach vs security each week</li>
+                  <li>\(\mathbb{E}[S_n] = 0\) (no trend)</li>
+                  <li>Unpredictable security; needs urgent intervention</li>
+                  <li>System is critically vulnerable</li>
+                </ul>
+              </div>
+              <div class="cyber-point">
+                <strong>If p > 0.5 (Downward Drift):</strong> System is VULNERABLE
+                <ul style="margin-left: 1.5rem; margin-top: 0.5rem;">
+                  <li>More breaches than secure weeks</li>
+                  <li>\(\mathbb{E}[S_n] < 0\) deteriorates over time</li>
+                  <li>Security posture worsens; defenses overwhelmed</li>
+                  <li>Critical risk: immediate remediation required</li>
+                </ul>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="step-container">
+          <div class="step-title">
+            <span class="step-number">3</span>
+            Connection to Binomial Distribution
+          </div>
+          
+          <div class="explanation">
+            <p>The final score \(S_n\) is directly related to the <strong>binomial distribution</strong>, which models the number of breaches. This connection is fundamental to understanding threat distribution across multiple attackers.</p>
+          </div>
+
+          <div class="math-formula">
+            <div class="formula-title">Binomial Relationship & Security Meaning:</div>
+            <div class="formula-content">
+              Let \(K\) = number of breaches (successful attacks) in \(n\) weeks:
+              $$K \sim \text{Binomial}(n, p)$$
+              $$P(K = k) = \binom{n}{k} p^k (1-p)^{n-k}$$
+              
+              <strong>Security Interpretation:</strong>
+              <ul style="margin-left: 1rem;">
+                <li>\(\binom{n}{k}\) = number of ways k breaches can be distributed across n weeks</li>
+                <li>\(p^k\) = probability of exactly k successful attacks</li>
+                <li>\((1-p)^{n-k}\) = probability of n-k weeks remaining secure</li>
+              </ul>
+            </div>
+          </div>
+
+          <div class="math-formula">
+            <div class="formula-title">Score from Breach Count:</div>
+            <div class="formula-content">
+              Secure weeks: \(n - K\)<br>
+              Breached weeks: \(K\)<br><br>
+              Final cumulative score:
+              $$S_n = (\text{secure weeks}) - (\text{breached weeks}) = (n - K) - K = n - 2K$$
+              
+              <strong>Solving for K (breaches):</strong>
+              $$K = \frac{n - S_n}{2}$$
+              
+              <strong>Probability of final score being exactly s:</strong>
+              $$P(S_n = s) = \binom{n}{\frac{n-s}{2}} p^{(n-s)/2} (1-p)^{(n+s)/2}$$
+            </div>
+          </div>
+
+          <div class="cyber-box">
+            <div class="cyber-title">🔒 What the Binomial Distribution Models</div>
+            <div class="cyber-content">
+              <div class="cyber-point">
+                <strong>Peak of Distribution:</strong> Most likely number of breaches
+                <ul style="margin-left: 1.5rem; margin-top: 0.5rem;">
+                  <li>Located at \(K_{mode} \approx np\)</li>
+                  <li>For n=50, p=0.3: expect ≈15 breaches in 50 weeks</li>
+                  <li>Helps organizations plan incident response capacity</li>
+                </ul>
+              </div>
+              <div class="cyber-point">
+                <strong>Tails of Distribution:</strong> Extreme scenarios
+                <ul style="margin-left: 1.5rem; margin-top: 0.5rem;">
+                  <li>Left tail: Extremely lucky outcomes (very few breaches)</li>
+                  <li>Right tail: Worst-case scenarios (many breaches)</li>
+                  <li>Tail probabilities inform risk management and insurance</li>
+                  <li>Example: P(K > 30) when expecting 15 = probability of disaster</li>
+                </ul>
+              </div>
+              <div class="cyber-point">
+                <strong>Distribution Shape:</strong> Indicates organizational predictability
+                <ul style="margin-left: 1.5rem; margin-top: 0.5rem;">
+                  <li>Narrow distribution: Predictable security behavior (good)</li>
+                  <li>Wide distribution: Highly uncertain outcomes (risky)</li>
+                  <li>Skewed distribution: Asymmetric vulnerability</li>
+                </ul>
+              </div>
+            </div>
+          </div>
+
+          <div class="math-formula">
+            <div class="formula-title">Key Statistics from Binomial:</div>
+            <div class="formula-content">
+              Expected number of breaches:
+              $$\mathbb{E}[K] = np$$
+              
+              Expected cumulative score:
+              $$\mathbb{E}[S_n] = n - 2\mathbb{E}[K] = n - 2np = n(1 - 2p)$$
+              
+              Variance of score:
+              $$\text{Var}(S_n) = 4\text{Var}(K) = 4np(1-p)$$
+              
+              Standard deviation (uncertainty):
+              $$\sigma_{S_n} = 2\sqrt{np(1-p)}$$
+            </div>
+          </div>
+
+          <div class="cyber-box">
+            <div class="cyber-title">🔒 Statistical Security Metrics</div>
+            <div class="cyber-content">
+              <div class="cyber-point">
+                <strong>Expected Score \(\mathbb{E}[S_n]\):</strong> Average security outcome
+                <ul style="margin-left: 1.5rem; margin-top: 0.5rem;">
+                  <li>Tells leadership: "On average, what's our security posture?"</li>
+                  <li>Positive \(\mathbb{E}[S_n]\): Good (system generally secure)</li>
+                  <li>Negative \(\mathbb{E}[S_n]\): Bad (system generally vulnerable)</li>
+                </ul>
+              </div>
+              <div class="cyber-point">
+                <strong>Standard Deviation \(\sigma_{S_n}\):</strong> Unpredictability of outcomes
+                <ul style="margin-left: 1.5rem; margin-top: 0.5rem;">
+                  <li>High \(\sigma\): Outcomes unpredictable; risky planning</li>
+                  <li>Low \(\sigma\): Outcomes stable; reliable estimates</li>
+                  <li>Used for confidence intervals: ±3\(\sigma\) = 99% probability range</li>
+                </ul>
+              </div>
+              <div class="cyber-point">
+                <strong>Coefficient of Variation:</strong> Relative risk
+                <ul style="margin-left: 1.5rem; margin-top: 0.5rem;">
+                  <li>\(\text{CV} = \sigma / |\mathbb{E}[S_n]|\)</li>
+                  <li>High CV: Expected outcome has high uncertainty</li>
+                  <li>Used to compare risk across different systems</li>
+                </ul>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="step-container">
+          <div class="step-title">
+            <span class="step-number">4</span>
+            Convergence: Why Simulations Match Theory
+          </div>
+          
+          <div class="explanation">
+            <p>As both the number of weeks \(n\) and attackers \(m\) grow large, the empirical (simulated) distribution of cumulative scores converges to the theoretical binomial distribution. This is due to fundamental laws of probability.</p>
+          </div>
+
+          <div class="math-formula">
+            <div class="formula-title">Law of Large Numbers (LLN):</div>
+            <div class="formula-content">
+              As the number of simulated trajectories \(m \to \infty\), the empirical frequency of each score converges to its theoretical probability:
+              
+              $$\frac{\text{count}(S_n = s)}{m} \xrightarrow{m \to \infty} P(S_n = s)$$
+              
+              <strong>In practical terms:</strong>
+              <ul style="margin-left: 1rem;">
+                <li>100 attackers: Rough estimate of distribution</li>
+                <li>1,000 attackers: Good estimate</li>
+                <li>10,000+ attackers: Excellent match to theory</li>
+              </ul>
+            </div>
+          </div>
+
+          <div class="math-formula">
+            <div class="formula-title">Central Limit Theorem (CLT) for Large n:</div>
+            <div class="formula-content">
+              For large \(n\), the distribution of \(S_n\) approaches a normal (Gaussian) distribution:
+              
+              $$\frac{S_n - \mathbb{E}[S_n]}{\sigma_{S_n}} = \frac{S_n - n(1-2p)}{2\sqrt{np(1-p)}} \xrightarrow{d} \mathcal{N}(0, 1)$$
+              
+              Therefore (approximation):
+              $$S_n \approx \mathcal{N}(n(1-2p), 4np(1-p))$$
+            </div>
+          </div>
+
+          <div class="cyber-box">
+            <div class="cyber-title">🔒 Why Convergence Matters for Cybersecurity</div>
+            <div class="cyber-content">
+              <div class="cyber-point">
+                <strong>Predictability:</strong> With enough historical data (large m and n), we can reliably forecast security outcomes
+                <ul style="margin-left: 1.5rem; margin-top: 0.5rem;">
+                  <li>Set realistic SLAs based on binomial probabilities</li>
+                  <li>Allocate incident response resources efficiently</li>
+                  <li>Plan budget for security improvements</li>
+                </ul>
+              </div>
+              <div class="cyber-point">
+                <strong>Risk Quantification:</strong> Use normal approximation for confidence intervals
+                <ul style="margin-left: 1.5rem; margin-top: 0.5rem;">
+                  <li>95% of outcomes fall within \(\mathbb{E}[S_n] \pm 2\sigma_{S_n}\)</li>
+                  <li>Identify exceptionally good or bad scenarios</li>
+                  <li>Example: Only 5% chance score drops below -20</li>
+                </ul>
+              </div>
+              <div class="cyber-point">
+                <strong>Comparing Systems:</strong> Use theoretical parameters to compare different security stances
+                <ul style="margin-left: 1.5rem; margin-top: 0.5rem;">
+                  <li>System A: p=0.1 → \(\mathbb{E}[S_{52}]\) = 41.6 (excellent)</li>
+                  <li>System B: p=0.3 → \(\mathbb{E}[S_{52}]\) = 20.8 (good)</li>
+                  <li>System C: p=0.5 → \(\mathbb{E}[S_{52}]\) = 0 (critical)</li>
+                </ul>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="step-container">
+          <div class="step-title">
+            <span class="step-number">5</span>
+            Interpreting Simulation Results
+          </div>
+          
+          <div class="explanation">
+            <p>When you run the simulation, the interactive tool calculates several metrics that directly relate to organizational security risk. Here's what each means:</p>
+          </div>
+
+          <table>
+            <thead>
+              <tr>
+                <th>Metric</th>
+                <th>Formula</th>
+                <th>Cybersecurity Meaning</th>
+                <th>Action If Concerning</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td><strong>Empirical Mean</strong></td>
+                <td>\(\bar{S}_n\)</td>
+                <td>Average security outcome across all attack scenarios</td>
+                <td>If negative: System compromised on average</td>
+              </tr>
+              <tr>
+                <td><strong>Theoretical Mean</strong></td>
+                <td>\(n(1-2p)\)</td>
+                <td>Expected security score (mathematical prediction)</td>
+                <td>Comparison with empirical mean validates simulations</td>
+              </tr>
+              <tr>
+                <td><strong>Std Dev</strong></td>
+                <td>\(2\sqrt{np(1-p)}\)</td>
+                <td>Unpredictability in security outcomes</td>
+                <td>If high: Outcomes too uncertain for planning</td>
+              </tr>
+              <tr>
+                <td><strong>Min/Max Score</strong></td>
+                <td>Range from empirical data</td>
+                <td>Worst and best-case scenarios observed</td>
+                <td>Check if acceptable vs. business continuity needs</td>
+              </tr>
+              <tr>
+                <td><strong>KS Statistic</strong></td>
+                <td>Max difference between CDFs</td>
+                <td>How well simulations match theory (0=perfect)</td>
+                <td>If > 0.15: Increase m (more simulations) for better estimate</td>
+              </tr>
+              <tr>
+                <td><strong>χ² Statistic</strong></td>
+                <td>Goodness-of-fit test</td>
+                <td>Overall agreement with binomial distribution</td>
+                <td>Large value: Check if p parameter is correct</td>
+              </tr>
+            </tbody>
+          </table>
+
+          <div class="cyber-box">
+            <div class="cyber-title">🔒 Example: Reading Simulation Results</div>
+            <div class="cyber-content">
+              <div class="cyber-point">
+                <strong>Scenario:</strong> n=52 weeks, m=5000 attackers, p=0.25
+                <ul style="margin-left: 1.5rem; margin-top: 0.5rem;">
+                  <li><strong>Empirical Mean:</strong> 36.2 → On average, 36 more secure weeks than breached weeks</li>
+                  <li><strong>Std Dev:</strong> 8.1 → Typical outcomes range 28-44 (±1σ)</li>
+                  <li><strong>Min Score:</strong> 18 → Worst-case: only 18 more secure weeks</li>
+                  <li><strong>Max Score:</strong> 50 → Best-case: only 2 breaches in entire year</li>
+                  <li><strong>KS Stat:</strong> 0.042 → Excellent match; p=0.25 assumption is validated</li>
+                  <li><strong>Interpretation:</strong> System is secure; only 25% of potential attacks succeed</li>
+                </ul>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- PART B: Simulation Tool -->
+      <div class="hw-section">
+        <h2 style="color: #18e0e6; margin-bottom: 1.5rem;">Part B — Interactive Simulation & Visualization</h2>
+        
+        <div class="interactive-tool">
+          <div class="tool-section">
+            <div class="tool-title">⚙️ Simulation Parameters</div>
+            
+            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 2rem;">
+              <div class="input-group">
+                <label for="numWeeks"><strong>Number of Weeks (n)</strong></label>
+                <input type="number" id="numWeeks" value="50" min="5" max="500">
+                <small>Time horizon for security evaluation (5-500 weeks)</small>
+              </div>
+
+              <div class="input-group">
+                <label for="numTrajectories"><strong>Number of Trajectories (m)</strong></label>
+                <input type="number" id="numTrajectories" value="2000" min="10" max="50000">
+                <small>Attackers or independent threat simulations (10-50000)</small>
+              </div>
+
+              <div class="input-group">
+                <label for="breachProb"><strong>Breach Probability (p)</strong></label>
+                <input type="number" id="breachProb" value="0.3" min="0" max="1" step="0.01">
+                <small>Probability each attacker succeeds per week (0-1)</small>
+              </div>
+
+              <div class="input-group">
+                <label for="displayTrajectories"><strong>Trajectories to Display</strong></label>
+                <input type="number" id="displayTrajectories" value="20" min="1" max="100">
+                <small>Number of attack paths to show in visualization (1-100)</small>
+              </div>
+            </div>
+
+            <div class="btn-group">
+              <button class="btn" onclick="runSimulation()">🚀 Run Simulation</button>
+              <button class="btn secondary" onclick="runMultipleTests()">📊 Convergence Analysis</button>
+              <button class="btn danger" onclick="clearSimulation()">🗑️ Clear Results</button>
+            </div>
+
+            <div class="progress-bar" id="progressBar" style="display: none;">
+              <div class="progress-fill" id="progressFill">0%</div>
+            </div>
+          </div>
+
+          <!-- Results Section -->
+          <div id="resultsSection" style="display: none;">
+            <!-- Statistics Summary -->
+            <div class="tool-section">
+              <div class="tool-title">📈 Security Statistics Summary</div>
+              <div class="stats-summary" id="statsSummary"></div>
+            </div>
+
+            <!-- Charts with descriptions -->
+            <div class="tool-section">
+              <div class="tool-title">📊 Interactive Visualizations & Analysis</div>
+              
+              <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(700px, 1fr)); gap: 2rem;">
+                <!-- Chart 1: Trajectories -->
+                <div>
+                  <div class="chart-container">
+                    <div class="chart-title">1️⃣ Random Walk Trajectories</div>
+                    <div class="chart-description">
+                      Shows m different attack paths over n weeks. Each line represents one attacker's cumulative score. Upward paths = secure; downward paths = vulnerable. Convergence point shows final outcome.
+                    </div>
+                    <canvas id="trajectoryChart"></canvas>
+                  </div>
+                  <div class="cyber-box" style="margin-top: 1rem;">
+                    <div class="cyber-title">What to Look For:</div>
+                    <div class="cyber-content">
+                      • Most paths positive? → System generally secure<br>
+                      • Diverging paths? → Unpredictable outcomes (high risk)<br>
+                      • Clustering? → Predictable behavior (good for planning)
+                    </div>
+                  </div>
+                </div>
+
+                <!-- Chart 2: Distribution -->
+                <div>
+                  <div class="chart-container">
+                    <div class="chart-title">2️⃣ Final Score Distribution vs Binomial Theory</div>
+                    <div class="chart-description">
+                      Blue bars = actual simulation results. Red line = theoretical binomial distribution. Close alignment validates our p parameter. Divergence suggests parameter adjustment needed.
+                    </div>
+                    <canvas id="distributionChart"></canvas>
+                  </div>
+                  <div class="cyber-box" style="margin-top: 1rem;">
+                    <div class="cyber-title">Interpretation:</div>
+                    <div class="cyber-content">
+                      • Peak of distribution = most likely final score<br>
+                      • Width of distribution = outcome uncertainty<br>
+                      • Skewness = bias toward security or vulnerability
+                    </div>
+                  </div>
+                </div>
+
+                <!-- Chart 3: Convergence -->
+                <div>
+                  <div class="chart-container">
+                    <div class="chart-title">3️⃣ Convergence: Empirical vs Theoretical</div>
+                    <div class="chart-description">
+                      Shows how well simulated data (m trajectories) matches theoretical binomial. Measured by χ² test: lower values = better fit. Validates that large m gives reliable estimates.
+                    </div>
+                    <canvas id="convergenceChart"></canvas>
+                  </div>
+                  <div class="cyber-box" style="margin-top: 1rem;">
+                    <div class="cyber-title">What This Means:</div>
+                    <div class="cyber-content">
+                      • Tall bars = scores far from expected<br>
+                      • Green bars = good agreement with theory<br>
+                      • Red bars = unusual outcomes, investigate why
+                    </div>
+                  </div>
+                </div>
+
+                <!-- Chart 4: CDF -->
+                <div>
+                  <div class="chart-container">
+                    <div class="chart-title">4️⃣ Cumulative Distribution Function (CDF)</div>
+                    <div class="chart-description">
+                      Blue line = "what % of outcomes are ≤ this score?" Cyan solid = simulation; Red dashed = theory. Used to calculate risk probabilities (e.g., P(score < 0) = probability system compromised).
+                    </div>
+                    <canvas id="cdfChart"></canvas>
+                  </div>
+                  <div class="cyber-box" style="margin-top: 1rem;">
+                    <div class="cyber-title">Risk Assessment:</div>
+                    <div class="cyber-content">
+                      • CDF(0) = probability of net negative score (system breached more than secure)<br>
+                      • CDF(20) = probability final score ≤ 20<br>
+                      • Used for: SLA planning, incident budgeting
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Detailed Analysis -->
+            <div class="tool-section" id="analysisSection"></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="centered">
+        <a href="homework.html" class="btn-main">← Back to Homework List</a>
+      </div>
+    </section>
+  </main>
+
+  <footer>
+    <span>&copy; 2025 Lorenzo Ciafrelli | MS Cybersecurity, Sapienza University of Rome</span>
+  </footer>
+
+  <script src="script.js"></script>
+  <script src="hw7.js"></script>
+</body>
+</html>
