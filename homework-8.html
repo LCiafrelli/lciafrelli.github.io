@@ -1,0 +1,750 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Homework 8 — Bernoulli Processes & Mathematical Connections</title>
+  <link rel="stylesheet" href="style.css"/>
+  <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;600;700&family=Orbitron:wght@600&display=swap" rel="stylesheet">
+  <script>
+    window.MathJax = {
+      tex: {
+        inlineMath: [['$', '$'], ['\\(', '\\)']],
+        displayMath: [['$$', '$$'], ['\\[', '\\]']],
+        processEscapes: true,
+        processEnvironments: true
+      },
+      svg: { fontCache: 'global' },
+      startup: {
+        delay: 500,
+        pageReady: () => MathJax.typesetPromise().catch(err => console.log(err))
+      }
+    };
+  </script>
+  <script async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+  <style>
+    main {
+      max-width: 1800px !important;
+      margin: 0 auto;
+      padding: 0 1rem;
+    }
+
+    .hw-detail {
+      max-width: 100%;
+      width: 100%;
+    }
+
+    .hw-section {
+      background: rgba(30,44,74,0.95);
+      border-radius: 16px;
+      margin: 2rem 0;
+      padding: 2rem;
+      box-shadow: 0 8px 32px rgba(24,224,230,0.15);
+    }
+    
+    .subsection {
+      background: rgba(20,32,66,0.6);
+      border-radius: 12px;
+      padding: 1.5rem;
+      margin: 1.5rem 0;
+      border-left: 4px solid #18e0e6;
+    }
+    
+    .subsection-title {
+      color: #18e0e6;
+      font-weight: 600;
+      font-size: 1.15rem;
+      margin-bottom: 1rem;
+    }
+
+    .narrative {
+      background: rgba(15,25,55,0.7);
+      border-radius: 8px;
+      padding: 1.25rem;
+      margin: 1rem 0;
+      border-left: 3px solid #4a9eff;
+      font-size: 0.95rem;
+      line-height: 1.9;
+      color: #b8d4ff;
+    }
+
+    .math-box {
+      background: rgba(8,15,35,0.95);
+      border-radius: 10px;
+      padding: 1.5rem;
+      margin: 1rem 0;
+      border-left: 3px solid #18e0e6;
+      color: #e9f2ff;
+      overflow-x: auto;
+    }
+
+    .formula-title {
+      color: #18e0e6;
+      font-weight: bold;
+      margin-bottom: 0.75rem;
+      font-size: 1.05rem;
+    }
+
+    .formula-content {
+      color: #b8d4ff;
+      line-height: 2;
+      margin: 0.5rem 0;
+      font-size: 1rem;
+    }
+
+    .insight-box {
+      background: rgba(76,175,80,0.08);
+      border: 2px solid #81c784;
+      border-radius: 10px;
+      padding: 1.5rem;
+      margin: 1.5rem 0;
+    }
+
+    .insight-title {
+      color: #81c784;
+      font-weight: 600;
+      margin-bottom: 0.75rem;
+      font-size: 1.05rem;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+
+    .insight-content {
+      color: #a5d6a7;
+      line-height: 1.8;
+    }
+
+    .comparison-box {
+      background: rgba(33,150,243,0.08);
+      border: 2px solid #64b5f6;
+      border-radius: 10px;
+      padding: 1.5rem;
+      margin: 1.5rem 0;
+    }
+
+    .comparison-title {
+      color: #64b5f6;
+      font-weight: 600;
+      margin-bottom: 1rem;
+      font-size: 1.05rem;
+    }
+
+    .comparison-item {
+      background: rgba(15,25,55,0.6);
+      border-left: 3px solid #64b5f6;
+      padding: 1rem;
+      margin: 0.75rem 0;
+      border-radius: 8px;
+      color: #b3e5fc;
+      line-height: 1.7;
+    }
+
+    .comparison-label {
+      color: #90caf9;
+      font-weight: 600;
+      margin-bottom: 0.3rem;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      background: rgba(8,15,35,0.9);
+      border-radius: 10px;
+      overflow: hidden;
+      margin: 1.5rem 0;
+    }
+
+    th, td {
+      padding: 1.2rem;
+      text-align: left;
+      border-bottom: 1px solid #2d4a7a;
+      color: #b8d4ff;
+      line-height: 1.6;
+    }
+
+    th {
+      background: rgba(24,224,230,0.15);
+      color: #18e0e6;
+      font-weight: 600;
+    }
+
+    tr:hover {
+      background: rgba(24,224,230,0.08);
+    }
+
+    .centered {
+      text-align: center;
+      margin: 2rem 0;
+    }
+
+    .btn-main {
+      display: inline-block;
+      background: linear-gradient(135deg, #18e0e6, #2bd4d9);
+      color: #0a1628;
+      padding: 1rem 2rem;
+      border-radius: 30px;
+      text-decoration: none;
+      font-weight: 700;
+      transition: all 0.3s;
+    }
+
+    .btn-main:hover {
+      transform: translateY(-3px);
+      box-shadow: 0 8px 20px rgba(24,224,230,0.3);
+    }
+
+    ul, ol {
+      line-height: 1.9;
+      margin-left: 1.5rem;
+    }
+
+    li {
+      margin-bottom: 0.7rem;
+      color: #b8d4ff;
+    }
+
+    p {
+      line-height: 1.8;
+      color: #b8d4ff;
+      margin-bottom: 1rem;
+    }
+
+    strong {
+      color: #18e0e6;
+    }
+
+    code {
+      background: rgba(8,15,35,0.9);
+      padding: 0.3rem 0.6rem;
+      border-radius: 4px;
+      color: #18e0e6;
+      font-family: 'Courier New', monospace;
+    }
+
+    h2 {
+      color: #18e0e6 !important;
+      margin-bottom: 1.5rem !important;
+    }
+
+    h3 {
+      color: #64b5f6 !important;
+      margin-top: 1.5rem !important;
+      margin-bottom: 1rem !important;
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <nav class="navbar">
+      <div class="logo">Statistics<span class="cyber">Cyber</span></div>
+      <ul id="navLinks">
+        <li><a href="index.html">Home</a></li>
+        <li><a href="homework.html">Homework</a></li>
+        <li><a href="about.html">About</a></li>
+      </ul>
+      <button class="nav-toggle" id="navToggle">&#9776;</button>
+    </nav>
+  </header>
+
+  <main>
+    <section class="hw-detail">
+      <h1>Homework 8: Bernoulli Processes & Mathematical Foundations</h1>
+      <p class="subtle">Exploring the profound connections between Homework 7's random walk theory and Bernoulli processes, uncovering the mathematical tapestry woven through binomial coefficients, Pascal's triangle, combinatorics, and the beautiful relationships that emerge from fundamental probability theory.</p>
+
+      <!-- SECTION 1: Overview & Connection -->
+      <div class="hw-section">
+        <h2 style="color: #18e0e6;">Section 1: Two Views of the Same Process</h2>
+        
+        <div class="subsection">
+          <div class="subsection-title">🔗 The Fundamental Relationship</div>
+          
+          <div class="narrative">
+            <p>Homework 7 and this homework are exploring the same mathematical phenomenon from two different perspectives. Think of it like observing the same landscape from different vantage points—the terrain hasn't changed, but the view reveals different aspects of its structure.</p>
+
+            <p style="margin-top: 1rem;">In Homework 7, we modeled a server's security posture as a <strong>random walk</strong>. Each week, the cumulative security score moves up (+1 for secure, -1 for breach), creating a path that wanders through positive and negative values. We tracked how this path evolved over time and how final outcomes clustered around certain values following the binomial distribution.</p>
+
+            <p style="margin-top: 1rem;">In this homework, we're studying the same underlying process through the lens of <strong>Bernoulli trials</strong>—examining the fundamental binary events (breach or secure) and counting how many times each outcome occurs. Rather than tracking the cumulative wandering path, we count the total number of successes.</p>
+
+            <p style="margin-top: 1rem;">The beautiful insight: these are mathematically equivalent. The binomial distribution that emerged naturally in Homework 7 is precisely the distribution of counting successes in repeated Bernoulli trials—the very foundation of what we're studying now.</p>
+          </div>
+        </div>
+
+        <div class="subsection">
+          <div class="subsection-title">📊 Side-by-Side Comparison</div>
+          
+          <div class="comparison-box">
+            <div class="comparison-title">How the Two Homeworks Differ (Surface Level)</div>
+            
+            <div class="comparison-item">
+              <div class="comparison-label">Homework 7: Random Walk Perspective</div>
+              Each trial contributes ±1 to a running total. The cumulative score \(S_n = \sum X_i\) where \(X_i \in \{-1, +1\}\) can range from \(-n\) to \(+n\). We visualized paths meandering through this space.
+            </div>
+
+            <div class="comparison-item">
+              <div class="comparison-label">Homework 8: Bernoulli Perspective</div>
+              Each trial is binary success/failure. The count \(K_n = \sum X_i\) where \(X_i \in \{0, 1\}\) ranges from 0 to n. We count how many successes occurred among all trials.
+            </div>
+          </div>
+
+          <div class="comparison-box">
+            <div class="comparison-title">How They're Actually Connected (The Mathematics)</div>
+            
+            <div class="comparison-item">
+              <div class="comparison-label">The Transformation</div>
+              If we have \(K\) successes and \(n-K\) failures in \(n\) trials, then:
+              $$S_n = (n - K) - K = n - 2K$$
+              
+              This simple equation encodes the entire relationship. The random walk score \(S_n\) is completely determined by the count of breaches \(K\). They contain identical information, just encoded differently.
+            </div>
+          </div>
+        </div>
+
+        <div class="insight-box">
+          <div class="insight-title">💡 Key Insight: Same Distribution, Different Representation</div>
+          <div class="insight-content">
+            <p>The binomial distribution \(\text{Binomial}(n, p)\) is universal. Whether we view it as:</p>
+            <ul>
+              <li>The sum of n Bernoulli trials (Homework 8 focus)</li>
+              <li>The distribution of a random walk's final position transformed (Homework 7 focus)</li>
+              <li>The number of paths through Pascal's triangle</li>
+              <li>A combinatorial count of "ways things can happen"</li>
+            </ul>
+            <p>...we're describing the exact same mathematical object. This unity is profound—it means probability theory is deeply connected to combinatorics.</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- SECTION 2: Bernoulli Processes Fundamentals -->
+      <div class="hw-section">
+        <h2 style="color: #18e0e6;">Section 2: Bernoulli Processes—The Foundation</h2>
+        
+        <div class="subsection">
+          <div class="subsection-title">🎯 What is a Bernoulli Process?</div>
+          
+          <div class="narrative">
+            <p>A Bernoulli process is the simplest but most fundamental model in probability theory. Imagine flipping a (possibly unfair) coin repeatedly. Each flip is independent, and each has the same probability \(p\) of landing heads.</p>
+
+            <p style="margin-top: 1rem;">Formally, a Bernoulli process is a sequence of independent, identically distributed (i.i.d.) random variables \(\{X_n\}_{n=1}^{\infty}\) where each \(X_i\) takes value 1 with probability \(p\) and value 0 with probability \(1-p\):</p>
+          </div>
+
+          <div class="math-box">
+            <div class="formula-title">Bernoulli Random Variable</div>
+            <div class="formula-content">
+              $$X \sim \text{Bernoulli}(p) \implies \begin{cases} P(X=1) = p \\ P(X=0) = 1-p \end{cases}$$
+              
+              Statistics:
+              $$\mathbb{E}[X] = p$$
+              $$\text{Var}(X) = p(1-p)$$
+            </div>
+          </div>
+
+          <div class="narrative">
+            <p style="margin-top: 1rem;">The elegance of this model is that despite its simplicity, it underpins virtually every probability application: from security breach modeling to genetics, from quality control to machine learning. The Bernoulli process is the atomic unit from which complex probability models are built.</p>
+          </div>
+        </div>
+
+        <div class="subsection">
+          <div class="subsection-title">📈 When Bernoulli Trials Sum Up: The Binomial Distribution</div>
+          
+          <div class="narrative">
+            <p>The magic happens when we sum Bernoulli trials. If we perform \(n\) independent Bernoulli trials, each with success probability \(p\), and count the total number of successes \(K\), then \(K\) follows a binomial distribution.</p>
+          </div>
+
+          <div class="math-box">
+            <div class="formula-title">Sum of Bernoullis = Binomial Distribution</div>
+            <div class="formula-content">
+              Let \(K_n = \sum_{i=1}^{n} X_i\) where each \(X_i \sim \text{Bernoulli}(p)\)
+              <br><br>
+              Then: \(K_n \sim \text{Binomial}(n, p)\)
+              <br><br>
+              Probability of exactly k successes:
+              $$P(K_n = k) = \binom{n}{k} p^k (1-p)^{n-k}$$
+              
+              Where \(\binom{n}{k} = \frac{n!}{k!(n-k)!}\) is the binomial coefficient
+            </div>
+          </div>
+
+          <div class="narrative">
+            <p style="margin-top: 1rem;">Why does the binomial coefficient appear? It counts something crucial: the number of different ways to arrange exactly k successes among n trials. If we have n trials and want exactly k to succeed, there are \(\binom{n}{k}\) different orderings (sequences) that achieve this. Each ordering has the same probability \(p^k(1-p)^{n-k}\), so we add them up, yielding the factor \(\binom{n}{k}\).</p>
+
+            <p style="margin-top: 1rem;">This is the conceptual bridge to combinatorics—probability and counting are intimately connected through the binomial distribution.</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- SECTION 3: The Law of Large Numbers Story -->
+      <div class="hw-section">
+        <h2 style="color: #18e0e6;">Section 3: The Law of Large Numbers & Convergence</h2>
+        
+        <div class="subsection">
+          <div class="subsection-title">🔄 From Theory to Reality: LLN in Action</div>
+          
+          <div class="narrative">
+            <p>The Law of Large Numbers is perhaps the most intuitive yet profound theorem in probability. It says: if you repeat an experiment many times, the average outcome converges to the theoretical expectation. This bridges the gap between abstract probability and empirical observation.</p>
+
+            <p style="margin-top: 1rem;">For Bernoulli trials with parameter \(p\), if we observe \(n\) trials and count \(K_n\) successes, the sample proportion \(\hat{p}_n = K_n / n\) gets arbitrarily close to the true probability \(p\) as \(n \to \infty\):</p>
+          </div>
+
+          <div class="math-box">
+            <div class="formula-title">Law of Large Numbers for Bernoulli Processes</div>
+            <div class="formula-content">
+              <strong>Weak LLN:</strong>
+              $$\lim_{n \to \infty} P(|\hat{p}_n - p| > \varepsilon) = 0$$
+              
+              <strong>Strong LLN:</strong>
+              $$P\left(\lim_{n \to \infty} \hat{p}_n = p\right) = 1$$
+              
+              In plain language: The sample proportion converges to true probability with certainty.
+            </div>
+          </div>
+
+          <div class="narrative">
+            <p style="margin-top: 1rem;">In Homework 7, we observed this phenomenon empirically. With enough attackers (m trajectories) and enough weeks (n trials), the empirical histogram of final scores converged to the theoretical binomial distribution. This wasn't magical—it was the Law of Large Numbers at work. Larger m means better statistical estimates, hence closer agreement with theory.</p>
+          </div>
+        </div>
+
+        <div class="subsection">
+          <div class="subsection-title">🎲 The Central Limit Theorem: Why Normal Distribution Emerges</div>
+          
+          <div class="narrative">
+            <p>Related to LLN is an even more remarkable result: the Central Limit Theorem. Even though individual Bernoulli trials are binary (0 or 1), when we sum many of them, the distribution of that sum approaches a normal (bell curve) distribution. This explains why so many phenomena in nature and technology follow normal distributions—hidden beneath the surface are millions of small independent trials accumulating.</p>
+          </div>
+
+          <div class="math-box">
+            <div class="formula-title">Central Limit Theorem for Bernoulli</div>
+            <div class="formula-content">
+              The standardized count converges in distribution to standard normal:
+              $$Z_n = \frac{K_n - np}{\sqrt{np(1-p)}} \xrightarrow{d} \mathcal{N}(0,1) \quad \text{as } n \to \infty$$
+              
+              Practical approximation (for moderate to large n):
+              $$K_n \approx \mathcal{N}\left(np, np(1-p)\right)$$
+            </div>
+          </div>
+
+          <div class="narrative">
+            <p style="margin-top: 1rem;">Homework 7's binomial distribution looked increasingly symmetric and bell-shaped as we increased n. That's CLT in action. By n=50 or n=100, the binomial is nearly indistinguishable from a normal curve with mean \(np\) and variance \(np(1-p)\). This is computationally convenient—for large n, we can use simpler normal approximations instead of calculating binomial coefficients.</p>
+          </div>
+        </div>
+
+        <div class="insight-box">
+          <div class="insight-title">💡 LLN vs CLT: Different but Complementary</div>
+          <div class="insight-content">
+            <p><strong>Law of Large Numbers:</strong> Tells us where the average goes (to μ). Says nothing about how spread out outcomes are.</p>
+            <p style="margin-top: 0.5rem;"><strong>Central Limit Theorem:</strong> Tells us the shape of the distribution. Shows that the standardized sum is approximately normal, revealing the bell curve shape.</p>
+            <p style="margin-top: 0.5rem;">In Homework 7: LLN explains why empirical distribution matches theoretical binomial. CLT explains why that binomial looks increasingly normal.</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- SECTION 4: Combinatorics Connection -->
+      <div class="hw-section">
+        <h2 style="color: #18e0e6;">Section 4: Binomial Coefficients & Combinatorial Foundations</h2>
+        
+        <div class="subsection">
+          <div class="subsection-title">🔢 Why Binomial Coefficients Matter</div>
+          
+          <div class="narrative">
+            <p>The binomial coefficient \(\binom{n}{k}\) appears in the formula for binomial probability, but its true meaning is combinatorial: it counts the number of ways to choose k items from n items without regard to order. This is fundamental.</p>
+
+            <p style="margin-top: 1rem;">In the context of Bernoulli trials, \(\binom{n}{k}\) answers the question: "In how many different sequences can exactly k successes occur among n trials?" The answer is \(\binom{n}{k}\), and since each sequence has probability \(p^k(1-p)^{n-k}\), the total probability is \(\binom{n}{k} \cdot p^k(1-p)^{n-k}\).</p>
+          </div>
+
+          <div class="math-box">
+            <div class="formula-title">Definition & Basic Properties</div>
+            <div class="formula-content">
+              $$\binom{n}{k} = \frac{n!}{k!(n-k)!}$$
+              
+              <strong>Key Properties:</strong>
+              <ul>
+                <li>Symmetry: \(\binom{n}{k} = \binom{n}{n-k}\)</li>
+                <li>Pascal's Identity: \(\binom{n}{k} = \binom{n-1}{k-1} + \binom{n-1}{k}\)</li>
+                <li>Sum: \(\sum_{k=0}^{n} \binom{n}{k} = 2^n\)</li>
+                <li>Probability constraint: \(\sum_{k=0}^{n} \binom{n}{k} p^k(1-p)^{n-k} = [p + (1-p)]^n = 1\)</li>
+              </ul>
+            </div>
+          </div>
+        </div>
+
+        <div class="subsection">
+          <div class="subsection-title">🔺 Pascal's Triangle: Visualizing Binomial Coefficients</div>
+          
+          <div class="narrative">
+            <p>Pascal's Triangle is one of mathematics' most elegant structures. Each row n contains all binomial coefficients \(\binom{n}{0}, \binom{n}{1}, \ldots, \binom{n}{n}\). Each entry is the sum of the two entries above it—this is Pascal's Identity in visual form.</p>
+
+            <p style="margin-top: 1rem;">Why is this connected to probability? Because it geometrically encodes all possible paths through a branching process. Imagine starting at the top and moving down, at each step choosing left or right. The number of paths reaching a particular position k in row n is exactly \(\binom{n}{k}\)—the same number of ways to arrange k successes in n trials.</p>
+
+            <p style="margin-top: 1rem;">The triangle also illustrates deeper patterns: the sum of nth row equals \(2^n\), which counts all possible subsets of an n-element set. The diagonals yield Fibonacci numbers. The entries themselves relate to many other mathematical sequences. Pascal's Triangle is a window into the hidden structure of combinatorics.</p>
+          </div>
+
+          <table>
+            <thead>
+              <tr>
+                <th>Row (n)</th>
+                <th colspan="9">Binomial Coefficients: \(\binom{n}{k}\) for k = 0,1,2,...</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>0</td>
+                <td>1</td>
+                <td colspan="8"></td>
+              </tr>
+              <tr>
+                <td>1</td>
+                <td>1</td>
+                <td>1</td>
+                <td colspan="7"></td>
+              </tr>
+              <tr>
+                <td>2</td>
+                <td>1</td>
+                <td>2</td>
+                <td>1</td>
+                <td colspan="6"></td>
+              </tr>
+              <tr>
+                <td>3</td>
+                <td>1</td>
+                <td>3</td>
+                <td>3</td>
+                <td>1</td>
+                <td colspan="5"></td>
+              </tr>
+              <tr>
+                <td>4</td>
+                <td>1</td>
+                <td>4</td>
+                <td>6</td>
+                <td>4</td>
+                <td>1</td>
+                <td colspan="4"></td>
+              </tr>
+              <tr>
+                <td>5</td>
+                <td>1</td>
+                <td>5</td>
+                <td>10</td>
+                <td>10</td>
+                <td>5</td>
+                <td>1</td>
+                <td colspan="3"></td>
+              </tr>
+              <tr>
+                <td>6</td>
+                <td>1</td>
+                <td>6</td>
+                <td>15</td>
+                <td>20</td>
+                <td>15</td>
+                <td>6</td>
+                <td>1</td>
+                <td colspan="2"></td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+        <div class="subsection">
+          <div class="subsection-title">📐 Binomial Expansion: Algebra Meets Probability</div>
+          
+          <div class="narrative">
+            <p>The binomial theorem is a fundamental algebraic identity that directly connects to probability:</p>
+          </div>
+
+          <div class="math-box">
+            <div class="formula-title">The Binomial Theorem</div>
+            <div class="formula-content">
+              $$(x + y)^n = \sum_{k=0}^{n} \binom{n}{k} x^k y^{n-k}$$
+              
+              Special cases revealing probability:
+              <ul>
+                <li>Set \(x = y = 1\): \(2^n = \sum_{k=0}^{n} \binom{n}{k}\) (total of nth row)</li>
+                <li>Set \(x = p, y = 1-p\): \(1 = \sum_{k=0}^{n} \binom{n}{k} p^k (1-p)^{n-k}\) ← This is the binomial PMF!</li>
+                <li>Set \(x = 1, y = -1\): \(0 = \sum_{k=0}^{n} (-1)^k \binom{n}{k}\) (alternating sum)</li>
+              </ul>
+            </div>
+          </div>
+
+          <div class="narrative">
+            <p style="margin-top: 1rem;">The binomial expansion isn't just an algebraic formula—it's the probability mass function of the binomial distribution in disguise. When we write \((p + q)^n\) where \(p + q = 1\), we're writing a normalized probability distribution. This unity between algebra and probability is a deep insight: algebraic manipulations of expansions correspond to probability calculations.</p>
+          </div>
+        </div>
+
+        <div class="insight-box">
+          <div class="insight-title">💡 Why This Matters: The Link Between Combinatorics and Probability</div>
+          <div class="insight-content">
+            <p>Combinatorics (the art of counting) and probability (the study of randomness) are two sides of the same coin. The binomial coefficient \(\binom{n}{k}\) is fundamentally a count: how many ways to choose k items from n. But it also appears in probability: how likely is it to see exactly k successes?</p>
+            <p style="margin-top: 0.5rem;">This isn't coincidence. If outcomes are equally likely, then probability = (number of favorable outcomes) / (total possible outcomes). Combinatorics counts both the numerator and denominator, so counting determines probability.</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- SECTION 5: Fibonacci & Hidden Patterns -->
+      <div class="hw-section">
+        <h2 style="color: #18e0e6;">Section 5: Hidden Patterns—Fibonacci & Beyond</h2>
+        
+        <div class="subsection">
+          <div class="subsection-title">🌀 The Fibonacci Sequence Lurking in Pascal's Triangle</div>
+          
+          <div class="narrative">
+            <p>One of mathematics' most beautiful surprises: the famous Fibonacci sequence—1, 1, 2, 3, 5, 8, 13, 21, 34, ...—is secretly encoded in Pascal's Triangle. If you sum the diagonals of Pascal's Triangle, you get consecutive Fibonacci numbers. This reveals a deep connection between linear recurrences and combinatorial structures.</p>
+          </div>
+
+          <div class="math-box">
+            <div class="formula-title">Fibonacci from Pascal's Diagonals</div>
+            <div class="formula-content">
+              The nth Fibonacci number is:
+              $$F_n = \sum_{k=0}^{\lfloor (n-1)/2 \rfloor} \binom{n-1-k}{k}$$
+              
+              Examples:
+              <ul>
+                <li>\(F_1 = 1 = \binom{0}{0}\)</li>
+                <li>\(F_2 = 1 = \binom{1}{0}\)</li>
+                <li>\(F_3 = 2 = \binom{2}{0} + \binom{1}{1}\)</li>
+                <li>\(F_4 = 3 = \binom{3}{0} + \binom{2}{1}\)</li>
+                <li>\(F_5 = 5 = \binom{4}{0} + \binom{3}{1} + \binom{2}{2}\)</li>
+              </ul>
+            </div>
+          </div>
+
+          <div class="narrative">
+            <p style="margin-top: 1rem;">What does this mean for Bernoulli processes? The Fibonacci recurrence \(F_n = F_{n-1} + F_{n-2}\) appears in contexts like counting binary sequences without consecutive 1's (or consecutive failures in Bernoulli trials). The combinatorial structure of such restricted sequences yields Fibonacci numbers. This is a reminder that probability and combinatorics are layered—what looks like pure randomness often has hidden recursive structure.</p>
+          </div>
+        </div>
+
+        <div class="subsection">
+          <div class="subsection-title">🔗 Generalizations: Multinomial & Negative Binomial</div>
+          
+          <div class="narrative">
+            <p>Bernoulli processes are the foundation, but probability theory extends naturally to richer scenarios through generalizations. Understanding these extensions reveals the adaptability and power of the underlying framework.</p>
+          </div>
+
+          <div class="math-box">
+            <div class="formula-title">Multinomial Distribution: k-ary Outcomes</div>
+            <div class="formula-content">
+              If each trial has k possible outcomes (not just 2) with probabilities \(p_1, p_2, \ldots, p_k\), after n trials the joint probability of seeing \(n_1, n_2, \ldots, n_k\) occurrences is:
+              $$P(N_1=n_1, \ldots, N_k=n_k) = \frac{n!}{n_1! \cdots n_k!} p_1^{n_1} \cdots p_k^{n_k}$$
+              
+              The multinomial coefficient \(\frac{n!}{n_1! \cdots n_k!}\) counts arrangements, generalizing binomial coefficients to k categories.
+            </div>
+          </div>
+
+          <div class="math-box">
+            <div class="formula-title">Negative Binomial Distribution: Flipping the Question</div>
+            <div class="formula-content">
+              Instead of: "In n trials, how many successes?" (binomial)
+              <br>
+              Ask: "How many trials until r successes?" (negative binomial)
+              <br><br>
+              Probability of needing exactly n trials to achieve r successes:
+              $$P(N = n) = \binom{n-1}{r-1} p^r (1-p)^{n-r} \quad n \geq r$$
+              
+              Same binomial coefficients appear, but in a different role—counting sequences instead of positions.
+            </div>
+          </div>
+
+          <div class="narrative">
+            <p style="margin-top: 1rem;">These generalizations share a pattern: combinatorial counting via factorials and binomial-like coefficients, weighted by probabilities. The mathematical machinery adapts elegantly to different problem formulations. This flexibility is why Bernoulli processes and binomial theory are so universal.</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- SECTION 6: Summary Synthesis -->
+      <div class="hw-section">
+        <h2 style="color: #18e0e6;">Section 6: Synthesis & Unified Understanding</h2>
+        
+        <div class="subsection">
+          <div class="subsection-title">🎯 The Grand Picture</div>
+          
+          <div class="narrative">
+            <p>Homework 7 and Homework 8, taken together, reveal a stunning mathematical landscape:</p>
+
+            <ul>
+              <li><strong>Homework 7's random walk</strong> is a visual, path-based perspective. It asks: "What are all the possible journeys, and where do they end?" This geometric view is intuitive and lends itself to simulation and visualization.</li>
+
+              <li><strong>Homework 8's Bernoulli process</strong> is an algebraic, counting-based perspective. It asks: "How many times does each outcome occur, and what's the probability distribution?" This combinatorial view connects to deep mathematical structures.</li>
+
+              <li>Both converge to the same distribution—the binomial. The Law of Large Numbers ensures that with enough samples, empirical and theoretical match. The Central Limit Theorem shows that this distribution approaches normality for large n.</li>
+
+              <li>Beneath these probabilistic concepts lies combinatorics: binomial coefficients count possibilities, Pascal's Triangle organizes them, binomial expansion expresses them algebraically. Fibonacci numbers and recursive sequences emerge as hidden patterns.</li>
+
+              <li>All of this—random walks, probability distributions, combinatorial counting, algebraic identities—flows from the simple idea of a Bernoulli trial: an independent experiment with two outcomes and fixed probability \(p\).</li>
+            </ul>
+          </div>
+        </div>
+
+        <div class="subsection">
+          <div class="subsection-title">🔀 How the Mathematics Properties Interconnect</div>
+          
+          <table>
+            <thead>
+              <tr>
+                <th>Mathematical Concept</th>
+                <th>How It Appears</th>
+                <th>Why It Matters</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td><strong>Binomial Coefficients</strong></td>
+                <td>Appear in binomial PMF: \(P(K=k) = \binom{n}{k} p^k (1-p)^{n-k}\)</td>
+                <td>Count sequences; multiply by probability per sequence</td>
+              </tr>
+              <tr>
+                <td><strong>Pascal's Triangle</strong></td>
+                <td>Rows contain all binomial coefficients for that n</td>
+                <td>Visual organization; reveals symmetries and patterns</td>
+              </tr>
+              <tr>
+                <td><strong>Binomial Expansion</strong></td>
+                <td>\((p + (1-p))^n = \sum \binom{n}{k} p^k (1-p)^{n-k} = 1\)</td>
+                <td>Proves PMF sums to 1; connects algebra to probability</td>
+              </tr>
+              <tr>
+                <td><strong>Fibonacci Sequence</strong></td>
+                <td>Diagonal sums in Pascal's Triangle yield Fibonacci numbers</td>
+                <td>Counts restricted sequences; appears in combinatorial recurrences</td>
+              </tr>
+              <tr>
+                <td><strong>Law of Large Numbers</strong></td>
+                <td>\(\hat{p}_n \to p\) as \(n \to \infty\)</td>
+                <td>Sample proportion converges to true probability</td>
+              </tr>
+              <tr>
+                <td><strong>Central Limit Theorem</strong></td>
+                <td>Standardized sum converges to \(\mathcal{N}(0,1)\)</td>
+                <td>Binomial approaches normal; enables simpler calculations</td>
+              </tr>
+              <tr>
+                <td><strong>Multinomial Coefficients</strong></td>
+                <td>Generalize binomial: \(\frac{n!}{n_1! \cdots n_k!}\)</td>
+                <td>Handle k outcomes; same principle, more flexibility</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+        <div class="insight-box">
+          <div class="insight-title">💡 The Deeper Truth</div>
+          <div class="insight-content">
+            <p>All these concepts—binomial distributions, combinatorics, limit theorems, Pascal's Triangle, Fibonacci—are manifestations of a single underlying principle: <strong>the behavior of independent repeated binary events</strong>.</p>
+            <p style="margin-top: 0.5rem;">Whether we model this as a random walk wandering up and down (Homework 7), count successes and failures (Homework 8), or examine the combinatorial structure (binomial coefficients), we're always describing the same mathematical reality from different angles.</p>
+            <p style="margin-top: 0.5rem;">This is the power of mathematical thinking: seemingly disparate concepts (random paths, counting sequences, recursive patterns) unite into a coherent whole when viewed through the right lens. The Bernoulli process is that lens.</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="centered">
+        <a href="homework.html" class="btn-main">← Back to Homework List</a>
+      </div>
+    </section>
+  </main>
+
+  <footer>
+    <span>&copy; 2025 Lorenzo Ciafrelli | MS Cybersecurity, Sapienza University of Rome</span>
+  </footer>
+
+  <script src="script.js"></script>
+</body>
+</html>
