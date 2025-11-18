@@ -1,0 +1,759 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Homework 9 — Foundations of Probability Theory</title>
+  <link rel="stylesheet" href="style.css"/>
+  <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;600;700&family=Orbitron:wght@600&display=swap" rel="stylesheet">
+  <script>
+    window.MathJax = {
+      tex: {
+        inlineMath: [['$', '$'], ['\\(', '\\)']],
+        displayMath: [['$$', '$$'], ['\\[', '\\]']],
+        processEscapes: true,
+        processEnvironments: true
+      },
+      svg: { fontCache: 'global' },
+      startup: {
+        delay: 500,
+        pageReady: () => MathJax.typesetPromise().catch(err => console.log(err))
+      }
+    };
+  </script>
+  <script async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+  <style>
+    main {
+      max-width: 1800px !important;
+      margin: 0 auto;
+      padding: 0 1rem;
+    }
+
+    .hw-detail {
+      max-width: 100%;
+      width: 100%;
+    }
+
+    .hw-section {
+      background: rgba(30,44,74,0.95);
+      border-radius: 16px;
+      margin: 2rem 0;
+      padding: 2rem;
+      box-shadow: 0 8px 32px rgba(24,224,230,0.15);
+    }
+    
+    .subsection {
+      background: rgba(20,32,66,0.6);
+      border-radius: 12px;
+      padding: 1.5rem;
+      margin: 1.5rem 0;
+      border-left: 4px solid #18e0e6;
+    }
+    
+    .subsection-title {
+      color: #18e0e6;
+      font-weight: 600;
+      font-size: 1.15rem;
+      margin-bottom: 1rem;
+    }
+
+    .narrative {
+      background: rgba(15,25,55,0.7);
+      border-radius: 8px;
+      padding: 1.25rem;
+      margin: 1rem 0;
+      border-left: 3px solid #4a9eff;
+      font-size: 0.95rem;
+      line-height: 1.9;
+      color: #b8d4ff;
+    }
+
+    .math-box {
+      background: rgba(8,15,35,0.95);
+      border-radius: 10px;
+      padding: 1.5rem;
+      margin: 1rem 0;
+      border-left: 3px solid #18e0e6;
+      color: #e9f2ff;
+      overflow-x: auto;
+    }
+
+    .formula-title {
+      color: #18e0e6;
+      font-weight: bold;
+      margin-bottom: 0.75rem;
+      font-size: 1.05rem;
+    }
+
+    .formula-content {
+      color: #b8d4ff;
+      line-height: 2;
+      margin: 0.5rem 0;
+      font-size: 1rem;
+    }
+
+    .diagram-box {
+      background: rgba(8,15,35,0.9);
+      border-radius: 10px;
+      padding: 2rem;
+      margin: 1.5rem 0;
+      border: 2px solid #2d4a7a;
+      text-align: center;
+      font-family: 'Courier New', monospace;
+      color: #18e0e6;
+      overflow-x: auto;
+      line-height: 1.8;
+    }
+
+    .diagram-title {
+      color: #18e0e6;
+      font-weight: bold;
+      margin-bottom: 1rem;
+      font-size: 1.05rem;
+    }
+
+    .definition-box {
+      background: rgba(76,175,80,0.08);
+      border-left: 4px solid #81c784;
+      border-radius: 8px;
+      padding: 1.25rem;
+      margin: 1rem 0;
+      color: #a5d6a7;
+    }
+
+    .definition-title {
+      color: #81c784;
+      font-weight: 600;
+      margin-bottom: 0.75rem;
+      font-size: 1.05rem;
+    }
+
+    .definition-content {
+      color: #a5d6a7;
+      line-height: 1.8;
+    }
+
+    .centered {
+      text-align: center;
+      margin: 2rem 0;
+    }
+
+    .btn-main {
+      display: inline-block;
+      background: linear-gradient(135deg, #18e0e6, #2bd4d9);
+      color: #0a1628;
+      padding: 1rem 2rem;
+      border-radius: 30px;
+      text-decoration: none;
+      font-weight: 700;
+      transition: all 0.3s;
+    }
+
+    .btn-main:hover {
+      transform: translateY(-3px);
+      box-shadow: 0 8px 20px rgba(24,224,230,0.3);
+    }
+
+    ul, ol {
+      line-height: 1.9;
+      margin-left: 1.5rem;
+    }
+
+    li {
+      margin-bottom: 0.7rem;
+      color: #b8d4ff;
+    }
+
+    p {
+      line-height: 1.8;
+      color: #b8d4ff;
+      margin-bottom: 1rem;
+    }
+
+    strong {
+      color: #18e0e6;
+    }
+
+    code {
+      background: rgba(8,15,35,0.9);
+      padding: 0.3rem 0.6rem;
+      border-radius: 4px;
+      color: #18e0e6;
+      font-family: 'Courier New', monospace;
+    }
+
+    h2 {
+      color: #18e0e6 !important;
+      margin-bottom: 1.5rem !important;
+    }
+
+    h3 {
+      color: #64b5f6 !important;
+      margin-top: 1.5rem !important;
+      margin-bottom: 1rem !important;
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <nav class="navbar">
+      <div class="logo">Statistics<span class="cyber">Cyber</span></div>
+      <ul id="navLinks">
+        <li><a href="index.html">Home</a></li>
+        <li><a href="homework.html">Homework</a></li>
+        <li><a href="about.html">About</a></li>
+      </ul>
+      <button class="nav-toggle" id="navToggle">&#9776;</button>
+    </nav>
+  </header>
+
+  <main>
+    <section class="hw-detail">
+      <h1>Homework 9: Foundations of Probability Theory</h1>
+      <p class="subtle">A rigorous examination of probability theory's conceptual foundations, from classical interpretations to the modern axiomatic framework, exploring connections to measure theory and deriving fundamental properties.</p>
+
+      <!-- SECTION 1: Interpretations of Probability -->
+      <div class="hw-section">
+        <h2 style="color: #18e0e6;">Section 1: Main Interpretations of Probability</h2>
+        
+        <div class="subsection">
+          <div class="subsection-title">Classical (Laplacian) Interpretation</div>
+          
+          <div class="narrative">
+            <p>The classical interpretation of probability emerged from the work of early mathematicians and represents one of the oldest conceptualizations. It defines probability through a principle of symmetry: when an experiment has finitely many possible outcomes and there is no reason to believe one outcome is more likely than another, each outcome is considered equally likely. Under this framework, the probability of an event is computed as the ratio of the number of favorable outcomes to the total number of possible outcomes.</p>
+
+            <p style="margin-top: 1rem;">This interpretation is intuitive and works well for well-defined, symmetric scenarios such as rolling fair dice, drawing cards from a shuffled deck, or other games of chance where symmetry can be reasonably assumed. However, the classical interpretation contains a subtle circularity: it assumes outcomes are "equally likely," but without first defining probability, how can we know when outcomes are equally likely? This apparent logical circle reveals a fundamental limitation—the classical approach presupposes the very concept it attempts to define.</p>
+
+            <p style="margin-top: 1rem;">Additionally, the classical interpretation is restricted to finite sample spaces. Many real-world experiments have infinitely many outcomes or outcomes that cannot reasonably be assumed equally likely. For such situations, the classical definition fails entirely, highlighting its limited scope.</p>
+          </div>
+
+          <div class="math-box">
+            <div class="formula-title">Classical Probability Formula</div>
+            <div class="formula-content">
+              If an experiment has n equally likely outcomes and m of these outcomes are favorable to event A:
+              $$P(A) = \frac{\text{number of favorable outcomes}}{\text{total number of outcomes}} = \frac{m}{n}$$
+            </div>
+          </div>
+        </div>
+
+        <div class="subsection">
+          <div class="subsection-title">Frequentist Interpretation</div>
+          
+          <div class="narrative">
+            <p>The frequentist interpretation attempts to ground probability in empirical reality by defining it in terms of the long-run relative frequency of an event. According to this view, the probability of an event is the limit of the proportion of times the event occurs as an experiment is repeated infinitely many times under identical conditions. This interpretation gained prominence as probability theory began interacting more deeply with empirical science and statistics.</p>
+
+            <p style="margin-top: 1rem;">The frequentist approach addresses some limitations of the classical interpretation: it does not require the assumption of equally likely outcomes, and theoretically it can be applied to any repeatable experiment. The interpretation is also operationally clear—to estimate a probability, one simply repeats an experiment many times and observes how often the event occurs. This empirical grounding has made frequentism dominant in statistics and many sciences.</p>
+
+            <p style="margin-top: 1rem;">However, the frequentist interpretation faces serious conceptual challenges. First, the limit of relative frequency may not exist mathematically for all experiments. Second, and perhaps more fundamentally, many events of interest are not repeatable: the probability that it will rain tomorrow at a specific location, the probability that a particular business venture will succeed, or the probability of a unique historical event. These single, unrepeatable events have no meaningful frequency in the frequentist sense, yet intuition suggests they should still be assigned probabilities. The frequentist approach struggles to accommodate such situations philosophically.</p>
+          </div>
+
+          <div class="math-box">
+            <div class="formula-title">Frequentist Probability Definition</div>
+            <div class="formula-content">
+              If an experiment is repeated N times and event A occurs \(n_A\) times:
+              $$P(A) = \lim_{N \to \infty} \frac{n_A}{N}$$
+              
+              The probability is defined as the limit of the relative frequency as the number of trials approaches infinity.
+            </div>
+          </div>
+        </div>
+
+        <div class="subsection">
+          <div class="subsection-title">Bayesian Interpretation</div>
+          
+          <div class="narrative">
+            <p>The Bayesian interpretation represents a fundamentally different perspective: probability is not an objective property of the world but rather a measure of subjective belief or uncertainty about a proposition. Under this view, probability quantifies the degree to which a rational agent should believe in a hypothesis or proposition, given available information. This belief is not fixed but evolves as new evidence is acquired.</p>
+
+            <p style="margin-top: 1rem;">The Bayesian framework is particularly powerful because it provides a systematic method for updating beliefs in light of new data through Bayes' theorem. An agent begins with a prior probability reflecting initial beliefs, updates this belief upon observing new evidence (the likelihood), and arrives at a posterior probability that synthesizes both prior knowledge and the new data. This sequential updating process makes Bayesian probability a natural framework for learning and inference.</p>
+
+            <p style="margin-top: 1rem;">A key advantage of Bayesian interpretation is that it can assign probabilities to unique, unrepeatable events by encoding available information and uncertainty about those events. This makes it applicable to scientific hypotheses, medical diagnoses, business decisions, and other domains where classical or frequentist approaches struggle. However, the subjectivity inherent in choosing prior beliefs is contentious. Different individuals with different priors may assign different probabilities to the same event. Critics argue this subjectivity undermines probability's objectivity; proponents counter that explicit, transparent priors are more honest than the hidden assumptions in other interpretations.</p>
+          </div>
+
+          <div class="math-box">
+            <div class="formula-title">Bayes' Theorem</div>
+            <div class="formula-content">
+              For a hypothesis H and evidence E:
+              $$P(H|E) = \frac{P(E|H) \cdot P(H)}{P(E)}$$
+              
+              Where:
+              <ul>
+                <li>\(P(H)\) = prior probability of hypothesis H (belief before observing E)</li>
+                <li>\(P(E|H)\) = likelihood of evidence E given H</li>
+                <li>\(P(E)\) = total probability of evidence (normalizing constant)</li>
+                <li>\(P(H|E)\) = posterior probability of H given E (updated belief after observing E)</li>
+              </ul>
+            </div>
+          </div>
+        </div>
+
+        <div class="subsection">
+          <div class="subsection-title">Geometric Interpretation</div>
+          
+          <div class="narrative">
+            <p>The geometric interpretation defines probability as a ratio of geometric measures. When a random point is uniformly distributed within a region, the probability that it falls within a sub-region is equal to the ratio of the geometric measure (length, area, volume, etc.) of the sub-region to the measure of the entire region. This interpretation is particularly natural for continuous probability problems and provides an intuitive spatial understanding of probability.</p>
+
+            <p style="margin-top: 1rem;">The geometric view has several strengths: it provides clear visual intuition, handles continuous sample spaces naturally, and connects probability to integration and calculus. Many continuous probability problems become transparent when viewed geometrically. However, the geometric interpretation, like the classical one, rests on an assumption of uniformity—that the point is uniformly distributed within the region. When the underlying probability distribution is non-uniform, the direct ratio-of-measures approach no longer applies. Additionally, geometric probability only makes sense for regions where the measures are finite and well-defined, limiting its scope to relatively well-behaved spaces.</p>
+          </div>
+
+          <div class="math-box">
+            <div class="formula-title">Geometric Probability</div>
+            <div class="formula-content">
+              For a region R and a measurable subregion A:
+              $$P(\text{randomly distributed point} \in A) = \frac{\text{measure}(A)}{\text{measure}(R)}$$
+              
+              Where measure refers to length (1D), area (2D), volume (3D), or more generally, Lebesgue measure in higher dimensions.
+            </div>
+          </div>
+        </div>
+
+        <div class="subsection">
+          <div class="subsection-title">The Fundamental Problem: Interpretational Inconsistencies</div>
+          
+          <div class="narrative">
+            <p>These four major interpretations reveal a profound conceptual tension in probability theory. They disagree on fundamental questions that define the very nature of probability:</p>
+
+            <ul>
+              <li><strong>What kinds of events can have probabilities?</strong> Classical and geometric interpretations require finite equally likely (or uniformly distributed) outcomes, severely restricting their scope. Frequentist interpretation requires repeatable experiments. Bayesian interpretation applies to any proposition, including unique unrepeatable events.</li>
+
+              <li><strong>Is probability objective or subjective?</strong> Classical probability is objective—determined by symmetry. Frequentist probability is objective—determined by limiting frequency. Bayesian probability is subjective—determined by personal belief. Geometric probability is objective in form but often assumes uniform distribution as a modeling choice.</li>
+
+              <li><strong>How are probabilities determined?</strong> Classical approach: count favorable vs. total outcomes. Frequentist approach: observe long-run frequencies. Bayesian approach: specify prior beliefs and update with evidence. Geometric approach: measure regions.</li>
+
+              <li><strong>Can probability be assigned to events that are not part of a natural ensemble?</strong> Classical and geometric interpretations struggle here. Frequentist interpretation struggles even more—if an event is unique, there is no frequency. Bayesian interpretation has no difficulty—every uncertain proposition can be assigned a probability.</li>
+            </ul>
+
+            <p style="margin-top: 1rem;">These disagreements are not merely philosophical quibbles. They lead to genuinely different probability assignments for the same scenario. For instance, what is the probability that a specific person will recover from a disease? A classical probability perspective doesn't apply (outcomes aren't equally likely). A frequentist perspective would say we need epidemiological data on recovery rates. A geometric perspective doesn't directly apply. A Bayesian perspective would incorporate the individual's characteristics, medical history, and relevant data into a subjective probability estimate. Each interpretation provides a different framework and potentially a different numerical answer.</p>
+
+            <p style="margin-top: 1rem;">For over a century, these competing interpretations created confusion and occasional dispute within probability theory and statistics. Mathematicians and philosophers disagreed fundamentally on what probability "really is." This conceptual fragmentation was not merely unsatisfying intellectually—it created practical problems for the rigor and foundations of probability as a mathematical discipline.</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- SECTION 2: The Axiomatic Approach -->
+      <div class="hw-section">
+        <h2 style="color: #18e0e6;">Section 2: Kolmogorov's Axiomatic Approach & Resolution of Inconsistencies</h2>
+        
+        <div class="subsection">
+          <div class="subsection-title">The Revolutionary Insight</div>
+          
+          <div class="narrative">
+            <p>In 1933, the Russian mathematician Andrey Kolmogorov proposed a breakthrough resolution to the interpretational conflicts that had plagued probability theory. Rather than attempting to declare one interpretation "correct" or trying to reconcile all interpretations through philosophical argument, Kolmogorov took a different approach entirely. He sidestepped the interpretational debates and instead placed probability on a rigorous mathematical foundation through axiomatization.</p>
+
+            <p style="margin-top: 1rem;">The fundamental insight was deceptively simple: instead of asking "what is probability?", one should ask "what properties must probability have?" By identifying a minimal set of essential properties—axioms—that any reasonable probability must satisfy, Kolmogorov unified all interpretations under a single mathematical structure. These axioms are so general and abstract that classical, frequentist, Bayesian, and geometric probabilities all satisfy them. Rather than choosing which interpretation is "right," the axiomatic framework shows they are all valid mathematical objects, each a particular instantiation of the same abstract structure.</p>
+
+            <p style="margin-top: 1rem;">This approach transformed probability from a philosophical battleground into a rigorous mathematical science. By focusing on formal properties rather than interpretations, mathematicians could proceed with confidence that their results would be valid regardless of how practitioners interpreted the probabilities numerically or conceptually. The interpretations became distinct applications of the same underlying mathematics, rather than competing foundational claims.</p>
+          </div>
+        </div>
+
+        <div class="subsection">
+          <div class="subsection-title">The Three Axioms of Probability</div>
+          
+          <div class="narrative">
+            <p>Kolmogorov's axiomatic framework is built on three fundamental axioms. These axioms specify the essential properties that any function assigning real numbers to events must have to qualify as a probability measure. The axioms are minimal—they impose the least restrictive conditions possible—yet they are sufficient to generate the entire structure of probability theory.</p>
+          </div>
+
+          <div class="definition-box">
+            <div class="definition-title">Kolmogorov's Three Axioms of Probability</div>
+            <div class="definition-content">
+              Let \(P: \mathcal{F} \to [0,1]\) be a function assigning real numbers between 0 and 1 to events in a σ-algebra \(\mathcal{F}\). P is a probability measure if and only if the following three axioms hold:
+              <br><br>
+              <strong>Axiom 1 (Non-negativity):</strong>
+              $$P(A) \geq 0 \quad \text{for all events } A \in \mathcal{F}$$
+              
+              Probabilities are never negative. This reflects the intuition that probability measures likelihood or possibility, which cannot be negative.
+              <br><br>
+              <strong>Axiom 2 (Normalization):</strong>
+              $$P(\Omega) = 1$$
+              
+              The probability that something (anything) happens when the experiment is conducted is exactly 1. Here, \(\Omega\) is the sample space—the set of all possible outcomes.
+              <br><br>
+              <strong>Axiom 3 (Countable Additivity):</strong>
+              $$P\left(\bigcup_{i=1}^{\infty} A_i\right) = \sum_{i=1}^{\infty} P(A_i)$$
+              
+              For any countably infinite collection of mutually disjoint (non-overlapping) events \(A_1, A_2, A_3, \ldots\), the probability that at least one occurs equals the sum of their individual probabilities.
+            </div>
+          </div>
+
+          <div class="narrative">
+            <p style="margin-top: 1rem;">These three axioms encode the minimal essential properties that capture the intuitive notion of probability. Axiom 1 is self-evident—probabilities cannot be negative. Axiom 2 establishes that the total probability across all possible outcomes is normalized to 1, a natural convention that ensures probabilities are meaningfully comparable and interpretable. Axiom 3, countable additivity, is the mathematical expression of the intuition that probabilities should be additive: if events cannot overlap, the probability of their union should be the sum of their individual probabilities.</p>
+
+            <p style="margin-top: 1rem;">The power of these axioms lies in their abstraction and generality. They make no statement about how probabilities are determined—whether through counting, limiting frequencies, subjective assessment, or geometric measure. They specify only what mathematical properties the resulting numbers must possess. This abstraction is precisely what enables the axioms to accommodate all interpretations: each interpretation provides a different method for assigning numbers to events, but as long as the resulting assignment satisfies the three axioms, it is mathematically valid.</p>
+          </div>
+        </div>
+
+        <div class="subsection">
+          <div class="subsection-title">How the Axioms Resolve Interpretational Conflicts</div>
+          
+          <div class="narrative">
+            <p>The axiomatic framework resolves conceptual inconsistencies not by declaring some interpretations wrong, but by showing that apparent conflicts are resolved when one adopts a properly abstract mathematical perspective. Let us examine how the axioms reconcile the major interpretational tensions:</p>
+
+            <p style="margin-top: 1rem;"><strong>Single Events vs. Repeatable Events:</strong> The classical and frequentist interpretations appear irreconcilable regarding probability for single, non-repeatable events. Classical probability seems to require equally likely outcomes, which only make sense for finite discrete events. Frequentist probability seems to require repeated trials, which are impossible for unique events. However, the axiomatic framework imposes no such restrictions. Any assignment of numbers between 0 and 1 to events that satisfies the three axioms is a valid probability measure. A Bayesian can assign a probability of 0.6 to a unique historical event (say, whether Julius Caesar was assassinated), and this assignment is perfectly valid mathematically as long as it is consistent with the axioms. The classical theorist can assign probabilities to dice outcomes, and the frequentist can assign limiting frequencies to repeatable experiments. All three are valid; they differ in interpretation, not mathematics.</p>
+
+            <p style="margin-top: 1rem;"><strong>Objectivity vs. Subjectivity:</strong> Frequentist probability claims objectivity—probabilities are determined by empirical frequencies. Bayesian probability allows subjectivity—different individuals with different beliefs can assign different probabilities. Under the axiomatic framework, both are valid. A frequentist probability calculated from 10,000 repetitions of an experiment is a perfectly valid probability measure satisfying the axioms. A Bayesian probability reflecting an individual's subjective belief is also a valid probability measure. The axioms are neutral on whether probabilities are "really" objective or subjective—they simply require that whatever assignment is made must be mathematically consistent.</p>
+
+            <p style="margin-top: 1rem;"><strong>Finite vs. Infinite Spaces:</strong> The classical interpretation struggles with infinite sample spaces; the frequentist and geometric interpretations can handle them via limiting processes and measure theory, respectively. The axioms encompass all cases: countable additivity (Axiom 3) naturally generalizes to infinite collections, and the framework can be extended to uncountably infinite spaces through measure theory. The axioms provide a unified language accommodating discrete, continuous, and even more exotic probability spaces.</p>
+
+            <p style="margin-top: 1rem;"><strong>The Core Resolution:</strong> By shifting focus from "what does probability mean?" to "what properties must probability have?", the axioms bypass philosophical disputes. Different interpretations answer the first question differently but all agree on the second. The mathematical framework is interpretation-agnostic. This is not a flaw but a feature: it allows mathematicians and statisticians to work rigorously with probability while remaining genuinely agnostic about its ultimate philosophical nature. Philosophers and practitioners can continue debating interpretation while using the same mathematics.</p>
+          </div>
+        </div>
+
+        <div class="subsection">
+          <div class="subsection-title">The Probability Space</div>
+          
+          <div class="narrative">
+            <p>The axiomatic framework is incarnated in the formal concept of a probability space, which specifies the complete mathematical structure within which probability operates. A probability space is a triplet consisting of three components: the sample space (encoding all possible outcomes), a σ-algebra (specifying which subsets of outcomes are events), and a probability measure (assigning probabilities to events).</p>
+          </div>
+
+          <div class="definition-box">
+            <div class="definition-title">Probability Space Definition</div>
+            <div class="definition-content">
+              A probability space is a triplet \((\Omega, \mathcal{F}, P)\) where:
+              <br><br>
+              <strong>\(\Omega\) = Sample Space:</strong> The set of all possible outcomes of the experiment. It must be non-empty and exhaustive—every possible outcome is included.
+              <br><br>
+              <strong>\(\mathcal{F}\) = σ-algebra (Sigma-algebra):</strong> A collection of subsets of \(\Omega\) representing events. The σ-algebra has three essential properties: it contains the empty set and the entire space; it is closed under complementation (if A is an event, so is its complement); it is closed under countable unions (if \(A_1, A_2, \ldots\) are events, their union is an event). Events are precisely the elements of \(\mathcal{F}\).
+              <br><br>
+              <strong>\(P\) = Probability Measure:</strong> A function \(P: \mathcal{F} \to [0,1]\) that assigns a probability to each event, satisfying Kolmogorov's three axioms.
+            </div>
+          </div>
+
+          <div class="narrative">
+            <p style="margin-top: 1rem;">The probability space is the complete formal structure within which probability lives. Any probability question must be framed within a properly defined probability space. Specifying a probability space means explicitly defining what the possible outcomes are, which subsets of outcomes are considered events, and what probability is assigned to each event. This explicitness is powerful: it forces clarity about what is being modeled and what assumptions underlie the model.</p>
+
+            <p style="margin-top: 1rem;">Different models for the same physical phenomenon may use different probability spaces. A Bayesian's probability space might assign initial probabilities reflecting prior beliefs; a frequentist's might base probabilities on observed frequencies. Yet both spaces satisfy the axioms and thus are equally valid mathematically. The difference is interpretational and arises from different choices about how to populate the probability space with concrete numbers, not from a difference in mathematical structure.</p>
+          </div>
+
+          <div class="diagram-box">
+            <div class="diagram-title">Structure of a Probability Space</div>
+            <pre>
+SAMPLE SPACE: Ω = {ω₁, ω₂, ω₃, ...}
+    All possible outcomes
+    
+    │
+    ├─ In finite space: Ω = {1, 2, 3, 4, 5, 6}  (die outcomes)
+    ├─ In continuous space: Ω = ℝ (real numbers)
+    └─ In abstract space: arbitrary set
+    
+σ-ALGEBRA: F (collection of events)
+    │
+    ├─ Must contain: ∅ (impossible event)
+    ├─ Must contain: Ω (certain event)
+    ├─ If A ∈ F, then A^c ∈ F
+    ├─ If {Aᵢ} ⊆ F, then ⋃Aᵢ ∈ F
+    │
+    └─ F determines which subsets are "valid events"
+    
+PROBABILITY MEASURE: P: F → [0, 1]
+    │
+    ├─ P(∅) = 0
+    ├─ P(Ω) = 1
+    ├─ P(A) ≥ 0 for all A
+    └─ P(⋃Aᵢ) = ΣP(Aᵢ) for disjoint Aᵢ
+            </pre>
+          </div>
+        </div>
+      </div>
+
+      <!-- SECTION 3: Measure Theory & Probability -->
+      <div class="hw-section">
+        <h2 style="color: #18e0e6;">Section 3: Measure Theory as the Foundation of Probability</h2>
+        
+        <div class="subsection">
+          <div class="subsection-title">σ-Algebras and Measurable Spaces</div>
+          
+          <div class="narrative">
+            <p>A σ-algebra is a mathematical structure that specifies which subsets of the sample space are "measurable"—which subsets can be meaningfully assigned a measure (or probability). The motivation for σ-algebras arises from a fundamental difficulty in continuous probability spaces: it is impossible to assign a measure to every possible subset of an uncountable set (like the real line) while maintaining consistency with the axioms. Attempting to do so leads to mathematical paradoxes and contradictions. σ-algebras sidestep this problem by restricting attention to a carefully chosen collection of subsets that are "nice" enough to be measured consistently.</p>
+
+            <p style="margin-top: 1rem;">For finite or countably infinite sample spaces, the σ-algebra can be simply the power set (all possible subsets), and every subset can be an event. For uncountable spaces like the real numbers, the σ-algebra must be more restrictive. The most common choice is the Borel σ-algebra, generated by open intervals. This contains all intervals, their complements, all countable unions of intervals, and all sets obtained by these operations. This is rich enough to cover virtually all sets encountered in practical probability work, yet restricted enough to avoid paradoxes.</p>
+
+            <p style="margin-top: 1rem;">From a mathematical perspective, a measurable space is the pair \((\Omega, \mathcal{F})\) consisting of a sample space and a σ-algebra on it. Every probability problem is implicitly (or should be explicitly) operating within a measurable space. The σ-algebra defines which events are "valid" for that model.</p>
+          </div>
+
+          <div class="definition-box">
+            <div class="definition-title">σ-Algebra: Formal Definition</div>
+            <div class="definition-content">
+              A σ-algebra (sigma-algebra) on a set \(\Omega\) is a collection \(\mathcal{F}\) of subsets of \(\Omega\) such that:
+              <br><br>
+              1. \(\emptyset \in \mathcal{F}\) (the empty set is in the σ-algebra)
+              <br><br>
+              2. If \(A \in \mathcal{F}\), then \(A^c \in \mathcal{F}\) (the σ-algebra is closed under complementation)
+              <br><br>
+              3. If \(\{A_1, A_2, A_3, \ldots\}\) is a countable collection of sets in \(\mathcal{F}\), then \(\bigcup_{i=1}^{\infty} A_i \in \mathcal{F}\) (the σ-algebra is closed under countable unions)
+              <br><br>
+              From these properties, it follows that \(\Omega \in \mathcal{F}\) and \(\mathcal{F}\) is also closed under countable intersections.
+            </div>
+          </div>
+
+          <div class="narrative">
+            <p style="margin-top: 1rem;">These conditions ensure that σ-algebras are closed under the standard set-theoretic operations that we perform in probability. If we want the union of countably many events to be an event, the σ-algebra must be closed under countable unions. If we want the complement of an event (its negation) to be an event, the σ-algebra must be closed under complementation. These conditions capture exactly what we need for probability to behave well.</p>
+          </div>
+        </div>
+
+        <div class="subsection">
+          <div class="subsection-title">Probability Measures within Measure Theory</div>
+          
+          <div class="narrative">
+            <p>In the broader framework of measure theory, a probability measure is a specialized type of measure. A measure is a function that assigns a numerical "size" or "mass" to sets—generalizing the intuitive notions of length (for intervals), area (for regions), or volume (for solids). Probability is measure theory's special case where the total measure of the space is normalized to 1.</p>
+
+            <p style="margin-top: 1rem;">The connection between probability and measure theory reveals a profound unity in mathematics. Lebesgue measure, which assigns lengths to intervals on the real line, is a measure. Probability measures, which assign likelihoods to events, are also measures. This common mathematical structure means tools developed for measuring sets (integration, convergence theorems, Fubini's theorem for products) automatically apply to probability. This unification is not merely conceptually elegant; it provides a treasury of mathematical techniques for working with probability distributions.</p>
+
+            <p style="margin-top: 1rem;">A measure space is the triplet \((\Omega, \mathcal{F}, \mu)\) where \(\mu\) is a measure on the measurable space \((\Omega, \mathcal{F})\). When \(\mu(\Omega) = 1\), the measure space becomes a probability space. This formal similarity shows that probability is not exotic or separate from general mathematics—it is a natural specialization of the theory of measures.</p>
+          </p>
+          </div>
+
+          <div class="definition-box">
+            <div class="definition-title">Measure: General Framework</div>
+            <div class="definition-content">
+              A measure on a measurable space \((\Omega, \mathcal{F})\) is a function \(\mu: \mathcal{F} \to [0, \infty]\) satisfying:
+              <br><br>
+              1. \(\mu(\emptyset) = 0\) (the empty set has measure zero)
+              <br><br>
+              2. Countable additivity: For any countable collection of disjoint sets \(\{A_i\} \subseteq \mathcal{F}\):
+              $$\mu\left(\bigcup_{i=1}^{\infty} A_i\right) = \sum_{i=1}^{\infty} \mu(A_i)$$
+              
+              A probability measure is a measure with \(\mu(\Omega) = 1\), ensuring it is normalized. The normalization makes the measure into a probability: it quantifies relative likelihoods as numbers between 0 and 1.
+            </div>
+          </definition-box>
+
+          <div class="narrative">
+            <p style="margin-top: 1rem;">This general framework of measure theory allows probability to be integrated into a vast mathematical landscape. Results about measures apply immediately to probability measures. For instance, the Radon-Nikodym theorem in measure theory establishes conditions under which one measure can be expressed as a density with respect to another measure. In probability, this translates directly to conditions for when probability distributions possess densities, which is fundamental for understanding continuous random variables.</p>
+          </div>
+        </div>
+
+        <div class="subsection">
+          <div class="subsection-title">Measurable Functions and Random Variables</div>
+          
+          <div class="narrative">
+            <p>A random variable is not truly a "variable" in the conventional sense—it is a function mapping outcomes from the sample space to numerical values. To ensure that this mapping respects the probability structure, the function must be measurable: the preimage of any Borel set must be a measurable event (in the σ-algebra). This measurability condition ensures that probabilities are well-defined for all events of interest involving the random variable.</p>
+
+            <p style="margin-top: 1rem;">Consider a simple example: suppose we roll a die (sample space \(\Omega = \{1,2,3,4,5,6\}\)) and define a random variable X that maps each outcome to its face value: \(X(1) = 1, X(2) = 2,\) etc. For the event "\(X \leq 3\)", we need to ask whether the preimage \(X^{-1}([0,3]) = \{1,2,3\}\) is a measurable set (an event in our σ-algebra). If our σ-algebra includes all subsets (as is standard for finite spaces), then yes, it is measurable, and we can meaningfully compute \(P(X \leq 3)\). If our σ-algebra were somehow restricted (e.g., by including only certain special subsets), then some events involving X might not be well-defined.</p>
+
+            <p style="margin-top: 1rem;">The formal definition of measurability ensures this consistency throughout probability theory. Without the measurability requirement, random variables could be defined in ways that lead to undefined or contradictory probabilities. By requiring measurability, we guarantee that probability is well-defined for all events naturally associated with a random variable.</p>
+          </div>
+
+          <div class="definition-box">
+            <div class="definition-title">Measurable Function (Random Variable)</div>
+            <div class="definition-content">
+              Let \((\Omega, \mathcal{F})\) be a measurable space. A function \(X: \Omega \to \mathbb{R}\) is measurable (also called a random variable) if for every Borel set \(B \subseteq \mathbb{R}\):
+              $$X^{-1}(B) = \{\omega \in \Omega : X(\omega) \in B\} \in \mathcal{F}$$
+              
+              That is, the preimage of every Borel set under X is a measurable set (an event in the σ-algebra). This ensures that events like \(\{X \leq x\}\), \(\{a \leq X \leq b\}\), and \(\{X \in B\}\) are all measurable and thus have well-defined probabilities.
+            </div>
+          </definition-box>
+
+          <div class="narrative">
+            <p style="margin-top: 1rem;">The measurability condition is often automatically satisfied in practice. For typical sample spaces and σ-algebras, and for functions that arise naturally in applications, measurability holds without explicit verification. However, the condition is mathematically essential: it prevents pathological situations where a "random variable" could be defined in ways incompatible with the probability structure. The measurability requirement ensures logical consistency throughout probability theory.</p>
+          </div>
+
+          <div class="diagram-box">
+            <div class="diagram-title">Random Variable as Measurable Function</div>
+            <pre>
+SAMPLE SPACE Ω        REAL NUMBERS ℝ
+   (abstract)              (concrete)
+   
+   ω₁ ──┐
+   ω₂ ──┼─→  X(ω) ∈ ℝ
+   ω₃ ──┤
+   ...  └──
+   
+EVENT A ⊆ Ω       BOREL SET B ⊆ ℝ
+  (measurable)     (standard sets)
+   
+Preimage: X⁻¹(B) = {ω ∈ Ω : X(ω) ∈ B}
+
+MEASURABILITY REQUIREMENT:
+If B is a Borel set, then X⁻¹(B) must be in the σ-algebra F
+This ensures P(X ∈ B) is well-defined
+            </pre>
+          </div>
+        </div>
+
+        <div class="subsection">
+          <div class="subsection-title">Integration and Expectations</div>
+          
+          <div class="narrative">
+            <p>Measure theory provides the rigorous foundation for computing expectations of random variables through Lebesgue integration. The Lebesgue integral is more general and powerful than the classical Riemann integral because it accommodates measures that are singular (concentrated on sets of zero measure) or otherwise exotic. For probability, this means expectations are well-defined even for pathological distributions that would cause problems for elementary approaches.</p>
+
+            <p style="margin-top: 1rem;">The expectation of a random variable X with respect to a probability measure P is formally defined as the Lebesgue integral of X with respect to P:</p>
+          </div>
+
+          <div class="math-box">
+            <div class="formula-title">Expectation via Lebesgue Integration</div>
+            <div class="formula-content">
+              For a measurable function \(X: \Omega \to \mathbb{R}\) on a probability space \((\Omega, \mathcal{F}, P)\):
+              $$\mathbb{E}[X] = \int_{\Omega} X(\omega) \, dP(\omega)$$
+              
+              This is the Lebesgue integral of X with respect to the measure P. It generalizes the expectation to all measurable functions where the integral is defined, including those with non-standard or singular distributions.
+            </div>
+          </math-box>
+
+          <div class="narrative">
+            <p style="margin-top: 1rem;">This definition unifies expectations across all types of random variables: discrete (where the integral becomes a sum), continuous (where it becomes a standard integral with respect to a density), and even mixed cases. The measure-theoretic approach reveals that the expectation concept is fundamentally about integration with respect to a measure, and the specific form (sum vs. integral) depends on the structure of the measure, not on different definitional approaches for discrete vs. continuous cases.</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- SECTION 4: Deriving Properties -->
+      <div class="hw-section">
+        <h2 style="color: #18e0e6;">Section 4: Fundamental Properties Derived from the Axioms</h2>
+        
+        <div class="subsection">
+          <div class="subsection-title">The Subadditivity Property</div>
+          
+          <div class="narrative">
+            <p>Subadditivity is a foundational property of probability measures that immediately follows from the axioms. It establishes that the probability of a union of events cannot exceed the sum of their individual probabilities. This property is particularly powerful when computing upper bounds on probabilities, especially when exact calculations are difficult or when events may not be independent or disjoint.</p>
+
+            <p style="margin-top: 1rem;">The intuition behind subadditivity is straightforward: when you add up individual probabilities without accounting for overlaps, you inevitably overcount. If events A and B both occur with probability 0.5, their sum is 1, but the probability that at least one occurs is at most 1 (since the union is a subset of the sample space). If they overlap significantly, the union's probability is strictly less than the sum. Subadditivity captures this idea formally.</p>
+          </div>
+
+          <div class="math-box">
+            <div class="formula-title">Subadditivity Property</div>
+            <div class="formula-content">
+              For any countable collection of events \(A_1, A_2, A_3, \ldots\):
+              $$P\left(\bigcup_{i=1}^{\infty} A_i\right) \leq \sum_{i=1}^{\infty} P(A_i)$$
+              
+              <strong>Finite Case (Union Bound):</strong>
+              $$P(A_1 \cup A_2 \cup \cdots \cup A_n) \leq P(A_1) + P(A_2) + \cdots + P(A_n)$$
+            </div>
+          </math-box>
+
+          <div class="narrative">
+            <p style="margin-top: 1rem;">Subadditivity is particularly useful in the context of the Union Bound (finite case), which is a standard tool in probability and statistics. The union bound provides a conservative upper bound on the probability that at least one of multiple events occurs. For instance, in statistical hypothesis testing with multiple comparisons, the union bound helps control the probability of at least one false positive among many tests. In reliability engineering, the union bound bounds the probability that at least one component fails.</p>
+
+            <p style="margin-top: 1rem;">The equality in subadditivity holds exactly when the events are disjoint (mutually exclusive). When events overlap, there is strict inequality: the probability of the union is strictly less than the sum of individual probabilities because the overlapping region would be counted multiple times in the sum but should only be counted once in the probability of the union.</p>
+          </div>
+        </div>
+
+        <div class="subsection">
+          <div class="subsection-title">The Inclusion-Exclusion Principle</div>
+          
+          <div class="narrative">
+            <p>While subadditivity provides a conservative upper bound, the inclusion-exclusion principle gives an exact formula for the probability of a union. It systematically accounts for all overlaps by alternately adding and subtracting probabilities of intersections at different levels. This principle is more powerful than subadditivity because it yields exact values rather than bounds, but it requires knowing probabilities of all pairwise, triple-wise, and higher-order intersections, which can become computationally intensive for large collections of events.</p>
+
+            <p style="margin-top: 1rem;">The principle derives its name from its structure: you first "include" all individual probabilities (union of all events can be approximated by adding individual probabilities), then "exclude" the overcounting of pairwise intersections (subtract their probabilities), then "include" back the triple intersections (which were subtracted too many times), and so on, alternating between inclusion and exclusion until all overlap corrections are accounted for.</p>
+
+            <p style="margin-top: 1rem;">The principle is fundamental in combinatorics and probability because it provides exact answers for counting and probability problems involving multiple overlapping events. In applications ranging from the probability of at least one error in a communication system to the probability that at least one person shares a birthday in a group, to the probability that a randomly selected item has at least one desired feature out of several, the inclusion-exclusion principle provides the exact answer.</p>
+          </div>
+
+          <div class="math-box">
+            <div class="formula-title">Inclusion-Exclusion Principle</div>
+            <div class="formula-content">
+              For finite events \(A_1, A_2, \ldots, A_n\):
+              $$P\left(\bigcup_{i=1}^{n} A_i\right) = \sum_{i=1}^{n} P(A_i) - \sum_{1 \leq i < j \leq n} P(A_i \cap A_j) + \sum_{1 \leq i < j < k \leq n} P(A_i \cap A_j \cap A_k) - \cdots$$
+              $$+ (-1)^{n-1} P(A_1 \cap A_2 \cap \cdots \cap A_n)$$
+              
+              <strong>Two-Event Case:</strong>
+              $$P(A \cup B) = P(A) + P(B) - P(A \cap B)$$
+              
+              <strong>Three-Event Case:</strong>
+              $$P(A \cup B \cup C) = P(A) + P(B) + P(C) - P(A \cap B) - P(A \cap C) - P(B \cap C) + P(A \cap B \cap C)$$
+            </div>
+          </math-box>
+
+          <div class="narrative">
+            <p style="margin-top: 1rem;">The inclusion-exclusion principle is not merely a computational tool—it embodies a deep insight into the structure of probability. The alternating sum of intersection probabilities perfectly captures the overlapping structure of events. Each term corrects for over- or under-counting at that level of overlap. The pattern continues for arbitrarily large collections of events, though computing all necessary intersections becomes increasingly complex.</p>
+
+            <p style="margin-top: 1rem;">A generalization of inclusion-exclusion is the Bonferroni inequalities, which provide partial inclusion-exclusion bounds. These inequalities truncate the full expansion at various points, trading precision for computational simplicity. For instance, the first-order Bonferroni inequality is precisely the union bound (subadditivity). Higher-order Bonferroni inequalities provide progressively tighter bounds by including additional terms from the full inclusion-exclusion formula. In applications where exact computation is infeasible, Bonferroni inequalities offer a practical balance between precision and simplicity.</p>
+          </div>
+        </div>
+
+        <div class="subsection">
+          <div class="subsection-title">Other Essential Properties Derived from the Axioms</div>
+          
+          <div class="narrative">
+            <p>Beyond subadditivity and inclusion-exclusion, Kolmogorov's axioms immediately yield numerous other properties that are essential for probability theory. These properties form the conceptual toolkit for probability calculations and reasoning.</p>
+
+            <p style="margin-top: 1rem;">The complement rule states that probabilities of an event and its complement sum to 1: \(P(A^c) = 1 - P(A)\). This is immediate from Axiom 2 (normalization) and the fact that A and its complement partition the entire sample space.</p>
+
+            <p style="margin-top: 1rem;">Monotonicity establishes that if one event is a subset of another, its probability cannot exceed the other's: if \(A \subseteq B\), then \(P(A) \leq P(B)\). This is intuitive—if A occurring implies B must occur, then B is "at least as likely" as A.</p>
+
+            <p style="margin-top: 1rem;">Continuity properties establish that probability measures behave continuously in certain limiting cases. If a sequence of events \(A_1 \subseteq A_2 \subseteq A_3 \subseteq \cdots\) increases toward their union, then \(P(A_n) \to P(\bigcup_i A_i)\) as \(n \to \infty\). Similarly, decreasing sequences have a dual continuity property. These continuity properties are consequences of countable additivity (Axiom 3) and are essential for extending probability theory to infinite collections of events.</p>
+
+            <p style="margin-top: 1rem;">All these derived properties, though seemingly simple consequences, are logically powerful. They provide the foundation upon which all of probability theory is built: conditional probability, independence, limit theorems, convergence of random variables, and the entire apparatus of statistical inference.</p>
+          </div>
+
+          <div class="definition-box">
+            <div class="definition-title">Essential Properties Derived from Axioms</div>
+            <div class="definition-content">
+              <strong>Complement Rule:</strong> \(P(A^c) = 1 - P(A)\)
+              <br><br>
+              <strong>Null Set:</strong> \(P(\emptyset) = 0\)
+              <br><br>
+              <strong>Monotonicity:</strong> If \(A \subseteq B\), then \(P(A) \leq P(B)\)
+              <br><br>
+              <strong>Continuity from Below:</strong> If \(A_1 \subseteq A_2 \subseteq A_3 \subseteq \cdots\), then \(\displaystyle P\left(\bigcup_{i=1}^{\infty} A_i\right) = \lim_{n \to \infty} P(A_n)\)
+              <br><br>
+              <strong>Continuity from Above:</strong> If \(A_1 \supseteq A_2 \supseteq A_3 \supseteq \cdots\), then \(\displaystyle P\left(\bigcap_{i=1}^{\infty} A_i\right) = \lim_{n \to \infty} P(A_n)\)
+              <br><br>
+              <strong>Addition Rule:</strong> \(P(A \cup B) = P(A) + P(B) - P(A \cap B)\)
+            </div>
+          </definition-box>
+        </div>
+      </div>
+
+      <!-- SECTION 5: Synthesis -->
+      <div class="hw-section">
+        <h2 style="color: #18e0e6;">Section 5: Synthesis & The Modern Foundation</h2>
+        
+        <div class="subsection">
+          <div class="subsection-title">The Triumph of Abstraction</div>
+          
+          <div class="narrative">
+            <p>Kolmogorov's axiomatic approach to probability theory exemplifies the power of mathematical abstraction to resolve conceptual confusion. For decades, probability theory was mired in philosophical disputes about its fundamental meaning. Was probability objective or subjective? Did it apply only to repeatable events or to single propositions? Could it be rigorously defined, or was it merely an intuitive notion? These questions created genuine uncertainty about the logical status of probability itself.</p>
+
+            <p style="margin-top: 1rem;">Rather than attempt to settle these debates philosophically, Kolmogorov's insight was to shift the conversation to mathematics. He identified the essential mathematical properties that any reasonable probability must have, expressed them as axioms, and showed that these axioms uniquely determine the structure of probability theory. This abstraction was revolutionary because it neutralized the philosophical debates: each interpretation (classical, frequentist, Bayesian, geometric) can satisfy the axioms, and as long as they do, they are all mathematically valid.</p>
+
+            <p style="margin-top: 1rem;">The axioms are not descriptions of "what probability really is"—they are specifications of what mathematical properties must be satisfied. This shift from philosophy to mathematics transformed probability from a contentious foundational debate into a rigorous mathematical discipline. Practitioners could now work confidently with probability while remaining genuinely agnostic about its ultimate interpretational status.</p>
+          </div>
+        </div>
+
+        <div class="subsection">
+          <div class="subsection-title">Measure Theory as the Universal Language</div>
+          
+          <div class="narrative">
+            <p>The connection of probability to measure theory reveals that probability is not isolated or special—it is a natural specialization of a broader mathematical framework. Measure theory provides the language and tools for assigning magnitudes to abstract sets. Probability is measure theory applied to events, with the additional normalization that the total measure is 1.</p>
+
+            <p style="margin-top: 1rem;">This unification has profound consequences. Techniques developed for general measure theory—integration theory, convergence theorems, product measures, and decomposition theorems—immediately apply to probability. The Lebesgue dominated convergence theorem, developed in the context of general integration, becomes a fundamental tool for probability. Fubini's theorem for products of measures explains why joint probabilities factor appropriately. The Radon-Nikodym theorem, a pillar of measure theory, characterizes when probability densities exist.</p>
+
+            <p style="margin-top: 1rem;">This connection also shows that discrete and continuous probability are not fundamentally different; they are merely different instantiations of the same underlying measure-theoretic structure. A probability distribution on a discrete space is a measure that assigns mass to individual points; a probability distribution on a continuous space is a measure that assigns mass to regions. The mathematical structure is identical; only the geometry of the space differs.</p>
+          </div>
+        </div>
+
+        <div class="subsection">
+          <div class="subsection-title">Resolution Through Mathematical Rigor</div>
+          
+          <div class="narrative">
+            <p>The axiomatic framework reveals that many classical debates about probability are not truly resolvable through philosophy—they reflect different valid contexts and perspectives, all of which can be mathematically rigorous within the axiomatic structure. A frequentist who views probability as limiting frequency can construct a probability space where probabilities are determined empirically. A Bayesian who views probability as subjective degree of belief can construct a different probability space reflecting those beliefs. A classical theorist and a geometric theorist similarly construct their respective spaces. All satisfy the axioms; all are mathematically valid.</p>
+
+            <p style="margin-top: 1rem;">This pluralistic resolution is more satisfying than any attempt to declare one interpretation "correct," because it acknowledges that different interpretations serve different purposes and embody different valid intuitions about probability. The axiomatic framework provides a common mathematical language within which all interpretations can coexist and be rigorously developed.</p>
+
+            <p style="margin-top: 1rem;">Furthermore, the axioms are minimal—they impose the fewest constraints necessary for a consistent probability theory. Any attempt to add further structure would be an additional choice, not forced by logic. This minimalism ensures that the axioms are truly foundational and not biased toward any particular interpretation.</p>
+          </div>
+        </div>
+
+        <div class="subsection">
+          <div class="subsection-title">The Lasting Achievement</div>
+          
+          <div class="narrative">
+            <p>Kolmogorov's 1933 axiomatization of probability theory stands as one of mathematics' great achievements. It transformed probability from a subject of philosophical dispute and intuitive reasoning into a rigorous mathematical discipline with solid foundations. The three axioms—non-negativity, normalization, and countable additivity—are so elegant and fundamental that they have remained essentially unchanged for nearly a century.</p>
+
+            <p style="margin-top: 1rem;">This axiomatic foundation has enabled probability theory to flourish in mathematical rigor and breadth of application. Modern probability theory encompasses sophisticated concepts like martingales, stochastic processes, and limit theorems, all resting securely on Kolmogorov's axioms. The connection to measure theory has enriched both disciplines. And the interpretation-agnostic nature of the axioms has allowed probability to be successfully applied across domains as diverse as quantum mechanics, finance, biology, machine learning, and cybersecurity, each with its own meaningful interpretation of what probability represents.</p>
+
+            <p style="margin-top: 1rem;">In retrospect, the axiomatization teaches a broader mathematical lesson: when conceptual disputes arise, seeking the underlying abstract structure often reveals that apparently contradictory views are compatible instantiations of a deeper unity. This principle has proven powerful far beyond probability—in algebra, geometry, topology, and logic. Kolmogorov's achievement demonstrates how abstraction, far from being detached from reality, can be the path to the most practical and powerful mathematical frameworks.</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="centered">
+        <a href="homework.html" class="btn-main">← Back to Homework List</a>
+      </div>
+    </section>
+  </main>
+
+  <footer>
+    <span>&copy; 2025 Lorenzo Ciafrelli | MS Cybersecurity, Sapienza University of Rome</span>
+  </footer>
+
+  <script src="script.js"></script>
+</body>
+</html>
