@@ -1,0 +1,667 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Homework 10 — Poisson Process Simulation</title>
+  <link rel="stylesheet" href="style.css"/>
+  <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;600;700&family=Orbitron:wght@600&display=swap" rel="stylesheet">
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.js"></script>
+  <style>
+    main {
+      max-width: 1800px !important;
+      margin: 0 auto;
+      padding: 0 1rem;
+    }
+
+    .hw-detail {
+      max-width: 100%;
+      width: 100%;
+    }
+
+    .hw-section {
+      background: rgba(30,44,74,0.95);
+      border-radius: 16px;
+      margin: 2rem 0;
+      padding: 2rem;
+      box-shadow: 0 8px 32px rgba(24,224,230,0.15);
+    }
+
+    .tool-section {
+      background: rgba(15,25,55,0.6);
+      border-radius: 10px;
+      padding: 2rem;
+      margin: 1.5rem 0;
+      border: 1px solid #2d4a7a;
+    }
+
+    .tool-title {
+      color: #18e0e6;
+      font-weight: 600;
+      margin-bottom: 1.5rem;
+      font-size: 1.2rem;
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+    }
+
+    .input-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 1.5rem;
+      margin-bottom: 1.5rem;
+    }
+
+    .input-group {
+      display: flex;
+      flex-direction: column;
+    }
+
+    .input-group label {
+      color: #b8d4ff;
+      margin-bottom: 0.75rem;
+      font-weight: 600;
+      font-size: 0.95rem;
+    }
+
+    .input-group input,
+    .input-group select {
+      padding: 0.85rem;
+      border-radius: 8px;
+      border: 1px solid #3a5a8a;
+      background: #0f1937;
+      color: #e9f2ff;
+      font-family: inherit;
+      font-size: 0.95rem;
+    }
+
+    .input-group small {
+      color: #4a9eff;
+      font-size: 0.8rem;
+      margin-top: 0.4rem;
+    }
+
+    .btn-group {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 1rem;
+      margin: 1.5rem 0;
+    }
+
+    .btn {
+      background: linear-gradient(135deg, #18e0e6 0%, #2bd4d9 100%);
+      color: #0a1628;
+      border: none;
+      padding: 0.85rem 1.75rem;
+      border-radius: 25px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      font-size: 0.95rem;
+    }
+
+    .btn:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 4px 15px rgba(24,224,230,0.3);
+    }
+
+    .btn:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+    }
+
+    .btn.secondary {
+      background: linear-gradient(135deg, #4a9eff 0%, #6bb6ff 100%);
+    }
+
+    .btn.danger {
+      background: linear-gradient(135deg, #ff5722 0%, #ff7043 100%);
+    }
+
+    .progress-bar {
+      background: rgba(15,25,55,0.9);
+      border-radius: 10px;
+      height: 30px;
+      margin: 1.5rem 0;
+      overflow: hidden;
+      border: 1px solid #2d4a7a;
+      display: none;
+    }
+
+    .progress-fill {
+      background: linear-gradient(90deg, #18e0e6 0%, #2bd4d9 100%);
+      height: 100%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: #0a1628;
+      font-weight: bold;
+      transition: width 0.3s ease;
+      width: 0%;
+    }
+
+    .chart-container {
+      background: rgba(8,15,35,0.9);
+      border-radius: 12px;
+      padding: 1.5rem;
+      margin: 1.5rem 0;
+      border: 2px solid #2d4a7a;
+      position: relative;
+      height: 450px;
+    }
+
+    .chart-title {
+      color: #18e0e6;
+      font-weight: 600;
+      margin-bottom: 0.75rem;
+      font-size: 1.05rem;
+    }
+
+    .chart-description {
+      color: #4a9eff;
+      font-size: 0.85rem;
+      margin-bottom: 1rem;
+      line-height: 1.5;
+    }
+
+    .charts-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(700px, 1fr));
+      gap: 2rem;
+      margin: 2rem 0;
+    }
+
+    .stats-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+      gap: 1.5rem;
+      margin: 1.5rem 0;
+    }
+
+    .stat-card {
+      background: linear-gradient(135deg, rgba(24,224,230,0.1) 0%, rgba(24,224,230,0.05) 100%);
+      border-radius: 10px;
+      padding: 1.5rem;
+      border: 2px solid #18e0e6;
+    }
+
+    .stat-label {
+      color: #4a9eff;
+      font-size: 0.85rem;
+      margin-bottom: 0.5rem;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    .stat-value {
+      color: #18e0e6;
+      font-size: 2rem;
+      font-weight: bold;
+      font-family: 'Orbitron', monospace;
+    }
+
+    .stat-sublabel {
+      color: #64b5f6;
+      font-size: 0.8rem;
+      margin-top: 0.5rem;
+      font-style: italic;
+    }
+
+    .highlight-section {
+      background: linear-gradient(135deg, rgba(76,175,80,0.1) 0%, rgba(76,175,80,0.05) 100%);
+      border: 3px solid #81c784;
+      border-radius: 12px;
+      padding: 2rem;
+      margin: 2rem 0;
+    }
+
+    .highlight-title {
+      color: #81c784;
+      font-weight: 700;
+      font-size: 1.3rem;
+      margin-bottom: 1.5rem;
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+    }
+
+    .highlight-content {
+      color: #a5d6a7;
+      line-height: 1.9;
+      font-size: 0.98rem;
+    }
+
+    .highlight-content p {
+      margin-bottom: 1rem;
+    }
+
+    .highlight-box {
+      background: rgba(8,15,35,0.6);
+      border-left: 4px solid #81c784;
+      padding: 1.5rem;
+      border-radius: 8px;
+      margin: 1rem 0;
+    }
+
+    .highlight-box strong {
+      color: #81c784;
+    }
+
+    .process-identification {
+      background: linear-gradient(135deg, rgba(255,193,7,0.1) 0%, rgba(255,193,7,0.05) 100%);
+      border: 3px solid #ffc107;
+      border-radius: 12px;
+      padding: 2rem;
+      margin: 2rem 0;
+    }
+
+    .process-title {
+      color: #ffc107;
+      font-weight: 700;
+      font-size: 1.3rem;
+      margin-bottom: 1.5rem;
+    }
+
+    .process-content {
+      color: #ffe082;
+      line-height: 1.9;
+      font-size: 0.98rem;
+    }
+
+    .process-content p {
+      margin-bottom: 1rem;
+    }
+
+    .process-formula {
+      background: rgba(8,15,35,0.8);
+      border-left: 4px solid #ffc107;
+      padding: 1.5rem;
+      border-radius: 8px;
+      margin: 1rem 0;
+      font-family: 'Courier New', monospace;
+      color: #ffd54f;
+    }
+
+    .property-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+      gap: 1.5rem;
+      margin: 1.5rem 0;
+    }
+
+    .property-card {
+      background: rgba(8,15,35,0.7);
+      border: 2px solid #64b5f6;
+      border-radius: 10px;
+      padding: 1.25rem;
+      border-left: 4px solid #64b5f6;
+    }
+
+    .property-name {
+      color: #64b5f6;
+      font-weight: 700;
+      font-size: 1rem;
+      margin-bottom: 0.75rem;
+    }
+
+    .property-description {
+      color: #b3e5fc;
+      font-size: 0.9rem;
+      line-height: 1.6;
+    }
+
+    .lambda-section {
+      background: linear-gradient(135deg, rgba(156,39,176,0.1) 0%, rgba(156,39,176,0.05) 100%);
+      border: 3px solid #ba68c8;
+      border-radius: 12px;
+      padding: 2rem;
+      margin: 2rem 0;
+    }
+
+    .lambda-title {
+      color: #ba68c8;
+      font-weight: 700;
+      font-size: 1.3rem;
+      margin-bottom: 1.5rem;
+    }
+
+    .lambda-content {
+      color: #ce93d8;
+      line-height: 1.9;
+      font-size: 0.98rem;
+    }
+
+    .lambda-content p {
+      margin-bottom: 1rem;
+    }
+
+    .lambda-box {
+      background: rgba(8,15,35,0.6);
+      border-left: 4px solid #ba68c8;
+      padding: 1.5rem;
+      border-radius: 8px;
+      margin: 1rem 0;
+    }
+
+    .alert {
+      position: fixed;
+      top: 20px;
+      right: 20px;
+      z-index: 1000;
+      max-width: 500px;
+      padding: 1rem 1.5rem;
+      border-radius: 8px;
+      font-weight: 600;
+      box-shadow: 0 4px 15px rgba(0,0,0,0.3);
+    }
+
+    .alert.success {
+      background: rgba(76,175,80,0.95);
+      border: 1px solid #4caf50;
+      color: #fff;
+    }
+
+    .alert.error {
+      background: rgba(244,67,54,0.95);
+      border: 1px solid #f44336;
+      color: #fff;
+    }
+
+    .alert.info {
+      background: rgba(33,150,243,0.95);
+      border: 1px solid #2196f3;
+      color: #fff;
+    }
+
+    #resultsSection {
+      display: none;
+    }
+
+    .centered {
+      text-align: center;
+      margin: 2rem 0;
+    }
+
+    .btn-main {
+      display: inline-block;
+      background: linear-gradient(135deg, #18e0e6, #2bd4d9);
+      color: #0a1628;
+      padding: 1rem 2rem;
+      border-radius: 30px;
+      text-decoration: none;
+      font-weight: 700;
+      transition: all 0.3s;
+    }
+
+    .btn-main:hover {
+      transform: translateY(-3px);
+      box-shadow: 0 8px 20px rgba(24,224,230,0.3);
+    }
+
+    p {
+      color: #b8d4ff;
+      line-height: 1.8;
+      margin-bottom: 1rem;
+    }
+
+    strong {
+      color: #18e0e6;
+    }
+
+    h1 {
+      color: #18e0e6 !important;
+      margin-bottom: 0.5rem !important;
+    }
+
+    .subtle {
+      color: #64b5f6;
+      font-size: 1.05rem;
+      margin-bottom: 2rem;
+    }
+
+    .convergence-indicator {
+      display: inline-block;
+      padding: 0.5rem 1rem;
+      border-radius: 20px;
+      font-weight: 600;
+      font-size: 0.9rem;
+      margin-top: 1rem;
+    }
+
+    .convergence-excellent {
+      background: rgba(76,175,80,0.3);
+      color: #81c784;
+      border: 1px solid #81c784;
+    }
+
+    .convergence-good {
+      background: rgba(76,175,80,0.2);
+      color: #81c784;
+      border: 1px solid #81c784;
+    }
+
+    .convergence-moderate {
+      background: rgba(255,193,7,0.2);
+      color: #ffc107;
+      border: 1px solid #ffc107;
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <nav class="navbar">
+      <div class="logo">Statistics<span class="cyber">Cyber</span></div>
+      <ul id="navLinks">
+        <li><a href="index.html">Home</a></li>
+        <li><a href="homework.html">Homework</a></li>
+        <li><a href="about.html">About</a></li>
+      </ul>
+      <button class="nav-toggle" id="navToggle">&#9776;</button>
+    </nav>
+  </header>
+
+  <main>
+    <section class="hw-detail">
+      <h1>Homework 10: Poisson Process Simulation</h1>
+      <p class="subtle">Discretize continuous time into Bernoulli subintervals to approximate a counting process. Identify the resulting stochastic process, analyze its theoretical properties, and interpret the rate parameter λ.</p>
+
+      <div class="hw-section">
+        <div class="tool-section">
+          <div class="tool-title">⚙️ Simulation Configuration</div>
+          
+          <div class="input-grid">
+            <div class="input-group">
+              <label for="timeInterval"><strong>Time Interval (T)</strong></label>
+              <input type="number" id="timeInterval" value="1" min="0.1" max="10" step="0.1">
+              <small>Total duration [0, T] seconds</small>
+            </div>
+
+            <div class="input-group">
+              <label for="rateParam"><strong>Rate Parameter (λ)</strong></label>
+              <input type="number" id="rateParam" value="5" min="0.5" max="50" step="0.5">
+              <small>Expected events per unit time</small>
+            </div>
+
+            <div class="input-group">
+              <label for="numSubintervals"><strong>Subintervals (n)</strong></label>
+              <input type="number" id="numSubintervals" value="1000" min="100" max="10000" step="100">
+              <small>Discretization granularity</small>
+            </div>
+
+            <div class="input-group">
+              <label for="numTrajectories"><strong>Trajectories (m)</strong></label>
+              <input type="number" id="numTrajectories" value="500" min="50" max="5000" step="50">
+              <small>Independent simulations</small>
+            </div>
+          </div>
+
+          <div class="btn-group">
+            <button class="btn" onclick="runSimulation()">🚀 Run Simulation</button>
+            <button class="btn secondary" onclick="runConvergenceTest()">📊 Convergence Test</button>
+            <button class="btn danger" onclick="clearResults()">🗑️ Clear</button>
+          </div>
+
+          <div class="progress-bar" id="progressBar">
+            <div class="progress-fill" id="progressFill">0%</div>
+          </div>
+        </div>
+
+        <!-- Results Section -->
+        <div id="resultsSection">
+          <!-- SECTION 1: Process Identification -->
+          <div class="process-identification">
+            <div class="process-title">🎯 Identified Stochastic Process</div>
+            <div class="process-content">
+              <p><strong>Process Type: Poisson Process</strong></p>
+              <p>By discretizing the continuous interval [0, T] into n small subintervals and performing Bernoulli trials (probability p = λ/n per subinterval), the resulting counting process approximates a <strong>Poisson process with rate parameter λ</strong>.</p>
+              
+              <div class="process-formula">
+                <strong>Definition:</strong><br>
+                N(t) = cumulative count of events by time t<br>
+                N(t) ~ Poisson(λ·t) for any t ∈ [0, T]<br>
+                <br>
+                <strong>Discrete Approximation:</strong><br>
+                Δt = T/n (subinterval length)<br>
+                p = λ·Δt (event probability per subinterval)<br>
+                As n → ∞, discrete process → true Poisson process
+              </div>
+
+              <p><strong>Key Insight:</strong> The Poisson process is the continuous-time limit of a sequence of independent Bernoulli trials conducted at increasingly finer time scales. This simulation demonstrates this fundamental relationship.</p>
+
+              <div id="convergenceIndicator"></div>
+            </div>
+          </div>
+
+          <!-- SECTION 2: Theoretical Properties -->
+          <div class="highlight-section">
+            <div class="highlight-title">📋 Theoretical Properties of Poisson Process</div>
+            <div class="highlight-content">
+              <p>The Poisson process identified in this simulation has the following theoretical characteristics:</p>
+              
+              <div class="property-grid">
+                <div class="property-card">
+                  <div class="property-name">Counting Property</div>
+                  <div class="property-description">N(t) counts the total number of events that have occurred by time t. It is non-decreasing and right-continuous.</div>
+                </div>
+
+                <div class="property-card">
+                  <div class="property-name">Independent Increments</div>
+                  <div class="property-description">The number of events in disjoint time intervals are independent random variables. Future events don't depend on past events.</div>
+                </div>
+
+                <div class="property-card">
+                  <div class="property-name">Stationary Increments</div>
+                  <div class="property-description">The distribution of events in any interval depends only on the interval's length, not its starting time. The process is time-homogeneous.</div>
+                </div>
+
+                <div class="property-card">
+                  <div class="property-name">Lack of Memory</div>
+                  <div class="property-description">The probability of an event in [t, t+s] is independent of history before t. This is the "memoryless" property of the exponential inter-arrival times.</div>
+                </div>
+
+                <div class="property-card">
+                  <div class="property-name">Event Distribution</div>
+                  <div class="property-description">The number of events in interval [0, t] follows Poisson(λt). Larger t yields higher expected count.</div>
+                </div>
+
+                <div class="property-card">
+                  <div class="property-name">Inter-arrival Times</div>
+                  <div class="property-description">Time between consecutive events follows Exponential(λ) distribution. Expected waiting time: 1/λ.</div>
+                </div>
+              </div>
+
+              <div class="highlight-box">
+                <strong>Theoretical Distribution:</strong> For the number of events N(T) in interval [0, T]:
+                <br><br>
+                P(N(T) = k) = (e^(-λT) · (λT)^k) / k!
+                <br><br>
+                Mean: E[N(T)] = λT<br>
+                Variance: Var[N(T)] = λT
+              </div>
+            </div>
+          </div>
+
+          <!-- SECTION 3: Rate Parameter Interpretation -->
+          <div class="lambda-section">
+            <div class="lambda-title">⚡ Rate Parameter (λ) Interpretation</div>
+            <div class="lambda-content">
+              <p><strong>Physical Meaning:</strong> λ represents the <strong>intensity</strong> or <strong>expected frequency</strong> of events in the process. It quantifies how "fast" events occur on average.</p>
+              
+              <div class="lambda-box" id="lambdaInterpretation"></div>
+
+              <p style="margin-top: 1.5rem;"><strong>Practical Implications:</strong></p>
+              <ul style="margin-left: 1.5rem; color: #ce93d8; line-height: 1.9;">
+                <li><strong>Higher λ:</strong> Events occur more frequently. More variability in outcomes.</li>
+                <li><strong>Lower λ:</strong> Events are sparse. More predictable timings.</li>
+                <li><strong>λ=1:</strong> On average, one event per unit time.</li>
+              </ul>
+
+              <p style="margin-top: 1rem;"><strong>Relationship to Process Parameters:</strong></p>
+              <div class="lambda-box">
+                Given interval [0, T] divided into n subintervals:<br>
+                • Step size: Δt = T/n<br>
+                • Bernoulli probability per step: p = λ·Δt<br>
+                • Expected total events: λ·T<br>
+                <br>
+                <strong>Key insight:</strong> As n increases (finer discretization), p decreases proportionally (p ∝ 1/n), maintaining the balance λ·T. This ensures the discrete approximation converges to the continuous Poisson process.
+              </div>
+            </div>
+          </div>
+
+          <!-- SECTION 4: Statistics Summary -->
+          <div class="tool-section">
+            <div class="tool-title">📊 Simulation Statistics Summary</div>
+            <div class="stats-grid" id="statsGrid"></div>
+          </div>
+
+          <!-- SECTION 5: Visualizations -->
+          <div class="tool-section">
+            <div class="tool-title">📈 Process Visualization & Analysis</div>
+            
+            <div class="charts-grid">
+              <div class="chart-container">
+                <div class="chart-title">Counting Process Trajectories</div>
+                <div class="chart-description">m independent realizations of N(t). Each path shows cumulative event count over time. The clustering indicates the expected behavior.</div>
+                <canvas id="trajectoryChart"></canvas>
+              </div>
+
+              <div class="chart-container">
+                <div class="chart-title">Final Count Distribution vs Theory</div>
+                <div class="chart-description">Empirical histogram vs Poisson PMF. Close alignment validates the process identification and shows convergence quality.</div>
+                <canvas id="distributionChart"></canvas>
+              </div>
+
+              <div class="chart-container">
+                <div class="chart-title">First Event Time Distribution</div>
+                <div class="chart-description">Histogram of first event occurrence times. Exponential shape confirms the theoretical exponential inter-arrival time property.</div>
+                <canvas id="eventTimingChart"></canvas>
+              </div>
+
+              <div class="chart-container">
+                <div class="chart-title">Convergence to Theory</div>
+                <div class="chart-description">χ² contributions showing goodness-of-fit. Green indicates excellent agreement; higher values suggest deviations to investigate.</div>
+                <canvas id="convergenceChart"></canvas>
+              </div>
+            </div>
+          </div>
+
+          <!-- SECTION 6: Detailed Analysis -->
+          <div class="tool-section" id="analysisSection"></div>
+        </div>
+      </div>
+
+      <div class="centered">
+        <a href="homework.html" class="btn-main">← Back to Homework List</a>
+      </div>
+    </section>
+  </main>
+
+  <footer>
+    <span>&copy; 2025 Lorenzo Ciafrelli | MS Cybersecurity, Sapienza University of Rome</span>
+  </footer>
+
+  <script src="script.js"></script>
+  <script src="hw10.js"></script>
+</body>
+</html>
