@@ -499,29 +499,52 @@ function displayAnalysis(T, lambda, n, m, data) {
 }
 
 function runConvergenceTest() {
-  const T = parseFloat($('#timeInterval').value);
+ const T = parseFloat($('#timeInterval').value);
   const lambda = parseFloat($('#rateParam').value);
   const baseM = 300;
 
   showAlert('🔄 Convergence test: varying discretization granularity...', 'info');
+  
+  $('#progressBar').style.display = 'block';
+  
+  const nValues = [100, 250, 500, 1000, 2500, 5000];
+  const results = [];
+  let index = 0;
 
-  setTimeout(() => {
-    const results = [];
-    const nValues = [100, 250, 500, 1000, 2500, 5000];
-
-    for (let n of nValues) {
-      const data = simulateCountingProcess(T, lambda, n, baseM);
-      results.push({
-        n,
-        meanError: Math.abs(data.mean - data.theoreticalMean) / data.theoreticalMean * 100,
-        varError: Math.abs(data.variance - data.theoreticalVar) / data.theoreticalVar * 100,
-        ks: data.ksStatistic
-      });
+  function processNextN() {
+    if (index >= nValues.length) {
+     
+      displayConvergenceTestChart(results);
+      $('#progressBar').style.display = 'none';
+      showAlert('✓ Convergence test complete! Notice how errors decrease with finer discretization.', 'success');
+      return;
     }
 
-    displayConvergenceTestChart(results);
-    showAlert('✓ Convergence test complete! Notice how errors decrease with finer discretization.', 'success');
-  }, 100);
+    const n = nValues[index];
+    $('#progressFill').style.width = ((index + 1) / nValues.length * 100) + '%';
+    $('#progressFill').textContent = Math.round((index + 1) / nValues.length * 100) + '%';
+
+    
+    setTimeout(() => {
+      try {
+        const data = simulateCountingProcess(T, lambda, n, baseM);
+        results.push({
+          n,
+          meanError: Math.abs(data.mean - data.theoreticalMean) / data.theoreticalMean * 100,
+          varError: Math.abs(data.variance - data.theoreticalVar) / data.theoreticalVar * 100,
+          ks: data.ksStatistic
+        });
+        
+        index++;
+        processNextN(); 
+      } catch (error) {
+        console.error('Error processing n=' + n, error);
+        showAlert('❌ Error during convergence test', 'error');
+      }
+    }, 50);
+  }
+
+  processNextN();
 }
 
 function displayConvergenceTestChart(results) {
