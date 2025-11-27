@@ -1,6 +1,6 @@
-/* ================================
-   Homework 7: Random Walk & Binomial Convergence
-   Interactive Simulation
+    /* ================================
+   Homework 7: Random Walk Simulation
+   Binomial Convergence & Security Analysis
    ================================ */
 
 const $ = sel => document.querySelector(sel);
@@ -523,7 +523,6 @@ function runConvergenceTest() {
 
   function processNextN() {
     if (index >= nValues.length) {
-      // Completato
       displayConvergenceTestChart(results);
       $('#progressBar').style.display = 'none';
       showAlert('✓ Convergence test complete! Observe how errors decrease with larger n.', 'success');
@@ -551,7 +550,7 @@ function runConvergenceTest() {
         console.log('Completed n=' + n, results[results.length - 1]);
 
         index++;
-        processNextN(); // Ricorsione
+        processNextN();
       } catch (error) {
         console.error('Error processing n=' + n, error);
         showAlert('❌ Error during convergence test at n=' + n, 'error');
@@ -560,7 +559,7 @@ function runConvergenceTest() {
     }, 100);
   }
 
-  processNextN(); // Inizia
+  processNextN();
 }
 
 function displayConvergenceTestChart(results) {
@@ -638,6 +637,18 @@ function displayConvergenceTestChart(results) {
       }
     }
   });
+
+  // Auto-scroll al chart dopo il rendering
+  setTimeout(() => {
+    const convergenceChartElement = document.getElementById('convergenceChart');
+    if (convergenceChartElement) {
+      convergenceChartElement.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    }
+  }, 300);
+}
+
+function runMultipleTests() {
+  runConvergenceTest();
 }
 
 function clearSimulation() {
