@@ -34,10 +34,17 @@ function runSimulation() {
   showAlert('🚀 Running simulation...', 'info');
 
   setTimeout(() => {
-    simulationData = simulateCountingProcess(T, lambda, n, m);
-    displayResults(T, lambda, n, m, simulationData);
-    $('#resultsSection').style.display = 'block';
-    showAlert('✓ Simulation completed! Poisson process identified.', 'success');
+    try {
+      simulationData = simulateCountingProcess(T, lambda, n, m);
+      displayResults(T, lambda, n, m, simulationData);
+      $('#resultsSection').style.display = 'block';
+      showAlert('✓ Simulation completed! Poisson process identified.', 'success');
+      $('#progressBar').style.display = 'none';
+    } catch (error) {
+      console.error('Simulation error:', error);
+      showAlert('❌ Error during simulation', 'error');
+      $('#progressBar').style.display = 'none';
+    }
   }, 100);
 }
 
@@ -459,14 +466,14 @@ function displayAnalysis(T, lambda, n, m, data) {
           <strong>Time interval:</strong> [0, ${T}]<br>
           <strong>Expected total events:</strong> λ·T = ${lambda} × ${T} = <strong>${(lambda * T).toFixed(2)}</strong><br>
           <strong>Observed mean:</strong> ${data.mean.toFixed(2)}<br>
-          <strong>Error:</strong> ${Math.abs(data.mean - data.expectedCount) / data.expectedCount * 100} %<br>
+          <strong>Error:</strong> ${(Math.abs(data.mean - data.expectedCount) / data.expectedCount * 100).toFixed(2)}%<br>
         </div>
         
         <div class="lambda-box" style="margin-top: 1rem;">
           <strong>First Event Timing:</strong><br>
           Expected (1/λ): ${(1/lambda).toFixed(4)} time units<br>
           Observed mean: ${data.meanFirstTime.toFixed(4)} time units<br>
-          Error: ${Math.abs(data.meanFirstTime - 1/lambda) / (1/lambda) * 100} %<br>
+          Error: ${(Math.abs(data.meanFirstTime - 1/lambda) / (1/lambda) * 100).toFixed(2)}%<br>
           <br>
           <strong>Interpretation:</strong> In a Poisson process, the time to first event follows Exponential(λ), confirming the theoretical prediction.
         </div>
@@ -499,13 +506,20 @@ function displayAnalysis(T, lambda, n, m, data) {
 }
 
 function runConvergenceTest() {
- const T = parseFloat($('#timeInterval').value);
+  const T = parseFloat($('#timeInterval').value);
   const lambda = parseFloat($('#rateParam').value);
-  const baseM = 300;
+  const baseM = 200; // Ridotto per velocità
+
+  if (T < 0.1 || T > 10 || lambda < 0.5 || lambda > 50) {
+    showAlert('❌ Invalid parameters', 'error');
+    return;
+  }
 
   showAlert('🔄 Convergence test: varying discretization granularity...', 'info');
   
   $('#progressBar').style.display = 'block';
+  $('#progressFill').style.width = '0%';
+  $('#progressFill').textContent = '0%';
   
   const nValues = [100, 250, 500, 1000, 2500, 5000];
   const results = [];
@@ -513,7 +527,7 @@ function runConvergenceTest() {
 
   function processNextN() {
     if (index >= nValues.length) {
-     
+      // Completato
       displayConvergenceTestChart(results);
       $('#progressBar').style.display = 'none';
       showAlert('✓ Convergence test complete! Notice how errors decrease with finer discretization.', 'success');
@@ -521,30 +535,36 @@ function runConvergenceTest() {
     }
 
     const n = nValues[index];
-    $('#progressFill').style.width = ((index + 1) / nValues.length * 100) + '%';
-    $('#progressFill').textContent = Math.round((index + 1) / nValues.length * 100) + '%';
+    const progress = Math.round((index / nValues.length) * 100);
+    $('#progressFill').style.width = progress + '%';
+    $('#progressFill').textContent = progress + '%';
 
-    
+    // Processa questa n con delay breve
     setTimeout(() => {
       try {
+        console.log('Processing n=' + n);
         const data = simulateCountingProcess(T, lambda, n, baseM);
+        
         results.push({
-          n,
+          n: n,
           meanError: Math.abs(data.mean - data.theoreticalMean) / data.theoreticalMean * 100,
           varError: Math.abs(data.variance - data.theoreticalVar) / data.theoreticalVar * 100,
           ks: data.ksStatistic
         });
+
+        console.log('Completed n=' + n, results[results.length - 1]);
         
         index++;
-        processNextN(); 
+        processNextN(); // Ricorsione per prossimo n
       } catch (error) {
         console.error('Error processing n=' + n, error);
-        showAlert('❌ Error during convergence test', 'error');
+        showAlert('❌ Error during convergence test at n=' + n, 'error');
+        $('#progressBar').style.display = 'none';
       }
-    }, 50);
+    }, 50); // Delay breve tra iterazioni
   }
 
-  processNextN();
+  processNextN(); // Inizia
 }
 
 function displayConvergenceTestChart(results) {
@@ -556,6 +576,8 @@ function displayConvergenceTestChart(results) {
   const meanErrors = results.map(r => r.meanError);
   const varErrors = results.map(r => r.varError);
   const ksStats = results.map(r => r.ks);
+
+  console.log('Rendering convergence chart with results:', results);
 
   charts.convergence = new Chart(ctx, {
     type: 'line',
@@ -635,7 +657,7 @@ function clearResults() {
   });
   charts = {};
   
-  showAlert('All results cleared', 'success');
+  showAlert('Results cleared', 'success');
 }
 
 // Helper functions
