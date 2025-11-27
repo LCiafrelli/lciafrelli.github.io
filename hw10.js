@@ -508,7 +508,7 @@ function displayAnalysis(T, lambda, n, m, data) {
 function runConvergenceTest() {
   const T = parseFloat($('#timeInterval').value);
   const lambda = parseFloat($('#rateParam').value);
-  const baseM = 200; // Ridotto per velocità
+  const baseM = 200; 
 
   if (T < 0.1 || T > 10 || lambda < 0.5 || lambda > 50) {
     showAlert('❌ Invalid parameters', 'error');
@@ -527,7 +527,7 @@ function runConvergenceTest() {
 
   function processNextN() {
     if (index >= nValues.length) {
-      // Completato
+      
       displayConvergenceTestChart(results);
       $('#progressBar').style.display = 'none';
       showAlert('✓ Convergence test complete! Notice how errors decrease with finer discretization.', 'success');
@@ -539,7 +539,7 @@ function runConvergenceTest() {
     $('#progressFill').style.width = progress + '%';
     $('#progressFill').textContent = progress + '%';
 
-    // Processa questa n con delay breve
+    
     setTimeout(() => {
       try {
         console.log('Processing n=' + n);
@@ -555,16 +555,16 @@ function runConvergenceTest() {
         console.log('Completed n=' + n, results[results.length - 1]);
         
         index++;
-        processNextN(); // Ricorsione per prossimo n
+        processNextN(); 
       } catch (error) {
         console.error('Error processing n=' + n, error);
         showAlert('❌ Error during convergence test at n=' + n, 'error');
         $('#progressBar').style.display = 'none';
       }
-    }, 50); // Delay breve tra iterazioni
+    }, 50); 
   }
 
-  processNextN(); // Inizia
+  processNextN();
 }
 
 function displayConvergenceTestChart(results) {
