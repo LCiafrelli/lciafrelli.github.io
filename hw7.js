@@ -28,23 +28,28 @@ function runSimulation() {
     return;
   }
 
-  // Show progress
   $('#progressBar').style.display = 'block';
   showAlert('🚀 Running simulation...', 'info');
 
-  // Run simulation in chunks to update progress
   setTimeout(() => {
-    simulationData = simulateRandomWalks(n, m, p, displayCount);
-    displayResults(n, m, p, simulationData);
-    $('#resultsSection').style.display = 'block';
-    showAlert('✓ Simulation completed!', 'success');
+    try {
+      simulationData = simulateRandomWalks(n, m, p, displayCount);
+      displayResults(n, m, p, simulationData);
+      $('#resultsSection').style.display = 'block';
+      showAlert('✓ Simulation completed!', 'success');
+      $('#progressBar').style.display = 'none';
+    } catch (error) {
+      console.error('Simulation error:', error);
+      showAlert('❌ Error during simulation', 'error');
+      $('#progressBar').style.display = 'none';
+    }
   }, 100);
 }
 
 function simulateRandomWalks(n, m, p, displayCount) {
   const trajectories = [];
   const finalScores = [];
-  
+
   // Generate m random walk trajectories
   for (let traj = 0; traj < m; traj++) {
     // Update progress
@@ -88,7 +93,8 @@ function simulateRandomWalks(n, m, p, displayCount) {
     if (Number.isInteger(k) && k >= 0 && k <= n) {
       // P(S_n = score) = C(n,k) * p^k * (1-p)^(n-k)
       const binomCoeff = binomial(n, k);
-      theoreticalProbs[score] = binomCoeff * Math.pow(p, k) * Math.pow(1 - p, n - k);
+      theoreticalProbs[score] =
+        binomCoeff * Math.pow(p, k) * Math.pow(1 - p, n - k);
     }
   });
 
@@ -144,7 +150,7 @@ function displayResults(n, m, p, data) {
     <div class="stat-card">
       <div class="stat-label">Min / Max Score</div>
       <div class="stat-value">${data.min} / ${data.max}</div>
-      <div style="color: #4a9eff; font-size: 0.85rem; margin-top: 0.5rem;">Possible: ${-n} to ${n}</div>
+      <div style="color: #4a9eff; font-size: 0.85rem; margin-top: 0.5rem;">Possible: -${n} to ${n}</div>
     </div>
     <div class="stat-card">
       <div class="stat-label">Median Score</div>
@@ -154,14 +160,12 @@ function displayResults(n, m, p, data) {
     <div class="stat-card">
       <div class="stat-label">KS Statistic</div>
       <div class="stat-value">${data.ksStatistic.toFixed(4)}</div>
-      <div style="color: ${data.ksStatistic < 0.1 ? '#81c784' : '#ffc107'}; font-size: 0.85rem; margin-top: 0.5rem;">
-        ${data.ksStatistic < 0.1 ? '✓ Good Fit' : '⚠ Deviation'}
-      </div>
+      <div style="color: ${data.ksStatistic < 0.1 ? '#81c784' : '#ffc107'}; font-size: 0.85rem; margin-top: 0.5rem;">${data.ksStatistic < 0.1 ? 'Good Fit' : 'Deviation'}</div>
     </div>
     <div class="stat-card">
       <div class="stat-label">χ² Statistic</div>
       <div class="stat-value">${data.chiSquare.toFixed(2)}</div>
-      <div style="color: #4a9eff; font-size: 0.85rem; margin-top: 0.5rem;">Degrees of freedom: ${data.sortedScores.length - 1}</div>
+      <div style="color: #4a9eff; font-size: 0.85rem; margin-top: 0.5rem;">DOF: ${data.sortedScores.length - 1}</div>
     </div>
   `;
   $('#statsSummary').innerHTML = statsHTML;
@@ -178,8 +182,7 @@ function displayResults(n, m, p, data) {
 
 function displayTrajectoryChart(data, n) {
   const ctx = document.getElementById('trajectoryChart').getContext('2d');
-  
-  // Destroy old chart if exists
+
   if (charts.trajectory) charts.trajectory.destroy();
 
   const datasets = [];
@@ -201,7 +204,7 @@ function displayTrajectoryChart(data, n) {
     });
   });
 
-  const labels = Array.from({length: n + 1}, (_, i) => i);
+  const labels = Array.from({ length: n + 1 }, (_, i) => i);
 
   charts.trajectory = new Chart(ctx, {
     type: 'line',
@@ -232,10 +235,9 @@ function displayTrajectoryChart(data, n) {
 
 function displayDistributionChart(data, n, m, p) {
   const ctx = document.getElementById('distributionChart').getContext('2d');
-  
+
   if (charts.distribution) charts.distribution.destroy();
 
-  // Normalize for comparison
   const empiricalProbs = {};
   data.sortedScores.forEach(score => {
     empiricalProbs[score] = data.scoreFrequency[score] / m;
@@ -294,32 +296,37 @@ function displayDistributionChart(data, n, m, p) {
 
 function displayConvergenceChart(data) {
   const ctx = document.getElementById('convergenceChart').getContext('2d');
-  
+
   if (charts.convergence) charts.convergence.destroy();
 
-  // Compute Chi-square values across score range
   const chiValues = data.sortedScores.map(score => {
     const observed = data.scoreFrequency[score] || 0;
     const expected = data.theoreticalProbs[score] * data.finalScores.length;
-    if (expected === 0) return 0;
-    return Math.pow(observed - expected, 2) / expected;
+    if (expected > 0) {
+      return Math.pow(observed - expected, 2) / expected;
+    }
+    return 0;
   });
 
   charts.convergence = new Chart(ctx, {
     type: 'bar',
     data: {
       labels: data.sortedScores.map(s => s.toString()),
-      datasets: [{
-        label: 'χ² Contribution per Score',
-        data: chiValues,
-        backgroundColor: chiValues.map(val => 
-          val < 1 ? 'rgba(129,199,132,0.7)' :
-          val < 5 ? 'rgba(255,193,7,0.7)' :
-          'rgba(255,112,67,0.7)'
-        ),
-        borderColor: '#18e0e6',
-        borderWidth: 1
-      }]
+      datasets: [
+        {
+          label: 'χ² Contribution per Score',
+          data: chiValues,
+          backgroundColor: chiValues.map(val =>
+            val < 1
+              ? 'rgba(129,199,132,0.7)'
+              : val < 5
+              ? 'rgba(255,193,7,0.7)'
+              : 'rgba(255,112,67,0.7)'
+          ),
+          borderColor: '#18e0e6',
+          borderWidth: 1
+        }
+      ]
     },
     options: {
       responsive: true,
@@ -331,7 +338,7 @@ function displayConvergenceChart(data) {
         y: {
           ticks: { color: '#b8d4ff' },
           grid: { color: '#2d4a7a' },
-          title: { display: true, text: 'χ² Contribution', color: '#18e0e6' }
+          title: { display: true, text: 'Contribution', color: '#18e0e6' }
         },
         x: {
           ticks: { color: '#b8d4ff' },
@@ -344,14 +351,14 @@ function displayConvergenceChart(data) {
 
 function displayCDFChart(data) {
   const ctx = document.getElementById('cdfChart').getContext('2d');
-  
+
   if (charts.cdf) charts.cdf.destroy();
 
-  // Compute empirical CDF
   const sortedFinal = [...data.finalScores].sort((a, b) => a - b);
+
+  // Empirical CDF
   const empiricalCDF = [];
   const cdfLabels = [];
-  
   for (let i = 0; i < sortedFinal.length; i++) {
     empiricalCDF.push((i + 1) / data.finalScores.length);
     if (i % Math.ceil(data.finalScores.length / 50) === 0) {
@@ -371,7 +378,7 @@ function displayCDFChart(data) {
   charts.cdf = new Chart(ctx, {
     type: 'line',
     data: {
-      labels: Array.from({length: sortedFinal.length}, (_, i) => i),
+      labels: Array.from({ length: sortedFinal.length }, (_, i) => i),
       datasets: [
         {
           label: 'Empirical CDF',
@@ -421,68 +428,72 @@ function displayCDFChart(data) {
 function displayAnalysis(n, m, p, data) {
   const meanDiff = Math.abs(data.mean - data.theoreticalMean);
   const stdDevDiff = Math.abs(data.stdDev - data.theoreticalStdDev);
-  const meanErrorPct = (meanDiff / Math.abs(data.theoreticalMean) * 100).toFixed(2);
-  const stdDevErrorPct = (stdDevDiff / data.theoreticalStdDev * 100).toFixed(2);
+  const meanErrorPct = ((meanDiff / Math.abs(data.theoreticalMean)) * 100).toFixed(2);
+  const stdDevErrorPct = ((stdDevDiff / data.theoreticalStdDev) * 100).toFixed(2);
 
   const analysisHTML = `
-    <div class="tool-title">📊 Statistical Analysis & Convergence Assessment</div>
-    
+    <div class="tool-title">📊 Statistical Analysis & Interpretation</div>
+
     <div style="background: rgba(8,15,35,0.6); border-radius: 10px; padding: 1.5rem; border-left: 3px solid #4a9eff; margin: 1.5rem 0;">
-      <strong style="color: #18e0e6; font-size: 1.05rem;">Parameters:</strong><br>
+      <strong style="color: #18e0e6; font-size: 1.05rem;">Parameters</strong><br>
       <div style="color: #b8d4ff; line-height: 2; margin-top: 0.75rem;">
-        <div>• Weeks (n) = ${n}</div>
-        <div>• Trajectories/Attackers (m) = ${m}</div>
-        <div>• Breach Probability (p) = ${p}</div>
-        <div>• Expected Breach Probability per Week = ${(1 - p).toFixed(3)} (secure)</div>
+        <div>Weeks: <strong>${n}</strong></div>
+        <div>Trajectories: <strong>${m}</strong></div>
+        <div>Breach Probability: <strong>${p}</strong></div>
+        <div>Secure Probability: <strong>${(1 - p).toFixed(3)}</strong></div>
       </div>
     </div>
 
     <div style="background: rgba(8,15,35,0.6); border-radius: 10px; padding: 1.5rem; border-left: 3px solid #81c784; margin: 1.5rem 0;">
-      <strong style="color: #81c784; font-size: 1.05rem;">✓ Convergence Quality:</strong><br>
+      <strong style="color: #81c784; font-size: 1.05rem;">Convergence Quality</strong><br>
       <div style="color: #b8d4ff; line-height: 2; margin-top: 0.75rem;">
         <div><strong>Mean Error:</strong> ${meanErrorPct}% (Empirical: ${data.mean.toFixed(3)} vs Theory: ${data.theoreticalMean.toFixed(3)})</div>
         <div><strong>Std Dev Error:</strong> ${stdDevErrorPct}% (Empirical: ${data.stdDev.toFixed(3)} vs Theory: ${data.theoreticalStdDev.toFixed(3)})</div>
-        <div><strong>KS Test Statistic:</strong> ${data.ksStatistic.toFixed(4)} (${data.ksStatistic < 0.05 ? '✓ Excellent fit' : data.ksStatistic < 0.15 ? '✓ Good fit' : '⚠ Moderate deviation'})</div>
+        <div><strong>KS Test Statistic:</strong> ${data.ksStatistic.toFixed(4)} - ${data.ksStatistic < 0.05 ? 'Excellent fit' : data.ksStatistic < 0.15 ? 'Good fit' : 'Moderate deviation'}</div>
         <div><strong>χ² Test Statistic:</strong> ${data.chiSquare.toFixed(2)} with ${data.sortedScores.length - 1} df</div>
       </div>
     </div>
 
     <div style="background: rgba(8,15,35,0.6); border-radius: 10px; padding: 1.5rem; border-left: 3px solid #2196f3; margin: 1.5rem 0;">
-      <strong style="color: #2196f3; font-size: 1.05rem;">📈 Random Walk Interpretation:</strong><br>
+      <strong style="color: #2196f3; font-size: 1.05rem;">Random Walk Interpretation</strong><br>
       <div style="color: #b8d4ff; line-height: 2; margin-top: 0.75rem;">
-        ${p < 0.5 ? 
-          `<div>• <strong>Upward Drift:</strong> System is generally SECURE (p=${p} < 0.5)</div>
-           <div>• Expected score: ${data.theoreticalMean.toFixed(2)} (positive trend)</div>
-           <div>• Interpretation: Updates are effective; breaches less frequent than secure weeks</div>` :
-          p > 0.5 ?
-          `<div>• <strong>Downward Drift:</strong> System is generally VULNERABLE (p=${p} > 0.5)</div>
-           <div>• Expected score: ${data.theoreticalMean.toFixed(2)} (negative trend)</div>
-           <div>• Interpretation: Breaches more frequent than secure weeks; critical risk</div>` :
-          `<div>• <strong>Symmetric Random Walk:</strong> System in equilibrium (p=0.5)</div>
-           <div>• Expected score: ≈ 0 (no drift)</div>
-           <div>• Interpretation: Equal probability of breach and security</div>`
-        }
+        ${p < 0.5 ? `
+          <div><strong>Upward Drift</strong> (p=${p})</div>
+          <div>System is generally <strong>SECURE</strong> (p < 0.5)</div>
+          <div>Expected score: ${data.theoreticalMean.toFixed(2)} - positive trend</div>
+          <div>Interpretation: Updates are effective, breaches less frequent than secure weeks</div>
+        ` : p > 0.5 ? `
+          <div><strong>Downward Drift</strong> (p=${p})</div>
+          <div>System is generally <strong>VULNERABLE</strong> (p > 0.5)</div>
+          <div>Expected score: ${data.theoreticalMean.toFixed(2)} - negative trend</div>
+          <div>Interpretation: Breaches more frequent than secure weeks, critical risk</div>
+        ` : `
+          <div><strong>Symmetric Random Walk</strong> (p=${p})</div>
+          <div>System in <strong>equilibrium</strong></div>
+          <div>Expected score: 0 - no drift</div>
+          <div>Interpretation: Equal probability of breach and security</div>
+        `}
       </div>
     </div>
 
     <div style="background: rgba(8,15,35,0.6); border-radius: 10px; padding: 1.5rem; border-left: 3px solid #ff7043; margin: 1.5rem 0;">
-      <strong style="color: #ff7043; font-size: 1.05rem;">🔐 Cybersecurity Implications:</strong><br>
+      <strong style="color: #ff7043; font-size: 1.05rem;">Cybersecurity Implications</strong><br>
       <div style="color: #b8d4ff; line-height: 2; margin-top: 0.75rem;">
-        <div>• <strong>Risk Score Range:</strong> [${data.min}, ${data.max}] out of possible [${-n}, ${n}]</div>
-        <div>• <strong>Median Security Outcome:</strong> ${data.median.toFixed(2)}</div>
-        <div>• <strong>Probability of Net Positive Score:</strong> ${((data.finalScores.filter(s => s > 0).length / m) * 100).toFixed(1)}%</div>
-        <div>• <strong>Probability of Severe Compromise (score ≤ -n/2):</strong> ${((data.finalScores.filter(s => s <= -n/2).length / m) * 100).toFixed(1)}%</div>
-        <div>• <strong>Convergence (m=${m} trajectories):</strong> Distribution closely matches theoretical binomial</div>
+        <div><strong>Risk Score Range:</strong> ${data.min} to ${data.max} (possible: -${n} to ${n})</div>
+        <div><strong>Median Security Outcome:</strong> ${data.median.toFixed(2)}</div>
+        <div><strong>Probability of Positive Score:</strong> ${(data.finalScores.filter(s => s > 0).length / m * 100).toFixed(1)}%</div>
+        <div><strong>Probability of Severe Compromise (score < -${Math.floor(n/2)}):</strong> ${(data.finalScores.filter(s => s < -Math.floor(n/2)).length / m * 100).toFixed(1)}%</div>
+        <div><strong>Convergence (m=${m} trajectories):</strong> Distribution closely matches theoretical binomial</div>
       </div>
     </div>
 
     <div style="background: rgba(8,15,35,0.6); border-radius: 10px; padding: 1.5rem; border-left: 3px solid #ffc107; margin: 1.5rem 0;">
-      <strong style="color: #ffc107; font-size: 1.05rem;">📊 Distribution Analysis:</strong><br>
+      <strong style="color: #ffc107; font-size: 1.05rem;">Distribution Analysis</strong><br>
       <div style="color: #b8d4ff; line-height: 2; margin-top: 0.75rem;">
-        <div>• <strong>Score Range Covered:</strong> ${data.sortedScores.length} distinct outcomes</div>
-        <div>• <strong>Most Likely Score:</strong> ${data.sortedScores.reduce((a, b) => data.scoreFrequency[a] > data.scoreFrequency[b] ? a : b)}</div>
-        <div>• <strong>Distribution Shape:</strong> ${p === 0.5 ? 'Symmetric (binomial)' : p < 0.5 ? 'Right-skewed (favoring security)' : 'Left-skewed (favoring breaches)'}</div>
-        <div>• <strong>Deviation from Theory:</strong> KS = ${data.ksStatistic.toFixed(4)} indicates ${data.ksStatistic < 0.1 ? 'excellent' : 'good'} convergence by LLN</div>
+        <div><strong>Score Range Covered:</strong> ${data.sortedScores.length} distinct outcomes</div>
+        <div><strong>Most Likely Score:</strong> ${data.sortedScores.reduce((a, b) => data.scoreFrequency[a] > data.scoreFrequency[b] ? a : b)}</div>
+        <div><strong>Distribution Shape:</strong> ${p === 0.5 ? 'Symmetric binomial' : p < 0.5 ? 'Right-skewed (favoring security)' : 'Left-skewed (favoring breaches)'}</div>
+        <div><strong>Deviation from Theory:</strong> KS ${data.ksStatistic.toFixed(4)} indicates ${data.ksStatistic < 0.1 ? 'excellent' : 'good'} convergence by LLN</div>
       </div>
     </div>
   `;
@@ -490,46 +501,85 @@ function displayAnalysis(n, m, p, data) {
   $('#analysisSection').innerHTML = analysisHTML;
 }
 
-function runMultipleTests() {
-  const startN = 10;
-  const endN = 100;
-  const step = 10;
-  const m = 500;
-  const p = 0.3;
+// Convergence Test with varying n
+function runConvergenceTest() {
+  const m = 500; // Fixed trajectories
+  const p = parseFloat($('#breachProb').value);
 
-  showAlert('🔄 Running convergence tests...', 'info');
-
-  const results = [];
-  for (let n = startN; n <= endN; n += step) {
-    const data = simulateRandomWalks(n, m, p, 5);
-    results.push({
-      n,
-      empiricalMean: data.mean,
-      theoreticalMean: data.theoreticalMean,
-      ksStatistic: data.ksStatistic,
-      meanError: Math.abs(data.mean - data.theoreticalMean)
-    });
+  if (p < 0 || p > 1) {
+    showAlert('Invalid breach probability', 'error');
+    return;
   }
 
-  displayConvergenceTests(results);
-  showAlert('✓ Convergence analysis completed!', 'success');
+  showAlert('🔄 Running convergence test: varying n...', 'info');
+
+  $('#progressBar').style.display = 'block';
+  $('#progressFill').style.width = '0%';
+  $('#progressFill').textContent = '0%';
+
+  const nValues = [10, 20, 50, 100, 200, 500];
+  const results = [];
+  let index = 0;
+
+  function processNextN() {
+    if (index >= nValues.length) {
+      // Completato
+      displayConvergenceTestChart(results);
+      $('#progressBar').style.display = 'none';
+      showAlert('✓ Convergence test complete! Observe how errors decrease with larger n.', 'success');
+      return;
+    }
+
+    const n = nValues[index];
+    const progress = Math.round((index / nValues.length) * 100);
+    $('#progressFill').style.width = progress + '%';
+    $('#progressFill').textContent = progress + '%';
+
+    setTimeout(() => {
+      try {
+        console.log('Processing n=' + n);
+        const data = simulateRandomWalks(n, m, p, 5);
+
+        results.push({
+          n: n,
+          empiricalMean: data.mean,
+          theoreticalMean: data.theoreticalMean,
+          meanError: Math.abs(data.mean - data.theoreticalMean) / Math.abs(data.theoreticalMean) * 100,
+          ksStatistic: data.ksStatistic
+        });
+
+        console.log('Completed n=' + n, results[results.length - 1]);
+
+        index++;
+        processNextN(); // Ricorsione
+      } catch (error) {
+        console.error('Error processing n=' + n, error);
+        showAlert('❌ Error during convergence test at n=' + n, 'error');
+        $('#progressBar').style.display = 'none';
+      }
+    }, 100);
+  }
+
+  processNextN(); // Inizia
 }
 
-function displayConvergenceTests(results) {
+function displayConvergenceTestChart(results) {
   const ctx = document.getElementById('convergenceChart').getContext('2d');
-  
+
   if (charts.convergence) charts.convergence.destroy();
 
   const nValues = results.map(r => r.n);
   const empiricalMeans = results.map(r => r.empiricalMean);
   const theoreticalMeans = results.map(r => r.theoreticalMean);
-  const ksStats = results.map(r => r.ksStatistic);
   const meanErrors = results.map(r => r.meanError);
+  const ksStats = results.map(r => r.ksStatistic);
+
+  console.log('Rendering convergence chart with results:', results);
 
   charts.convergence = new Chart(ctx, {
     type: 'line',
     data: {
-      labels: nValues,
+      labels: nValues.map(n => 'n=' + n),
       datasets: [
         {
           label: 'Empirical Mean',
@@ -538,7 +588,9 @@ function displayConvergenceTests(results) {
           backgroundColor: 'rgba(24,224,230,0.1)',
           borderWidth: 2.5,
           fill: true,
-          tension: 0.3
+          tension: 0.4,
+          pointRadius: 5,
+          pointBackgroundColor: '#18e0e6'
         },
         {
           label: 'Theoretical Mean',
@@ -548,7 +600,21 @@ function displayConvergenceTests(results) {
           borderWidth: 2.5,
           borderDash: [5, 5],
           fill: false,
-          tension: 0.3
+          tension: 0.4,
+          pointRadius: 5,
+          pointBackgroundColor: '#ff7043'
+        },
+        {
+          label: 'Mean Error %',
+          data: meanErrors,
+          borderColor: '#ffc107',
+          backgroundColor: 'transparent',
+          borderWidth: 2,
+          borderDash: [2, 2],
+          fill: false,
+          tension: 0.4,
+          pointRadius: 4,
+          pointBackgroundColor: '#ffc107'
         }
       ]
     },
@@ -562,7 +628,7 @@ function displayConvergenceTests(results) {
         y: {
           ticks: { color: '#b8d4ff' },
           grid: { color: '#2d4a7a' },
-          title: { display: true, text: 'Mean Score', color: '#18e0e6' }
+          title: { display: true, text: 'Mean Value', color: '#18e0e6' }
         },
         x: {
           ticks: { color: '#b8d4ff' },
@@ -574,14 +640,27 @@ function displayConvergenceTests(results) {
   });
 }
 
+function clearSimulation() {
+  $('#resultsSection').style.display = 'none';
+  $('#progressBar').style.display = 'none';
+  simulationData = null;
+
+  Object.values(charts).forEach(chart => {
+    if (chart) chart.destroy();
+  });
+  charts = {};
+
+  showAlert('Results cleared', 'success');
+}
+
 // Helper functions
 function binomial(n, k) {
   if (k < 0 || k > n) return 0;
   if (k === 0 || k === n) return 1;
-  
+
   let result = 1;
   for (let i = Math.min(k, n - k); i > 0; i--) {
-    result = result * (n - i + 1) / i;
+    result = (result * (n - i + 1)) / i;
   }
   return result;
 }
@@ -595,45 +674,32 @@ function computeMedian(arr) {
 function computeKSStatistic(scores, empirical, theoretical, totalCount) {
   let maxDiff = 0;
   let empiricalCDF = 0;
-  
+
   for (let score of scores) {
     empiricalCDF += (empirical[score] || 0) / totalCount;
     const theoreticalCDF = Object.keys(theoretical)
       .filter(s => Number(s) <= score)
       .reduce((sum, s) => sum + theoretical[s], 0);
-    
+
     maxDiff = Math.max(maxDiff, Math.abs(empiricalCDF - theoreticalCDF));
   }
-  
+
   return maxDiff;
 }
 
 function computeChiSquare(scores, empirical, theoretical, totalCount) {
   let chiSquare = 0;
-  
+
   for (let score of scores) {
     const observed = empirical[score] || 0;
     const expected = (theoretical[score] || 0) * totalCount;
-    
+
     if (expected > 0) {
       chiSquare += Math.pow(observed - expected, 2) / expected;
     }
   }
-  
-  return chiSquare;
-}
 
-function clearSimulation() {
-  $('#resultsSection').style.display = 'none';
-  $('#progressBar').style.display = 'none';
-  simulationData = null;
-  
-  Object.values(charts).forEach(chart => {
-    if (chart) chart.destroy();
-  });
-  charts = {};
-  
-  showAlert('Results cleared', 'success');
+  return chiSquare;
 }
 
 function showAlert(msg, type = 'info') {
@@ -641,7 +707,7 @@ function showAlert(msg, type = 'info') {
   alert.className = `alert ${type}`;
   alert.textContent = msg;
   document.body.appendChild(alert);
-  
+
   setTimeout(() => {
     alert.style.opacity = '0';
     alert.style.transition = 'opacity 0.3s ease';
@@ -652,7 +718,7 @@ function showAlert(msg, type = 'info') {
 // Initialize
 document.addEventListener('DOMContentLoaded', () => {
   console.log('[HW7] Random Walk simulator ready');
-  
+
   const navToggle = document.getElementById('navToggle');
   if (navToggle) {
     navToggle.addEventListener('click', () => {
