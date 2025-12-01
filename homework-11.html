@@ -3,329 +3,468 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Homework 11: Wiener Process & Brownian Motion Simulation</title>
+    <title>Homework 11: Wiener Process Simulation</title>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    <script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
     <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
     <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
+main {
+      max-width: 1500px !important;
+      margin: 0 auto;
+      padding: 0 1rem;
+    }
 
-        body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background: linear-gradient(135deg, #1a1a2e 0%, #0f3460 100%);
-            color: #e0e0e0;
-            min-height: 100vh;
-            padding: 20px;
-        }
+    .hw-detail {
+      max-width: 100%;
+      width: 100%;
+    }
 
-        .container {
-            max-width: 1400px;
-            margin: 0 auto;
-        }
+    .hw-section {
+      background: rgba(30,44,74,0.95);
+      border-radius: 16px;
+      margin: 2rem 0;
+      padding: 2rem;
+      box-shadow: 0 8px 32px rgba(24,224,230,0.15);
+    }
 
-        header {
-            text-align: center;
-            margin-bottom: 40px;
-            padding: 30px;
-            background: rgba(20, 60, 90, 0.6);
-            border-radius: 12px;
-            border-left: 4px solid #00d4ff;
-        }
+    .tool-section {
+      background: rgba(15,25,55,0.6);
+      border-radius: 10px;
+      padding: 2rem;
+      margin: 1.5rem 0;
+      border: 1px solid #2d4a7a;
+    }
 
-        h1 {
-            color: #00d4ff;
-            margin-bottom: 10px;
-            font-size: 2.2em;
-        }
+    .tool-title {
+      color: #18e0e6;
+      font-weight: 600;
+      margin-bottom: 1.5rem;
+      font-size: 1.2rem;
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+    }
 
-        .subtitle {
-            color: #88ccff;
-            font-size: 1.1em;
-        }
+    .input-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 1.5rem;
+      margin-bottom: 1.5rem;
+    }
 
-        .content {
-            display: grid;
-            grid-template-columns: 1fr 2fr;
-            gap: 20px;
-            margin-bottom: 30px;
-        }
+    .input-group {
+      display: flex;
+      flex-direction: column;
+    }
 
-        .theory-panel {
-            background: rgba(20, 60, 90, 0.5);
-            padding: 25px;
-            border-radius: 10px;
-            border: 1px solid rgba(0, 212, 255, 0.3);
-            max-height: 850px;
-            overflow-y: auto;
-        }
+    .input-group label {
+      color: #b8d4ff;
+      margin-bottom: 0.75rem;
+      font-weight: 600;
+      font-size: 0.95rem;
+    }
 
-        .theory-title {
-            color: #00d4ff;
-            font-size: 1.4em;
-            margin-bottom: 15px;
-            font-weight: 600;
-        }
+    .input-group input,
+    .input-group select {
+      padding: 0.85rem;
+      border-radius: 8px;
+      border: 1px solid #3a5a8a;
+      background: #0f1937;
+      color: #e9f2ff;
+      font-family: inherit;
+      font-size: 0.95rem;
+    }
 
-        .theory-section {
-            margin-bottom: 22px;
-            padding-bottom: 18px;
-            border-bottom: 1px solid rgba(0, 212, 255, 0.2);
-        }
+    .input-group small {
+      color: #4a9eff;
+      font-size: 0.8rem;
+      margin-top: 0.4rem;
+    }
 
-        .theory-section:last-child {
-            border-bottom: none;
-        }
+    .btn-group {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 1rem;
+      margin: 1.5rem 0;
+    }
 
-        .theory-section h3 {
-            color: #00d4ff;
-            font-size: 1.02em;
-            margin-bottom: 10px;
-            font-weight: 600;
-        }
+    .btn {
+      background: linear-gradient(135deg, #18e0e6 0%, #2bd4d9 100%);
+      color: #0a1628;
+      border: none;
+      padding: 0.85rem 1.75rem;
+      border-radius: 25px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      font-size: 0.95rem;
+    }
 
-        .theory-section p {
-            color: #b0c4de;
-            font-size: 0.96em;
-            line-height: 1.7;
-            margin-bottom: 10px;
-        }
+    .btn:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 4px 15px rgba(24,224,230,0.3);
+    }
 
-        .theory-section ul {
-            color: #b0c4de;
-            font-size: 0.96em;
-            line-height: 1.7;
-            margin-left: 18px;
-            margin-bottom: 10px;
-        }
+    .btn:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+    }
 
-        .theory-section li {
-            margin-bottom: 6px;
-        }
+    .btn.secondary {
+      background: linear-gradient(135deg, #4a9eff 0%, #6bb6ff 100%);
+    }
 
-        .controls-panel {
-            background: rgba(20, 60, 90, 0.5);
-            padding: 25px;
-            border-radius: 10px;
-            border: 1px solid rgba(0, 212, 255, 0.3);
-        }
+    .btn.danger {
+      background: linear-gradient(135deg, #ff5722 0%, #ff7043 100%);
+    }
 
-        .control-group {
-            margin-bottom: 18px;
-        }
+    .progress-bar {
+      background: rgba(15,25,55,0.9);
+      border-radius: 10px;
+      height: 30px;
+      margin: 1.5rem 0;
+      overflow: hidden;
+      border: 1px solid #2d4a7a;
+      display: none;
+    }
 
-        .control-label {
-            display: block;
-            color: #00d4ff;
-            font-size: 0.95em;
-            margin-bottom: 6px;
-            font-weight: 500;
-        }
+    .progress-fill {
+      background: linear-gradient(90deg, #18e0e6 0%, #2bd4d9 100%);
+      height: 100%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: #0a1628;
+      font-weight: bold;
+      transition: width 0.3s ease;
+      width: 0%;
+    }
 
-        .control-input {
-            width: 100%;
-            padding: 10px;
-            background: rgba(30, 70, 100, 0.8);
-            border: 1px solid rgba(0, 212, 255, 0.4);
-            color: #e0e0e0;
-            border-radius: 6px;
-            font-size: 0.95em;
-        }
+    .chart-container {
+      background: rgba(8,15,35,0.9);
+      border-radius: 12px;
+      padding: 1.5rem;
+      margin: 1.5rem 0;
+      border: 2px solid #2d4a7a;
+      position: relative;
+      height: 450px;
+    }
 
-        .control-input:focus {
-            outline: none;
-            border-color: #00d4ff;
-            box-shadow: 0 0 8px rgba(0, 212, 255, 0.3);
-        }
+    .chart-title {
+      color: #18e0e6;
+      font-weight: 600;
+      margin-bottom: 0.75rem;
+      font-size: 1.05rem;
+    }
 
-        .button-group {
-            display: flex;
-            gap: 10px;
-            margin-top: 20px;
-        }
+    .chart-description {
+      color: #4a9eff;
+      font-size: 0.85rem;
+      margin-bottom: 1rem;
+      line-height: 1.5;
+    }
 
-        button {
-            flex: 1;
-            padding: 12px;
-            border: none;
-            border-radius: 6px;
-            font-size: 0.95em;
-            font-weight: 600;
-            cursor: pointer;
-            transition: all 0.3s ease;
-        }
+    .charts-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(700px, 1fr));
+      gap: 2rem;
+      margin: 2rem 0;
+    }
 
-        .btn-primary {
-            background: linear-gradient(135deg, #00d4ff, #0099cc);
-            color: #000;
-        }
+    .stats-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+      gap: 1.5rem;
+      margin: 1.5rem 0;
+    }
 
-        .btn-primary:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 8px 16px rgba(0, 212, 255, 0.3);
-        }
+    .stat-card {
+      background: linear-gradient(135deg, rgba(24,224,230,0.1) 0%, rgba(24,224,230,0.05) 100%);
+      border-radius: 10px;
+      padding: 1.5rem;
+      border: 2px solid #18e0e6;
+    }
 
-        .btn-secondary {
-            background: rgba(100, 100, 120, 0.7);
-            color: #e0e0e0;
-        }
+    .stat-label {
+      color: #4a9eff;
+      font-size: 0.85rem;
+      margin-bottom: 0.5rem;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
 
-        .btn-secondary:hover {
-            background: rgba(120, 120, 140, 0.8);
-        }
+    .stat-value {
+      color: #18e0e6;
+      font-size: 2rem;
+      font-weight: bold;
+      font-family: 'Orbitron', monospace;
+    }
 
-        .progress-bar {
-            width: 100%;
-            height: 6px;
-            background: rgba(50, 80, 110, 0.8);
-            border-radius: 3px;
-            overflow: hidden;
-            margin-top: 15px;
-            display: none;
-        }
+    .stat-sublabel {
+      color: #64b5f6;
+      font-size: 0.8rem;
+      margin-top: 0.5rem;
+      font-style: italic;
+    }
 
-        .progress-fill {
-            height: 100%;
-            background: linear-gradient(90deg, #00d4ff, #00ff88);
-            width: 0%;
-            transition: width 0.3s ease;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            color: #000;
-            font-size: 0.7em;
-            font-weight: bold;
-        }
+    .highlight-section {
+      background: linear-gradient(135deg, rgba(76,175,80,0.1) 0%, rgba(76,175,80,0.05) 100%);
+      border: 3px solid #81c784;
+      border-radius: 12px;
+      padding: 2rem;
+      margin: 2rem 0;
+    }
 
-        .results-section {
-            background: rgba(20, 60, 90, 0.5);
-            padding: 25px;
-            border-radius: 10px;
-            border: 1px solid rgba(0, 212, 255, 0.3);
-            display: none;
-            margin-top: 30px;
-        }
+    .highlight-title {
+      color: #81c784;
+      font-weight: 700;
+      font-size: 1.3rem;
+      margin-bottom: 1.5rem;
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+    }
 
-        .results-title {
-            color: #00d4ff;
-            font-size: 1.6em;
-            margin-bottom: 25px;
-            font-weight: 600;
-            border-bottom: 2px solid rgba(0, 212, 255, 0.3);
-            padding-bottom: 12px;
-        }
+    .highlight-content {
+      color: #a5d6a7;
+      line-height: 1.9;
+      font-size: 0.98rem;
+    }
 
-        .chart-container {
-            position: relative;
-            width: 100%;
-            height: 500px;
-            margin-bottom: 30px;
-            background: rgba(10, 40, 70, 0.4);
-            padding: 15px;
-            border-radius: 8px;
-            border: 1px solid rgba(0, 212, 255, 0.2);
-        }
+    .highlight-content p {
+      margin-bottom: 1rem;
+    }
 
-        .analysis-section {
-            background: rgba(10, 40, 70, 0.6);
-            padding: 20px;
-            border-radius: 8px;
-            border-left: 3px solid #00ff88;
-            margin-top: 25px;
-        }
+    .highlight-box {
+      background: rgba(8,15,35,0.6);
+      border-left: 4px solid #81c784;
+      padding: 1.5rem;
+      border-radius: 8px;
+      margin: 1rem 0;
+    }
 
-        .analysis-title {
-            color: #00ff88;
-            font-size: 1.2em;
-            margin-bottom: 15px;
-            font-weight: 600;
-        }
+    .highlight-box strong {
+      color: #81c784;
+    }
 
-        .alert {
-            padding: 14px 16px;
-            border-radius: 6px;
-            margin-bottom: 12px;
-            font-size: 0.95em;
-            animation: slideIn 0.3s ease;
-        }
+    .process-identification {
+      background: linear-gradient(135deg, rgba(255,193,7,0.1) 0%, rgba(255,193,7,0.05) 100%);
+      border: 3px solid #ffc107;
+      border-radius: 12px;
+      padding: 2rem;
+      margin: 2rem 0;
+    }
 
-        .alert.success {
-            background: rgba(0, 255, 136, 0.2);
-            border-left: 3px solid #00ff88;
-            color: #00ff88;
-        }
+    .process-title {
+      color: #ffc107;
+      font-weight: 700;
+      font-size: 1.3rem;
+      margin-bottom: 1.5rem;
+    }
 
-        .alert.error {
-            background: rgba(255, 100, 100, 0.2);
-            border-left: 3px solid #ff6464;
-            color: #ff9999;
-        }
+    .process-content {
+      color: #ffe082;
+      line-height: 1.9;
+      font-size: 0.98rem;
+    }
 
-        .alert.info {
-            background: rgba(0, 212, 255, 0.2);
-            border-left: 3px solid #00d4ff;
-            color: #88ccff;
-        }
+    .process-content p {
+      margin-bottom: 1rem;
+    }
 
-        @keyframes slideIn {
-            from {
-                opacity: 0;
-                transform: translateY(-10px);
-            }
-            to {
-                opacity: 1;
-                transform: translateY(0);
-            }
-        }
+    .process-formula {
+      background: rgba(8,15,35,0.8);
+      border-left: 4px solid #ffc107;
+      padding: 1.5rem;
+      border-radius: 8px;
+      margin: 1rem 0;
+      font-family: 'Courier New', monospace;
+      color: #ffd54f;
+    }
 
-        .mathjax-block {
-            background: rgba(10, 40, 70, 0.4);
-            padding: 12px;
-            border-radius: 6px;
-            margin: 10px 0;
-            border-left: 3px solid #00d4ff;
-        }
+    .property-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+      gap: 1.5rem;
+      margin: 1.5rem 0;
+    }
 
-        ::-webkit-scrollbar {
-            width: 8px;
-        }
+    .property-card {
+      background: rgba(8,15,35,0.7);
+      border: 2px solid #64b5f6;
+      border-radius: 10px;
+      padding: 1.25rem;
+      border-left: 4px solid #64b5f6;
+    }
 
-        ::-webkit-scrollbar-track {
-            background: rgba(50, 80, 110, 0.3);
-            border-radius: 10px;
-        }
+    .property-name {
+      color: #64b5f6;
+      font-weight: 700;
+      font-size: 1rem;
+      margin-bottom: 0.75rem;
+    }
 
-        ::-webkit-scrollbar-thumb {
-            background: rgba(0, 212, 255, 0.5);
-            border-radius: 10px;
-        }
+    .property-description {
+      color: #b3e5fc;
+      font-size: 0.9rem;
+      line-height: 1.6;
+    }
 
-        ::-webkit-scrollbar-thumb:hover {
-            background: rgba(0, 212, 255, 0.8);
-        }
+    .lambda-section {
+      background: linear-gradient(135deg, rgba(156,39,176,0.1) 0%, rgba(156,39,176,0.05) 100%);
+      border: 3px solid #ba68c8;
+      border-radius: 12px;
+      padding: 2rem;
+      margin: 2rem 0;
+    }
 
-        @media (max-width: 1000px) {
-            .content {
-                grid-template-columns: 1fr;
-            }
+    .lambda-title {
+      color: #ba68c8;
+      font-weight: 700;
+      font-size: 1.3rem;
+      margin-bottom: 1.5rem;
+    }
 
-            .theory-panel {
-                max-height: 500px;
-            }
-        }
+    .lambda-content {
+      color: #ce93d8;
+      line-height: 1.9;
+      font-size: 0.98rem;
+    }
+
+    .lambda-content p {
+      margin-bottom: 1rem;
+    }
+
+    .lambda-box {
+      background: rgba(8,15,35,0.6);
+      border-left: 4px solid #ba68c8;
+      padding: 1.5rem;
+      border-radius: 8px;
+      margin: 1rem 0;
+    }
+
+    .alert {
+      position: fixed;
+      top: 20px;
+      right: 20px;
+      z-index: 1000;
+      max-width: 500px;
+      padding: 1rem 1.5rem;
+      border-radius: 8px;
+      font-weight: 600;
+      box-shadow: 0 4px 15px rgba(0,0,0,0.3);
+    }
+
+    .alert.success {
+      background: rgba(76,175,80,0.95);
+      border: 1px solid #4caf50;
+      color: #fff;
+    }
+
+    .alert.error {
+      background: rgba(244,67,54,0.95);
+      border: 1px solid #f44336;
+      color: #fff;
+    }
+
+    .alert.info {
+      background: rgba(33,150,243,0.95);
+      border: 1px solid #2196f3;
+      color: #fff;
+    }
+
+    #resultsSection {
+      display: none;
+    }
+
+    .centered {
+      text-align: center;
+      margin: 2rem 0;
+    }
+
+    .btn-main {
+      display: inline-block;
+      background: linear-gradient(135deg, #18e0e6, #2bd4d9);
+      color: #0a1628;
+      padding: 1rem 2rem;
+      border-radius: 30px;
+      text-decoration: none;
+      font-weight: 700;
+      transition: all 0.3s;
+    }
+
+    .btn-main:hover {
+      transform: translateY(-3px);
+      box-shadow: 0 8px 20px rgba(24,224,230,0.3);
+    }
+
+    p {
+      color: #b8d4ff;
+      line-height: 1.8;
+      margin-bottom: 1rem;
+    }
+
+    strong {
+      color: #18e0e6;
+    }
+
+    h1 {
+      color: #18e0e6 !important;
+      margin-bottom: 0.5rem !important;
+    }
+
+    .subtle {
+      color: #64b5f6;
+      font-size: 1.05rem;
+      margin-bottom: 2rem;
+    }
+
+    .convergence-indicator {
+      display: inline-block;
+      padding: 0.5rem 1rem;
+      border-radius: 20px;
+      font-weight: 600;
+      font-size: 0.9rem;
+      margin-top: 1rem;
+    }
+
+    .convergence-excellent {
+      background: rgba(76,175,80,0.3);
+      color: #81c784;
+      border: 1px solid #81c784;
+    }
+
+    .convergence-good {
+      background: rgba(76,175,80,0.2);
+      color: #81c784;
+      border: 1px solid #81c784;
+    }
+
+    .convergence-moderate {
+      background: rgba(255,193,7,0.2);
+      color: #ffc107;
+      border: 1px solid #ffc107;
+    }
     </style>
 </head>
 <body>
-    <div class="container">
-        <header>
-            <h1>🌊 Homework 11: Wiener Process & Brownian Motion</h1>
-            <p class="subtitle">Continuous Stochastic Processes via Box-Muller Discretization</p>
-        </header>
+    <header>
+    <nav class="navbar">
+      <div class="logo">Statistics<span class="cyber">Cyber</span></div>
+      <ul id="navLinks">
+        <li><a href="index.html">Home</a></li>
+        <li><a href="homework.html">Homework</a></li>
+        <li><a href="about.html">About</a></li>
+      </ul>
+      <button class="nav-toggle" id="navToggle">&#9776;</button>
+    </nav>
+  </header>
 
-        <div class="content">
+    <main>
+        <div class="hw-container">
+            <h1 class="hw-title">Homework 11: Wiener Process Simulation</h1>
+            <p class="hw-subtitle">Analyze continuous-time stochastic trajectories with drift and volatility</p>
+
             <div class="theory-panel">
                 <div class="theory-title">📖 Theoretical Framework</div>
 
@@ -482,6 +621,16 @@
         </div>
     </div>
     <script src="script.js"></script>
+    <script src="hw11.js"></script>
+</body>
+</html>
+        </div>
+    </main>
+
+    <footer>
+    <span>&copy; 2025 Lorenzo Ciafrelli | MS Cybersecurity, Sapienza University of Rome</span>
+  </footer>
+	<script src="script.js"></script>
     <script src="hw11.js"></script>
 </body>
 </html>
