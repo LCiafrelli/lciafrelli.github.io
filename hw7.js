@@ -174,6 +174,7 @@ function displayResults(n, m, p, data) {
   displayTrajectoryChart(data, n);
   displayDistributionChart(data, n, m, p);
   displayConvergenceChart(data);
+  displayCDFChart(data);
 
   // Display analysis
   displayAnalysis(n, m, p, data);
@@ -342,6 +343,82 @@ function displayConvergenceChart(data) {
         x: {
           ticks: { color: '#b8d4ff' },
           grid: { color: '#2d4a7a' }
+        }
+      }
+    }
+  });
+}
+
+function displayCDFChart(data) {
+  const ctx = document.getElementById('cdfChart').getContext('2d');
+
+  if (charts.cdf) charts.cdf.destroy();
+
+  const sortedFinal = [...data.finalScores].sort((a, b) => a - b);
+
+  // Empirical CDF
+  const empiricalCDF = [];
+  const cdfLabels = [];
+  for (let i = 0; i < sortedFinal.length; i++) {
+    empiricalCDF.push((i + 1) / data.finalScores.length);
+    if (i % Math.ceil(data.finalScores.length / 50) === 0) {
+      cdfLabels.push(sortedFinal[i]);
+    }
+  }
+
+  // Theoretical CDF (cumulative binomial)
+  const theoreticalCDF = sortedFinal.map(score => {
+    let cumProb = 0;
+    for (let s = -data.finalScores.length; s <= score; s++) {
+      cumProb += data.theoreticalProbs[s] || 0;
+    }
+    return cumProb;
+  });
+
+  charts.cdf = new Chart(ctx, {
+    type: 'line',
+    data: {
+      labels: Array.from({ length: sortedFinal.length }, (_, i) => i),
+      datasets: [
+        {
+          label: 'Empirical CDF',
+          data: empiricalCDF,
+          borderColor: '#18e0e6',
+          backgroundColor: 'rgba(24,224,230,0.1)',
+          borderWidth: 2.5,
+          fill: true,
+          tension: 0
+        },
+        {
+          label: 'Theoretical CDF',
+          data: theoreticalCDF,
+          borderColor: '#ff7043',
+          backgroundColor: 'transparent',
+          borderWidth: 2.5,
+          borderDash: [5, 5],
+          fill: false,
+          tension: 0
+        }
+      ]
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      plugins: {
+        legend: { labels: { color: '#b8d4ff' } }
+      },
+      scales: {
+        y: {
+          ticks: { color: '#b8d4ff' },
+          grid: { color: '#2d4a7a' },
+          min: 0,
+          max: 1,
+          title: { display: true, text: 'Cumulative Probability', color: '#18e0e6' }
+        },
+        x: {
+          ticks: { color: '#b8d4ff' },
+          grid: { color: '#2d4a7a' },
+          title: { display: true, text: 'Sample Index', color: '#18e0e6' }
         }
       }
     }
