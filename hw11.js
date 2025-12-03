@@ -660,7 +660,7 @@ function runSimulation2() {
     const m = parseInt($('#inM').value);
     const displayCount = parseInt($('#inShow').value);
     const procType = $('#procType').value;
-   
+
     if (!(T > 0 && n >= 100 && m >= 10)) {
         showAlert('Check parameters: T > 0, n >= 100, m >= 10', 'error');
         return;
@@ -697,9 +697,8 @@ function runSimulation2() {
             }
 
            
-if (resultsSection2) resultsSection2.style.display = 'block';
 
-        //    if (resultsSection2) resultsSection2.classList.add('active');
+            if (resultsSection2) resultsSection2.classList.add('active');
             showAlert('✓ Done!', 'success');
 
         } catch (error) {
@@ -714,9 +713,7 @@ if (resultsSection2) resultsSection2.style.display = 'block';
 
 // PART 2: Clear Results
 function clearResults2() {
-    const resultsSection2 = $('#resultsSection2');
-    if (resultsSection2) resultsSection2.style.display = 'none';
-    //$('#resultsSection2').classList.remove('active');
+    $('#resultsSection2').classList.remove('active');
     if (charts.trajectory2) charts.trajectory2.destroy();
     if (charts.histogram2) charts.histogram2.destroy();
     showAlert('Part II results cleared', 'info');
@@ -742,8 +739,7 @@ document.addEventListener('DOMContentLoaded', () => {
     if (procType) procType.addEventListener('change', () => {
         toggleSDEControls();
         const rs = $('#resultsSection2');
-        //if (rs) rs.classList.remove('active');
-        if (rs) rs.style.display = 'none';
+        if (rs) rs.classList.remove('active');
     });
     if (driftForm) driftForm.addEventListener('change', toggleCustomExpressions);
     if (diffForm) diffForm.addEventListener('change', toggleCustomExpressions);
