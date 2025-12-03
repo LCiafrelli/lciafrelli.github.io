@@ -12,8 +12,7 @@
 <script src="https://cdn.jsdelivr.net/npm/chart.js@4.3.0/dist/chart.umd.min.js"></script>
     
     <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
-    
-<style>
+    <style>
  section.transition {
             background: linear-gradient(135deg, #1f2937 0%, #111827 100%);
             border: 2px dashed #f59e0b;
@@ -477,8 +476,9 @@ main {
       border: 1px solid #ffc107;
     }
 
-</style>
-<body>
+    </style>
+
+
      <header>
     <nav class="navbar">
       <div class="logo">Statistics<span class="cyber">Cyber</span></div>
@@ -494,6 +494,7 @@ main {
     <section class="hw-detail">
 
         <!-- ============ PART I: ORIGINAL CONTENT ============ -->
+         <section class="hw-detail">
             <h1>Homework 11: Wiener Process Simulation</h1>
             <p class="subtle">Analyze continuous-time stochastic trajectories with drift and volatility</p>
 
@@ -788,20 +789,18 @@ main {
 
             <div class="alert" id="alert"></div>
 
-            <!-- Results -->
-            <!-- ============================================================== -->
-<!-- PART 2: EULER-MARUYAMA SIMULATOR RESULTS -->
+          
 <!-- ============================================================== -->
 
-<div id="resultsSection2" class="results-section">
+<div id="resultsSection2" class="results-section" >
     <h3 style="color: #18e0e6; margin-top: 2rem;">📊 Part II Results</h3>
     
     <div class="chart-container">
-        <canvas id="trajectoryChart2" style="max-height: 400px;"></canvas>
+        <canvas id="trajectoryChart2"></canvas>
     </div>
     
     <div class="chart-container">
-        <canvas id="histogramChart2" style="max-height: 400px;"></canvas>
+        <canvas id="histogramChart2"></canvas>
     </div>
     
     
@@ -814,11 +813,8 @@ main {
 
          </section>
 </main>
-
     <footer>
     <span>&copy; 2025 Lorenzo Ciafrelli | MS Cybersecurity, Sapienza University of Rome</span>
   </footer>
     <script src="script.js"></script>
     <script src="hw11.js"></script>
-</body>
-</html>
