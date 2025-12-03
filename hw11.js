@@ -1,289 +1,292 @@
-const $ = sel => document.querySelector(sel);
+// ====================================================================
+// HOMEWORK 11 EXTENDED: Dual Simulator
+// Part 1: Wiener Process with Drift & Volatility
+// Part 2: General SDE with Euler-Maruyama Method
+// ====================================================================
+
+const $ = (sel) => document.querySelector(sel);
 let charts = {};
 let simulationData = null;
 
+// ======================================================================
+// UTILITY FUNCTIONS
+// ======================================================================
+
 // Box-Muller Transform: Generate N(0,1) from U(0,1)
 function boxMullerNormal() {
-  const u1 = Math.random();
-  const u2 = Math.random();
-  
-  // First normal (second can be cached for efficiency)
-  const z0 = Math.sqrt(-2 * Math.log(u1)) * Math.cos(2 * Math.PI * u2);
-  return z0;
+    const u1 = Math.random();
+    const u2 = Math.random();
+    const z0 = Math.sqrt(-2 * Math.log(u1)) * Math.cos(2 * Math.PI * u2);
+    return z0;
 }
 
-// Main simulation function
-function runSimulation() {
-  const T = parseFloat($('#timeInterval').value);
-  const n = parseInt($('#numSteps').value);
-  const m = parseInt($('#numTrajectories').value);
-  const mu = parseFloat($('#driftParam').value);
-  const sigma = parseFloat($('#volatilityParam').value);
-  const displayCount = parseInt($('#displayTrajectories').value);
+// Error function for CDF
+function erf(z) {
+    const a1 = 0.254829592, a2 = -0.284496736, a3 = 1.421413741,
+          a4 = -1.453152027, a5 = 1.061405429, p = 0.3275911;
+    const sign = z < 0 ? -1 : 1;
+    z = Math.abs(z);
+    const t = 1 / (1 + p * z);
+    const t2 = t * t, t3 = t2 * t, t4 = t3 * t, t5 = t4 * t;
+    return sign * (1 - (((((a5 * t5 + a4 * t4) + a3 * t3) + a2 * t2) + a1 * t) * t) * Math.exp(-z * z));
+}
 
-  // Validation
-  if (T < 0.5 || T > 100) {
-    showAlert('Time interval must be between 0.5 and 100', 'error');
-    return;
-  }
-  if (n < 100 || n > 20000) {
-    showAlert('Steps must be between 100 and 20000', 'error');
-    return;
-  }
-  if (m < 50 || m > 5000) {
-    showAlert('Trajectories must be between 50 and 5000', 'error');
-    return;
-  }
-  if (sigma <= 0 || sigma > 5) {
-    showAlert('Volatility must be between 0.1 and 5', 'error');
-    return;
-  }
-
-  $('#progressBar').style.display = 'block';
-  showAlert('🚀 Generating Wiener process trajectories with Box-Muller...', 'info');
-
-  setTimeout(() => {
-    try {
-      simulationData = simulateWienerProcess(T, n, m, mu, sigma, displayCount);
-      displayResults(T, n, m, mu, sigma, simulationData);
-      $('#resultsSection').style.display = 'block';
-      showAlert('✓ Simulation completed! Analyzing continuous paths...', 'success');
-      $('#progressBar').style.display = 'none';
-    } catch (error) {
-      console.error('Simulation error:', error);
-      showAlert('❌ Error during simulation: ' + error.message, 'error');
-      $('#progressBar').style.display = 'none';
+// Show alert message
+function showAlert(msg, type = 'info') {
+    const el = $('#alert');
+    if (!el) {
+        console.log(`[${type.toUpperCase()}]`, msg);
+        return;
     }
-  }, 100);
+    el.className = `alert ${type} show`;
+    el.textContent = msg;
+    setTimeout(() => el.classList.remove('show'), 5000);
+}
+
+// ======================================================================
+// PART 1: WIENER PROCESS SIMULATOR (Original)
+// ======================================================================
+
+function runSimulation() {
+    const T = parseFloat($('#timeInterval').value);
+    const n = parseInt($('#numSteps').value);
+    const m = parseInt($('#numTrajectories').value);
+    const mu = parseFloat($('#driftParam').value);
+    const sigma = parseFloat($('#volatilityParam').value);
+    const displayCount = parseInt($('#displayTrajectories').value);
+
+    // Validation
+    if (T < 0.5 || T > 100) {
+        showAlert('Time interval must be between 0.5 and 100', 'error');
+        return;
+    }
+    if (n < 100 || n > 20000) {
+        showAlert('Steps must be between 100 and 20000', 'error');
+        return;
+    }
+    if (m < 50 || m > 5000) {
+        showAlert('Trajectories must be between 50 and 5000', 'error');
+        return;
+    }
+    if (sigma <= 0 || sigma > 5) {
+        showAlert('Volatility must be between 0.1 and 5', 'error');
+        return;
+    }
+
+    $('#progressBar').style.display = 'block';
+    showAlert('🚀 Generating Wiener process trajectories with Box-Muller...', 'info');
+
+    setTimeout(() => {
+        try {
+            simulationData = simulateWienerProcess(T, n, m, mu, sigma, displayCount);
+            displayResults(T, n, m, mu, sigma, simulationData);
+            $('#resultsSection').style.display = 'block';
+            showAlert('✓ Simulation completed! Analyzing continuous paths...', 'success');
+            $('#progressBar').style.display = 'none';
+        } catch (error) {
+            console.error('Simulation error:', error);
+            showAlert('❌ Error during simulation: ' + error.message, 'error');
+            $('#progressBar').style.display = 'none';
+        }
+    }, 100);
 }
 
 function simulateWienerProcess(T, n, m, mu, sigma, displayCount) {
-  const dt = T / n;
-  const sqrtDt = Math.sqrt(dt);
-  const trajectories = [];
-  const finalValues = [];
-  const timePath = [];
+    const dt = T / n;
+    const sqrtDt = Math.sqrt(dt);
+    const trajectories = [];
+    const finalValues = [];
+    const timePath = [];
 
-  // Generate time points
-  for (let i = 0; i <= n; i++) {
-    timePath.push((i / n) * T);
-  }
-
-  // Generate m trajectories
-  for (let traj = 0; traj < m; traj++) {
-    // Progress indicator
-    const progress = Math.round((traj / m) * 100);
-    $('#progressFill').style.width = progress + '%';
-    $('#progressFill').textContent = progress + '%';
-
-    const path = [0]; // W(0) = 0
-    let currentValue = 0;
-
-    // Generate n steps using Box-Muller for normal increments
-    for (let step = 0; step < n; step++) {
-      // Box-Muller generates N(0,1)
-      const z = boxMullerNormal();
-      
-      // Wiener increment: dW = sqrt(dt) * Z
-      // With drift: dX = mu*dt + sigma*sqrt(dt)*Z
-      const increment = mu * dt + sigma * sqrtDt * z;
-      currentValue += increment;
-      path.push(currentValue);
+    for (let i = 0; i <= n; i++) {
+        timePath.push((i / n) * T);
     }
 
-    finalValues.push(currentValue);
+    for (let traj = 0; traj < m; traj++) {
+        const progress = Math.round((traj / m) * 100);
+        const progressFill = $('#progressFill');
+        if (progressFill) {
+            progressFill.style.width = progress + '%';
+            progressFill.textContent = progress + '%';
+        }
 
-    // Store only subset of trajectories for visualization
-    if (traj < displayCount) {
-      trajectories.push(path);
+        const path = [0];
+        let currentValue = 0;
+
+        for (let step = 0; step < n; step++) {
+            const z = boxMullerNormal();
+            const increment = mu * dt + sigma * sqrtDt * z;
+            currentValue += increment;
+            path.push(currentValue);
+        }
+
+        finalValues.push(currentValue);
+        if (traj < displayCount) {
+            trajectories.push(path);
+        }
     }
-  }
 
-  // Compute statistics on final values
-  const sortedFinals = [...finalValues].sort((a, b) => a - b);
-  const min = sortedFinals[0];
-  const max = sortedFinals[sortedFinals.length - 1];
-  const q25 = sortedFinals[Math.floor(sortedFinals.length * 0.25)];
-  const q50 = sortedFinals[Math.floor(sortedFinals.length * 0.50)];
-  const q75 = sortedFinals[Math.floor(sortedFinals.length * 0.75)];
+    const sortedFinals = [...finalValues].sort((a, b) => a - b);
+    const min = sortedFinals[0];
+    const max = sortedFinals[sortedFinals.length - 1];
+    const q25 = sortedFinals[Math.floor(sortedFinals.length * 0.25)];
+    const q50 = sortedFinals[Math.floor(sortedFinals.length * 0.50)];
+    const q75 = sortedFinals[Math.floor(sortedFinals.length * 0.75)];
 
-  // Theoretical statistics for ABM at time T
-  const theoreticalMean = mu * T;
-  const theoreticalVar = sigma * sigma * T;
-  const theoreticalStd = Math.sqrt(theoreticalVar);
+    const theoreticalMean = mu * T;
+    const theoreticalVar = sigma * sigma * T;
+    const theoreticalStd = Math.sqrt(theoreticalVar);
 
-  // Empirical statistics
-  const empiricalMean = finalValues.reduce((a, b) => a + b, 0) / m;
-  const empiricalVar = finalValues.reduce((sum, x) => sum + Math.pow(x - empiricalMean, 2), 0) / m;
-  const empiricalStd = Math.sqrt(empiricalVar);
+    const empiricalMean = finalValues.reduce((a, b) => a + b, 0) / m;
+    const empiricalVar = finalValues.reduce((sum, x) => sum + Math.pow(x - empiricalMean, 2), 0) / m;
+    const empiricalStd = Math.sqrt(empiricalVar);
 
-  // Probability of positive/negative final values
-  const probPositive = finalValues.filter(v => v > 0).length / m;
-  const probNegative = finalValues.filter(v => v < 0).length / m;
+    const probPositive = finalValues.filter(v => v > 0).length / m;
+    const probNegative = finalValues.filter(v => v < 0).length / m;
 
-  return {
-    trajectories,
-    finalValues,
-    timePath,
-    dt,
-    sqrtDt,
-    min,
-    max,
-    q25,
-    q50,
-    q75,
-    empiricalMean,
-    empiricalVar,
-    empiricalStd,
-    theoreticalMean,
-    theoreticalVar,
-    theoreticalStd,
-    sortedFinals,
-    probPositive,
-    probNegative
-  };
+    return {
+        trajectories, finalValues, timePath, dt, sqrtDt,
+        min, max, q25, q50, q75, empiricalMean, empiricalVar, empiricalStd,
+        theoreticalMean, theoreticalVar, theoreticalStd, sortedFinals,
+        probPositive, probNegative
+    };
 }
 
 function displayResults(T, n, m, mu, sigma, data) {
-  displayTrajectoryChart(data, T);
-  displayCDFChart(data);
-  displayAnalysis(T, n, m, mu, sigma, data);
+    displayTrajectoryChartPart1(data, T);
+    displayCDFChartPart1(data);
+    displayAnalysis(T, n, m, mu, sigma, data);
 
-  // MathJax rendering for any LaTeX in analysis
-  if (window.MathJax) {
-    MathJax.typesetPromise().catch(err => console.log(err));
-  }
-}
-
-function displayTrajectoryChart(data, T) {
-  const ctx = document.getElementById('trajectoryChart').getContext('2d');
-
-  if (charts.trajectory) charts.trajectory.destroy();
-
-  const datasets = [];
-  const colors = [
-    '#18e0e6', '#64b5f6', '#81c784', '#ffc107', '#ff7043',
-    '#ba68c8', '#4db6ac', '#7986cb', '#ffb74d', '#e57373'
-  ];
-
-  data.trajectories.forEach((path, idx) => {
-    datasets.push({
-      label: `Path ${idx + 1}`,
-      data: path,
-      borderColor: colors[idx % colors.length],
-      backgroundColor: 'transparent',
-      borderWidth: 1.2,
-      tension: 0.1,
-      pointRadius: 0,
-      pointHoverRadius: 0
-    });
-  });
-
-  const labels = Array.from({ length: data.timePath.length }, (_, i) => (i / (data.timePath.length - 1)).toFixed(2));
-
-  charts.trajectory = new Chart(ctx, {
-    type: 'line',
-    data: { labels, datasets },
-    options: {
-      responsive: true,
-      maintainAspectRatio: false,
-      interaction: { mode: 'index' },
-      plugins: {
-        legend: { labels: { color: '#b8d4ff' }, display: data.trajectories.length <= 10 },
-        title: { display: true, text: 'Wiener Process Trajectories W(t)', color: '#18e0e6' }
-      },
-      scales: {
-        y: {
-          ticks: { color: '#b8d4ff' },
-          grid: { color: '#2d4a7a' },
-          title: { display: true, text: 'Value W(t)', color: '#18e0e6' }
-        },
-        x: {
-          ticks: { color: '#b8d4ff' },
-          grid: { color: '#2d4a7a' },
-          title: { display: true, text: 'Normalized Time [0,1]', color: '#18e0e6' }
-        }
-      }
+    if (window.MathJax) {
+        MathJax.typesetPromise().catch(err => console.log(err));
     }
-  });
 }
 
-function displayCDFChart(data) {
-  const ctx = document.getElementById('cdfChart').getContext('2d');
-  if (charts.cdf) charts.cdf.destroy();
-
-  const theoreticalMean = data.theoreticalMean;
-  const theoreticalStd = data.theoreticalStd;
-
-  // Empirical CDF points
-  const empiricalX = data.sortedFinals;
-  const empiricalY = empiricalX.map((_, idx) => (idx + 1) / data.sortedFinals.length);
-
-  // Theoretical CDF smooth curve
-  const minVal = data.sortedFinals[0];
-  const maxVal = data.sortedFinals[data.sortedFinals.length - 1];
-  const theoreticalX = [];
-  const theoreticalY = [];
-  
-  for (let i = 0; i <= 100; i++) {
-    const x = minVal + (maxVal - minVal) * (i / 100);
-    theoreticalX.push(x.toFixed(2));
+function displayTrajectoryChartPart1(data, T) {
+    const ctx = document.getElementById('trajectoryChart');
+    if (!ctx) return;
     
-    const z = (x - theoreticalMean) / theoreticalStd;
-    const cdf = 0.5 * (1 + erf(z / Math.sqrt(2)));
-    theoreticalY.push(cdf);
-  }
+    if (charts.trajectory) charts.trajectory.destroy();
 
-  charts.cdf = new Chart(ctx, {
-    type: 'scatter',
-    data: {
-      datasets: [
-        {
-          label: 'Empirical CDF',
-          data: empiricalX.map((x, idx) => ({ x: x, y: empiricalY[idx] })),
-          borderColor: '#18e0e6',
-          backgroundColor: 'rgba(24,224,230,0.3)',
-          pointRadius: 3,
-          pointHoverRadius: 5,
-          showLine: false
-        },
-        {
-          label: 'Theoretical Normal CDF',
-          data: theoreticalX.map((x, idx) => ({ x: parseFloat(x), y: theoreticalY[idx] })),
-          borderColor: '#ff7043',
-          backgroundColor: 'transparent',
-          borderWidth: 2.5,
-          fill: false,
-          tension: 0.3,
-          pointRadius: 0,
-          showLine: true
+    const datasets = [];
+    const colors = ['#18e0e6', '#64b5f6', '#81c784', '#ffc107', '#ff7043', '#ba68c8', '#4db6ac', '#7986cb', '#ffb74d', '#e57373'];
+
+    data.trajectories.forEach((path, idx) => {
+        datasets.push({
+            label: `Path ${idx + 1}`,
+            data: path,
+            borderColor: colors[idx % colors.length],
+            backgroundColor: 'transparent',
+            borderWidth: 1.2,
+            tension: 0.1,
+            pointRadius: 0,
+            pointHoverRadius: 0
+        });
+    });
+
+    const labels = Array.from({ length: data.timePath.length }, (_, i) => (i / (data.timePath.length - 1)).toFixed(2));
+
+    charts.trajectory = new Chart(ctx, {
+        type: 'line',
+        data: { labels, datasets },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            interaction: { mode: 'index' },
+            plugins: {
+                legend: { labels: { color: '#b8d4ff' }, display: data.trajectories.length <= 10 },
+                title: { display: true, text: 'Wiener Process Trajectories W(t)', color: '#18e0e6' }
+            },
+            scales: {
+                y: {
+                    ticks: { color: '#b8d4ff' },
+                    grid: { color: '#2d4a7a' },
+                    title: { display: true, text: 'Value W(t)', color: '#18e0e6' }
+                },
+                x: {
+                    ticks: { color: '#b8d4ff' },
+                    grid: { color: '#2d4a7a' },
+                    title: { display: true, text: 'Normalized Time [0,1]', color: '#18e0e6' }
+                }
+            }
         }
-      ]
-    },
-    options: {
-      responsive: true,
-      maintainAspectRatio: false,
-      plugins: { 
-        legend: { labels: { color: '#b8d4ff' } },
-        title: { display: true, text: 'Cumulative Distribution: Final Values W(T)', color: '#18e0e6' }
-      },
-      scales: {
-        y: {
-          min: 0,
-          max: 1,
-          ticks: { color: '#b8d4ff' },
-          grid: { color: '#2d4a7a' },
-          title: { display: true, text: 'CDF: P(W(T) ≤ w)', color: '#18e0e6' }
-        },
-        x: {
-          type: 'linear',
-          ticks: { color: '#b8d4ff' },
-          grid: { color: '#2d4a7a' },
-          title: { display: true, text: 'Value w', color: '#18e0e6' }
-        }
-      }
+    });
+}
+
+function displayCDFChartPart1(data) {
+    const ctx = document.getElementById('cdfChart');
+    if (!ctx) return;
+    
+    if (charts.cdf) charts.cdf.destroy();
+
+    const theoreticalMean = data.theoreticalMean;
+    const theoreticalStd = data.theoreticalStd;
+
+    const empiricalX = data.sortedFinals;
+    const empiricalY = empiricalX.map((_, idx) => (idx + 1) / data.sortedFinals.length);
+
+    const minVal = data.sortedFinals[0];
+    const maxVal = data.sortedFinals[data.sortedFinals.length - 1];
+    const theoreticalX = [];
+    const theoreticalY = [];
+
+    for (let i = 0; i <= 100; i++) {
+        const x = minVal + (maxVal - minVal) * (i / 100);
+        theoreticalX.push(x.toFixed(2));
+        const z = (x - theoreticalMean) / theoreticalStd;
+        const cdf = 0.5 * (1 + erf(z / Math.sqrt(2)));
+        theoreticalY.push(cdf);
     }
-  });
+
+    charts.cdf = new Chart(ctx, {
+        type: 'scatter',
+        data: {
+            datasets: [
+                {
+                    label: 'Empirical CDF',
+                    data: empiricalX.map((x, idx) => ({ x: x, y: empiricalY[idx] })),
+                    borderColor: '#18e0e6',
+                    backgroundColor: 'rgba(24,224,230,0.3)',
+                    pointRadius: 3,
+                    pointHoverRadius: 5,
+                    showLine: false
+                },
+                {
+                    label: 'Theoretical Normal CDF',
+                    data: theoreticalX.map((x, idx) => ({ x: parseFloat(x), y: theoreticalY[idx] })),
+                    borderColor: '#ff7043',
+                    backgroundColor: 'transparent',
+                    borderWidth: 2.5,
+                    fill: false,
+                    tension: 0.3,
+                    pointRadius: 0,
+                    showLine: true
+                }
+            ]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: { labels: { color: '#b8d4ff' } },
+                title: { display: true, text: 'Cumulative Distribution: Final Values W(T)', color: '#18e0e6' }
+            },
+            scales: {
+                y: {
+                    min: 0, max: 1,
+                    ticks: { color: '#b8d4ff' },
+                    grid: { color: '#2d4a7a' },
+                    title: { display: true, text: 'CDF: P(W(T) ≤ w)', color: '#18e0e6' }
+                },
+                x: {
+                    type: 'linear',
+                    ticks: { color: '#b8d4ff' },
+                    grid: { color: '#2d4a7a' },
+                    title: { display: true, text: 'Value w', color: '#18e0e6' }
+                }
+            }
+        }
+    });
 }
 
 function displayAnalysis(T, n, m, mu, sigma, data) {
@@ -415,7 +418,334 @@ function showAlert(msg, type = 'info') {
   }, 5000);
 }
 
-// Initialize
+// ======================================================================
+// PART 2: EULER-MARUYAMA SIMULATOR
+// ======================================================================
+
+// PART 2: Normal PDF
+function normalPDF(x, mu = 0, sigma = 1) {
+    const s = sigma * Math.sqrt(2 * Math.PI);
+    return Math.exp(-0.5 * Math.pow((x - mu) / sigma, 2)) / s;
+}
+
+// PART 2: Wiener Process Simulator
+function simulateWienerProcessPart2(T, n, m, displayCount) {
+    const dt = T / n;
+    const timePoints = Array.from({ length: n + 1 }, (_, i) => (i / n) * T);
+    const trajectories = [];
+    const finalValues = [];
+
+    for (let traj = 0; traj < m; traj++) {
+        const progress = Math.round((traj / m) * 100);
+        const progressFill = $('#progressFill');
+        if (progressFill) progressFill.style.width = progress + '%';
+
+        const path = [0];
+        let x = 0;
+        for (let step = 0; step < n; step++) {
+            x += Math.sqrt(dt) * boxMullerNormal();
+            path.push(x);
+        }
+        finalValues.push(x);
+        if (traj < displayCount) trajectories.push(path);
+    }
+
+    const sorted = [...finalValues].sort((a, b) => a - b);
+    const mean = finalValues.reduce((s, v) => s + v, 0) / m;
+    const variance = finalValues.reduce((s, v) => s + (v - mean) ** 2, 0) / m;
+    const std = Math.sqrt(variance);
+
+    return { trajectories, finalValues, sorted, timePoints, mean, variance, std, dt };
+}
+
+// PART 2: General SDE Simulator (Euler-Maruyama)
+function simulateSDE(T, n, m, x0, driftFn, diffFn, displayCount) {
+    const dt = T / n;
+    const timePoints = Array.from({ length: n + 1 }, (_, i) => (i / n) * T);
+    const trajectories = [];
+    const finalValues = [];
+
+    for (let traj = 0; traj < m; traj++) {
+        const progress = Math.round((traj / m) * 100);
+        const progressFill = $('#progressFill');
+        if (progressFill) progressFill.style.width = progress + '%';
+
+        const path = [x0];
+        let x = x0;
+        for (let step = 0; step < n; step++) {
+            const t = timePoints[step];
+            const a = driftFn(x, t);
+            const b = diffFn(x, t);
+            const dW = Math.sqrt(dt) * boxMullerNormal();
+            x = x + a * dt + b * dW;
+            path.push(x);
+        }
+        finalValues.push(x);
+        if (traj < displayCount) trajectories.push(path);
+    }
+
+    const sorted = [...finalValues].sort((a, b) => a - b);
+    const mean = finalValues.reduce((s, v) => s + v, 0) / m;
+    const variance = finalValues.reduce((s, v) => s + (v - mean) ** 2, 0) / m;
+    const std = Math.sqrt(variance);
+
+    return { trajectories, finalValues, sorted, timePoints, mean, variance, std, dt };
+}
+
+// PART 2: Function Builders
+function buildDriftFunction(form, mu, customStr) {
+    if (form === 'const') return () => mu;
+    if (form === 'linear') return (x) => mu * x;
+    if (form === 'custom') {
+        try {
+            const fn = new Function('x', 't', 'return ' + customStr + ';');
+            fn(1, 0);
+            return fn;
+        } catch (e) {
+            showAlert('Drift error: ' + e.message, 'error');
+            return () => 0;
+        }
+    }
+    return () => 0;
+}
+
+function buildDiffusionFunction(form, sigma, customStr) {
+    if (form === 'const') return () => sigma;
+    if (form === 'linear') return (x) => sigma * x;
+    if (form === 'custom') {
+        try {
+            const fn = new Function('x', 't', 'return ' + customStr + ';');
+            fn(1, 0);
+            return fn;
+        } catch (e) {
+            showAlert('Diffusion error: ' + e.message, 'error');
+            return () => 1;
+        }
+    }
+    return () => 1;
+}
+
+// PART 2: UI Controls
+function toggleSDEControls() {
+    const sdeParams = $('#sdeParams');
+    const procType = $('#procType');
+    if (sdeParams && procType) {
+        sdeParams.classList.toggle('active', procType.value === 'sde');
+    }
+}
+
+function toggleCustomExpressions() {
+    const driftForm = $('#driftForm');
+    const diffForm = $('#diffForm');
+    const driftExpr = $('#customDriftExpr');
+    const diffExpr = $('#customDiffExpr');
+    
+    if (driftExpr && driftForm) driftExpr.classList.toggle('show', driftForm.value === 'custom');
+    if (diffExpr && diffForm) diffExpr.classList.toggle('show', diffForm.value === 'custom');
+}
+
+// PART 2: Visualization
+function displayTrajectoryChartPart2(data, timePoints, T) {
+    const ctx = $('#trajectoryChart2');
+    if (!ctx) {
+        console.error('Canvas trajectoryChart2 not found');
+        return;
+    }
+    
+    if (charts.trajectory2) charts.trajectory2.destroy();
+
+    const colors = ['#18e0e6', '#64b5f6', '#81c784', '#ffc107', '#ff7043', '#ba68c8', '#4db6ac'];
+    const datasets = data.trajectories.map((path, idx) => ({
+        label: `Path ${idx + 1}`,
+        data: path,
+        borderColor: colors[idx % colors.length],
+        backgroundColor: 'transparent',
+        borderWidth: 1.2,
+        pointRadius: 0,
+        tension: 0.1,
+        fill: false
+    }));
+
+    const labels = Array.from({ length: timePoints.length }, (_, i) => (i / (timePoints.length - 1)).toFixed(2));
+
+    charts.trajectory2 = new Chart(ctx, {
+        type: 'line',
+        data: { labels, datasets },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: { labels: { color: '#b8d4ff' }, display: datasets.length <= 15 },
+                title: { display: true, text: 'Sample Trajectories X(t)', color: '#18e0e6', font: { size: 14 } }
+            },
+            scales: {
+                y: { ticks: { color: '#b8d4ff' }, grid: { color: '#2d4a7a' } },
+                x: { ticks: { color: '#b8d4ff' }, grid: { color: '#2d4a7a' } }
+            }
+        }
+    });
+}
+
+function displayHistogramChartPart2(data, T, procType) {
+    const ctx = $('#histogramChart2');
+    if (!ctx) {
+        console.error('Canvas histogramChart2 not found');
+        return;
+    }
+    
+    if (charts.histogram2) charts.histogram2.destroy();
+
+    const min = Math.min(...data.finalValues);
+    const max = Math.max(...data.finalValues);
+    const numBins = Math.min(50, Math.max(10, Math.floor(data.finalValues.length / 10)));
+    const binWidth = (max - min) / numBins || 1;
+    const bins = Array(numBins).fill(0);
+    const labels = [];
+    const binCenters = [];
+
+    for (let i = 0; i < numBins; i++) {
+        const center = min + (i + 0.5) * binWidth;
+        binCenters.push(center);
+        labels.push(center.toFixed(2));
+    }
+
+    data.finalValues.forEach(v => {
+        const idx = Math.min(numBins - 1, Math.floor((v - min) / binWidth));
+        bins[idx]++;
+    });
+
+    const datasets = [{
+        type: 'bar',
+        label: 'Empirical',
+        data: bins,
+        backgroundColor: 'rgba(24, 224, 230, 0.5)',
+        borderColor: '#18e0e6'
+    }];
+
+    if (procType === 'wiener') {
+        const theoretical = binCenters.map(x => normalPDF(x, 0, Math.sqrt(T)) * data.finalValues.length * binWidth);
+        datasets.push({
+            type: 'line',
+            label: 'Theoretical N(0,T)',
+            data: theoretical,
+            borderColor: '#ff7043',
+            borderWidth: 2,
+            fill: false,
+            pointRadius: 0
+        });
+    }
+
+    charts.histogram2 = new Chart(ctx, {
+        type: 'bar',
+        data: { labels, datasets },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: { labels: { color: '#b8d4ff' } },
+                title: { display: true, text: 'Distribution X(T)', color: '#18e0e6', font: { size: 14 } }
+            },
+            scales: {
+                y: { ticks: { color: '#b8d4ff' }, grid: { color: '#2d4a7a' } },
+                x: { ticks: { color: '#b8d4ff' }, grid: { color: '#2d4a7a' } }
+            }
+        }
+    });
+}
+
+// PART 2: Main Run
+function runSimulation2() {
+    const T = parseFloat($('#inT').value);
+    const n = parseInt($('#inN').value);
+    const m = parseInt($('#inM').value);
+    const displayCount = parseInt($('#inShow').value);
+    const procType = $('#procType').value;
+
+    if (!(T > 0 && n >= 100 && m >= 10)) {
+        showAlert('Check parameters: T > 0, n >= 100, m >= 10', 'error');
+        return;
+    }
+
+    const progressBar = $('#progressBar');
+    if (progressBar) progressBar.style.display = 'block';
+
+    showAlert('🚀 Starting simulation...', 'info');
+
+    setTimeout(() => {
+        try {
+            let data;
+
+            if (procType === 'wiener') {
+                data = simulateWienerProcessPart2(T, n, m, displayCount);
+                displayTrajectoryChartPart2(data, data.timePoints, T);
+                displayHistogramChartPart2(data, T, 'wiener');
+            } else {
+                const x0 = parseFloat($('#inX0').value);
+                const driftForm = $('#driftForm').value;
+                const diffForm = $('#diffForm').value;
+                const mu = parseFloat($('#inMu').value);
+                const sigma = parseFloat($('#inSigma').value);
+                const customDrift = $('#customDrift').value.trim();
+                const customDiff = $('#customDiff').value.trim();
+
+                const driftFn = buildDriftFunction(driftForm, mu, customDrift);
+                const diffFn = buildDiffusionFunction(diffForm, sigma, customDiff);
+
+                data = simulateSDE(T, n, m, x0, driftFn, diffFn, displayCount);
+                displayTrajectoryChartPart2(data, data.timePoints, T);
+                displayHistogramChartPart2(data, T, 'sde');
+            }
+
+           
+
+            if (resultsSection2) resultsSection2.classList.add('active');
+            showAlert('✓ Done!', 'success');
+
+        } catch (error) {
+            console.error(error);
+            showAlert('Error: ' + error.message, 'error');
+        } finally {
+            const progressBar = $('#progressBar');
+            if (progressBar) progressBar.style.display = 'none';
+        }
+    }, 100);
+}
+
+// PART 2: Clear Results
+function clearResults2() {
+    $('#resultsSection2').classList.remove('active');
+    if (charts.trajectory2) charts.trajectory2.destroy();
+    if (charts.histogram2) charts.histogram2.destroy();
+    showAlert('Part II results cleared', 'info');
+}
+
+// ======================================================================
+// INITIALIZATION
+// ======================================================================
+
 document.addEventListener('DOMContentLoaded', () => {
-  console.log('[HW11] Wiener Process simulator with Box-Muller ready');
+    console.log('✓ Simulators loaded');
+
+    // PART 2: Event listeners
+    const btnRun2 = $('#btnRun');
+    const procType = $('#procType');
+    const driftForm = $('#driftForm');
+    const diffForm = $('#diffForm');
+    const btnClear2 = $('#btnClear2');
+
+    if (btnRun2) btnRun2.addEventListener('click', runSimulation2);
+    if (btnClear2) btnClear2.addEventListener('click', clearResults2);
+    
+    if (procType) procType.addEventListener('change', () => {
+        toggleSDEControls();
+        const rs = $('#resultsSection2');
+        if (rs) rs.classList.remove('active');
+    });
+    if (driftForm) driftForm.addEventListener('change', toggleCustomExpressions);
+    if (diffForm) diffForm.addEventListener('change', toggleCustomExpressions);
+
+    toggleSDEControls();
+    toggleCustomExpressions();
+
+    console.log('✓ Simulators ready');
 });

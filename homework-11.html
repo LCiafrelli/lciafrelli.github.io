@@ -9,7 +9,11 @@
   <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
-    <style>
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.3.0/dist/chart.umd.min.js"></script>
+    
+    <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+    
+<style>
 main {
       max-width: 1200px !important;
       margin: 0 auto;
@@ -448,10 +452,10 @@ main {
       color: #ffc107;
       border: 1px solid #ffc107;
     }
-    </style>
-</head>
+
+</style>
 <body>
-    <header>
+     <header>
     <nav class="navbar">
       <div class="logo">Statistics<span class="cyber">Cyber</span></div>
       <ul id="navLinks">
@@ -462,14 +466,15 @@ main {
       <button class="nav-toggle" id="navToggle">&#9776;</button>
     </nav>
   </header>
+<main>
+    <section class="hw-detail">
 
-    <main>
-        <section class="hw-detail">
+        <!-- ============ PART I: ORIGINAL CONTENT ============ -->
+         <section class="hw-detail">
             <h1>Homework 11: Wiener Process Simulation</h1>
             <p class="subtle">Analyze continuous-time stochastic trajectories with drift and volatility</p>
 
-            <div class="theory-panel">
-                <div class="theory-title">📖 Theoretical Framework</div>
+            
 
                 <div class="hw-section">
                     <h3>What is Brownian Motion?</h3>
@@ -551,7 +556,7 @@ main {
                         matching theoretical predictions—this is the <strong>Functional Central Limit Theorem</strong>.
                     </p>
                 </div>
-            </div>
+            
 
             <div class="tool-section">
                 <h2 style="color: #00d4ff; margin-bottom: 20px;">⚙️ Simulation Parameters</h2>
@@ -625,17 +630,172 @@ main {
             <div class="analysis-section" id="analysisSection"></div>
         </div>
     </div>
-    <script src="script.js"></script>
-    <script src="hw11.js"></script>
-</body>
-</html>
+
+
+        <!-- ============ TRANSITION ============ -->
+        <section class="transition">
+            <div class="transition-text">UPDATE AFTER NEW REQUEST</div>
         </section>
-    </main>
+
+        <!-- ============ PART II: NEW EULER-MARUYAMA ============ -->
+        <section class="hw-detail">
+            <h2> Euler–Maruyama Method for General SDEs</h2>
+<div class="hw-section">
+            <h3>What is a Stochastic Differential Equation?</h3>
+            
+                A stochastic differential equation (SDE) is a differential equation that includes randomness. The general form is:
+                $$dX_t = a(X_t, t) \, dt + b(X_t, t) \, dW_t$$
+                where:
+                <ul>
+                    <li><strong>\(a(X_t, t)\)</strong> is the <strong>drift coefficient</strong> (deterministic trend)</li>
+                    <li><strong>\(b(X_t, t)\)</strong> is the <strong>diffusion coefficient</strong> (noise intensity)</li>
+                    <li><strong>\(dW_t\)</strong> is an infinitesimal Wiener process increment</li>
+                </ul>
+            </div>
+<div class="hw-section">
+            <h3>The Euler–Maruyama Scheme</h3>
+            <p>Since most SDEs have no closed-form solution, we discretize. The Euler–Maruyama method approximates the continuous dynamics over discrete time steps:</p>
+            <div class="math-block">
+                $$X_{k+1} = X_k + a(X_k, t_k) \Delta t + b(X_k, t_k) \Delta W_k$$
+            </div>
+            <p>where \(\Delta t = T / n\), \(\Delta W_k = \sqrt{\Delta t} \, Z_k\) with \(Z_k \sim \mathcal{N}(0,1)\), and \(t_k = k \Delta t\).</p>
+
+            <p><strong>Key insight:</strong> At each step, we evolve the state by two components: <span class="highlight">deterministic drift</span> (proportional to \(\Delta t\)) and <span class="highlight">random diffusion</span> (proportional to \(\sqrt{\Delta t}\)).</p>
+            </div>
+ <div class="hw-section">
+            <h3>Why \(\sqrt{\Delta t}\) for Noise?</h3>
+           
+                The variance of $$\Delta W_k = \sqrt{\Delta t} \, Z_k$$ is $$\mathbb{E}[(\Delta W_k)^2] = \Delta t$$ This ensures that as we refine the time grid (smaller \(\Delta t\)), the increments shrink appropriately—matching the continuous theory.
+            </div>
+
+            <!-- ===== INTERACTIVE SIMULATOR ===== -->
+            <div class="tool-section">
+                <h2 style="color: #00d4ff; margin-bottom: 20px;">⚙️ Simulation Parameters</h2>
+<div class="input-grid">
+                    <div class="input-group">
+                        <label class="procType">Process Type:</label>
+                        <select id="procType">
+                            <option value="wiener">Pure Wiener Process</option>
+                            <option value="sde">General SDE (Euler–Maruyama)</option>
+                        </select>
+                    </div>
+
+                    <div class="input-group">
+                        <label for="inT">Total Time T:</label>
+                        <input type="number" id="inT" min="0.1" step="0.1" value="1">
+                    </div>
+
+                    <div class="input-group">
+                        <label for="inN">Time Steps n:</label>
+                        <input type="number" id="inN" min="100" step="100" value="1000">
+                    </div>
+
+                    <div class="input-group">
+                        <label for="inM">Simulations m:</label>
+                        <input type="number" id="inM" min="10" step="50" value="200">
+                    </div>
+
+                    <div class="input-group">
+                        <label for="inShow">Display Trajectories:</label>
+                        <input type="number" id="inShow" min="1" step="1" value="40">
+                    </div>
+                </div>
+
+                <!-- SDE Parameters -->
+                <div class="sde-params" id="sdeParams">
+                    <h4>SDE Parameters (when General SDE is selected)</h4>
+                    <div class="controls-grid">
+                        <div class="input-group">
+                            <label for="inX0">Initial Value \(X_0\):</label>
+                            <input type="number" id="inX0" step="0.1" value="0">
+                        </div>
+
+                        <div class="input-group">
+                            <label for="driftForm">Drift Form:</label>
+                            <select id="driftForm">
+                                <option value="const">Constant: \(a = \mu\)</option>
+                                <option value="linear">Linear: $$a = \mu \cdot x$$</option>
+                                <option value="custom">Custom Expression</option>
+                            </select>
+                        </div>
+
+                        <div class="input-group">
+                            <label for="inMu">μ:</label>
+                            <input type="number" id="inMu" step="0.1" value="0.1">
+                        </div>
+
+                        <div class="input-group">
+                            <label for="diffForm">Diffusion Form:</label>
+                            <select id="diffForm">
+                                <option value="const">Constant: $$b = \sigma$$</option>
+                                <option value="linear">Linear: $$b = \sigma \cdot x$$</option>
+                                <option value="custom">Custom Expression</option>
+                            </select>
+                        </div>
+
+                        <div class="input-group">
+                            <label for="inSigma">σ:</label>
+                            <input type="number" id="inSigma" step="0.1" value="0.5" min="0.01">
+                        </div>
+                    </div>
+
+                    <div class="input-group" id="customDriftExpr">
+                        <label for="customDrift">Custom Drift (use x and t):</label>
+                        <input type="text" id="customDrift" placeholder='e.g., "0.5 - 0.2*x"'>
+                        <p style="font-size: 0.85rem; color: #94a3b8; margin-top: 0.5rem;">Available: x, t, Math.sin, Math.exp, etc.</p>
+                    </div>
+
+                    <div class="input-group" id="customDiffExpr">
+                        <label for="customDiff">Custom Diffusion (use x and t):</label>
+                        <input type="text" id="customDiff" placeholder='e.g., "0.3 + 0.1*Math.abs(x)"'>
+                        <p style="font-size: 0.85rem; color: #94a3b8; margin-top: 0.5rem;">Available: x, t, Math functions</p>
+                    </div>
+                </div>
+
+                <div class="progress-bar" id="progressBar">
+                    <div class="progress-fill" id="progressFill">0%</div>
+                </div>
+
+                <div class="btn-group">
+                    <button id="btnRun" class="btn">▶ Run Simulation</button>
+                
+                    <button id="btnClear2" class="btn danger" style="margin-top: 1.5rem;">🔄Clear</button>
+                </div>
+            </div>
+
+            <div class="alert" id="alert"></div>
+
+            <!-- Results -->
+            <!-- ============================================================== -->
+<!-- PART 2: EULER-MARUYAMA SIMULATOR RESULTS -->
+<!-- ============================================================== -->
+
+<div id="resultsSection2" class="results-section">
+    <h3 style="color: #18e0e6; margin-top: 2rem;">📊 Part II Results</h3>
+    
+    <div class="chart-container">
+        <canvas id="trajectoryChart2" style="max-height: 400px;"></canvas>
+    </div>
+    
+    <div class="chart-container">
+        <canvas id="histogramChart2" style="max-height: 400px;"></canvas>
+    </div>
+    
+    
+    
+    
+</div>
+
+
+        </section>
+
+         </section>
+</main>
 
     <footer>
     <span>&copy; 2025 Lorenzo Ciafrelli | MS Cybersecurity, Sapienza University of Rome</span>
   </footer>
-	<script src="script.js"></script>
+    <script src="script.js"></script>
     <script src="hw11.js"></script>
 </body>
 </html>
